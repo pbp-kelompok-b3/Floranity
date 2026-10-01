@@ -6,7 +6,7 @@ __pycache__/
 
 # Django environment & local settings
 local_settings.py
-.env
+.env*
 *.log
 
 # Databases (Do not track local SQLite development data)
