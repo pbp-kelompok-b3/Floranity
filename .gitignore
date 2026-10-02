@@ -1,0 +1,45 @@
+# Python bytecode (compiled files)
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Django environment & local settings
+local_settings.py
+.env*
+*.log
+
+# Databases (Do not track local SQLite development data)
+*.sqlite3
+*.sqlite3-journal
+*.db
+
+# Virtual Environments
+venv/
+.venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Django media & static files
+media/
+# Uncomment below if you gather static files into a single root for production
+# staticfiles/
+
+# Testing & Coverage
+.coverage
+htmlcov/
+.tox/
+.cache/
+
+# IDE / Editor configurations
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+
+# System files
+.DS_Store
+Thumbs.db
