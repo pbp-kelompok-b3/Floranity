@@ -1,0 +1,61 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>{% block title %}Floranity{% endblock title %}</title>
+
+    <link rel="stylesheet" href="{% static 'css/global.css' %}">
+    {% block extra_css %}{% endblock extra_css %}
+</head>
+<body>
+
+    <header class="site-header">
+        {% block navbar %}
+        <nav class="navbar-container">
+            <a href="/" class="brand-logo">Floranity</a>
+
+            <button class="nav-toggle" type="button" aria-label="Open Navigation Bar" aria-expanded="false" aria-controls="nav-menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+            <ul class="nav-menu" id="nav-menu">
+                <li><a href="/" class="nav-link">Beranda</a></li>
+                <li><a href="/koleksi/" class="nav-link">Koleksi</a></li>
+                <li><a href="/katalog/" class="nav-link">Katalog</a></li>
+                <li><a href="/kalender/" class="nav-link">Kalender</a></li>
+                <li><a href="/forum/" class="nav-link">Forum</a></li>
+            </ul>
+        <a>Login</a>
+        </nav>
+        {% endblock navbar %}
+    </header>
+
+    <main class="main-content">
+        {% block content %}
+        {% endblock content %}
+    </main>
+
+    <footer class="site-footer">
+        {% block footer %}
+        <div class="footer-container">
+            <ul class="footer-links">
+                <li><a href="/">Beranda</a></li>
+                <li><a href="/koleksi/">Koleksi</a></li>
+                <li><a href="/katalog/">Katalog</a></li>
+                <li><a href="/kalender/">Kalender</a></li>
+                <li><a href="/forum/">Forum</a></li>
+            </ul>
+            <p class="copyright-text">&copy; {% now "Y" %} Floranity. All rights reserved.</p>
+        </div>
+        {% endblock footer %}
+    </footer>
+
+    <script src="{% static 'js/main.js' %}"></script>
+    {% block extra_js %}{% endblock extra_js %}
+</body>
+</html>
