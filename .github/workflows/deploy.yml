@@ -1,0 +1,58 @@
+name: Deploy Django ke PWS
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install Linting Tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8
+          
+      - name: Lint with flake8
+        run: flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+
+      - name: Authenticate and Push to PWS
+        run: |
+          if [ "${{ github.ref_name }}" = "main" ]; then
+            echo "Routing deployment to Rama's Production PWS instance..."
+            RAW_URL="${{ secrets.PROD_PWS_URL }}"
+            USER="${{ secrets.PROD_PWS_USER }}"
+            PASS="${{ secrets.PROD_PWS_PASS }}"
+          else
+            echo "Routing deployment to Syabil's Staging PWS instance..."
+            RAW_URL="${{ secrets.DEV_PWS_URL }}"
+            USER="${{ secrets.DEV_PWS_USER }}"
+            PASS="${{ secrets.DEV_PWS_PASS }}"
+          fi
+
+          # Strip standard web headers to inject inline basic authentication safely
+          CLEAN_URL=$(echo "$RAW_URL" | sed 's|https://||')
+          AUTH_REMOTE_URL="https://${USER}:${PASS}@${CLEAN_URL}"
+          
+          # Force push your local code update directly to PWS remote's building branch
+          git remote add pws-target "$AUTH_REMOTE_URL"
+          
+          # Note: The PWS platform triggers builds when receiving code on its default tracking target.
+          # We align our local active branch name with the server deployment engine targets.
+          if [ "${{ github.ref_name }}" = "main" ]; then
+            git push pws-target main:master --force
+          else
+            git push pws-target dev:master --force
+          fi
