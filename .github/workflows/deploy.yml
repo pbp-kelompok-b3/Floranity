@@ -46,13 +46,11 @@ jobs:
           CLEAN_URL=$(echo "$RAW_URL" | sed 's|https://||')
           AUTH_REMOTE_URL="https://${USER}:${PASS}@${CLEAN_URL}"
           
-          # Force push your local code update directly to PWS remote's building branch
           git remote add pws-target "$AUTH_REMOTE_URL"
           
-          # Note: The PWS platform triggers builds when receiving code on its default tracking target.
-          # We align our local active branch name with the server deployment engine targets.
           if [ "${{ github.ref_name }}" = "main" ]; then
             git push pws-target main:master --force
           else
             git push pws-target dev:master --force
           fi
+
