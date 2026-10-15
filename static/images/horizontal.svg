@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 50" width="200" height="50">
+  <g transform="translate(10, 8)">
+    <!-- Leaf icon -->
+    <path d="M12 2C6 8 4 18 12 26C20 18 18 8 12 2Z" fill="#1b4d3e" />
+    <path d="M12 2C16 10 22 14 28 16C24 22 18 24 12 26" stroke="#faf2e2" stroke-width="1.5" fill="none" />
+    <path d="M12 26L12 32" stroke="#1b4d3e" stroke-width="2" stroke-linecap="round" />
+  </g>
+  <text x="50" y="32" font-family="system-ui, -apple-system, sans-serif" font-size="22" font-weight="700" fill="#1b4d3e">Floranity</text>
+</svg>
