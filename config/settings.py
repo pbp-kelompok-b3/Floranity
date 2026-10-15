@@ -151,5 +151,7 @@ MAILERS = {
     },
 }
 
-# Perenual API Key
-PERENUAL_API_KEY = os.environ.get("PERENUAL_API_KEY", "")
+# Plant APIs Configuration
+PERENUAL_API_KEY = os.environ.get("PERENUAL_API_KEY", "") or os.environ.get("PERENUAL_KEY", "")
+PERMAPEOPLE_KEY_ID = os.environ.get("PERMAPEOPLE_KEY_ID", "")
+PERMAPEOPLE_KEY_SECRET = os.environ.get("PERMAPEOPLE_KEY_SECRET", "")

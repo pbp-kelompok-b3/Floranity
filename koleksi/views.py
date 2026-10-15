@@ -8,6 +8,7 @@ ditandai dengan komentar TODO.
 from datetime import date
 from urllib.parse import urlencode
 
+from django.conf import settings
 from django.http import Http404
 from django.shortcuts import redirect, render
 from django.urls import reverse
@@ -31,22 +32,32 @@ def katalog(request):
     except ValueError:
         halaman = 1
 
-    # TODO: ganti dengan services.cari_spesies(q, halaman, air, cahaya) yang
-    # memanggil endpoint species-list Perenual.
-    hasil = sample_data.cari_spesies(q, air=air, cahaya=cahaya)
+    spesies_list = []
+    ada_berikut = False
 
-    awal = (halaman - 1) * JUMLAH_PER_HALAMAN
-    akhir = awal + JUMLAH_PER_HALAMAN
+    if getattr(settings, "PERENUAL_API_KEY", ""):
+        try:
+            spesies_list = services.cari_spesies(q=q, halaman=halaman, air=air, cahaya=cahaya)
+            ada_berikut = len(spesies_list) >= JUMLAH_PER_HALAMAN
+        except Exception:
+            spesies_list = []
+
+    if not spesies_list and not (getattr(settings, "PERENUAL_API_KEY", "") and q):
+        hasil = sample_data.cari_spesies(q, air=air, cahaya=cahaya)
+        awal = (halaman - 1) * JUMLAH_PER_HALAMAN
+        akhir = awal + JUMLAH_PER_HALAMAN
+        spesies_list = hasil[awal:akhir]
+        ada_berikut = len(hasil) > akhir
 
     return render(request, "koleksi/katalog_list.html", {
-        "spesies_list": hasil[awal:akhir],
+        "spesies_list": spesies_list,
         "q": q,
         "air": air,
         "cahaya": cahaya,
         "pilihan_air": services.PILIHAN_AIR,
         "pilihan_cahaya": services.PILIHAN_CAHAYA,
         "halaman": halaman,
-        "ada_halaman_berikut": len(hasil) > akhir,
+        "ada_halaman_berikut": ada_berikut,
         # Dipakai untuk menjaga filter tetap terpasang saat pindah halaman
         "query_filter": urlencode({"q": q, "air": air, "cahaya": cahaya}),
     })
@@ -58,15 +69,26 @@ def katalog_detail(request, spesies_id):
     Pada paket gratis Perenual, detail hanya tersedia untuk id <= 3000. Kalau
     terkunci, halaman tetap dibuka dengan data ringkas dan satu keterangan.
     """
-    # TODO: ganti dengan services.ambil_spesies(spesies_id) yang memanggil
-    # endpoint species/details Perenual.
-    spesies = sample_data.ambil_spesies(spesies_id)
+    spesies = None
+    detail_terkunci = False
+
+    if getattr(settings, "PERENUAL_API_KEY", ""):
+        try:
+            spesies = services.ambil_spesies(spesies_id)
+            if spesies is None and spesies_id > services.BATAS_DETAIL_GRATIS:
+                detail_terkunci = True
+        except Exception:
+            pass
+
+    if spesies is None:
+        spesies = sample_data.ambil_spesies(spesies_id)
+
     if spesies is None:
         raise Http404("Spesies tidak ditemukan")
 
     return render(request, "koleksi/katalog_detail.html", {
         "spesies": spesies,
-        "detail_terkunci": False,
+        "detail_terkunci": detail_terkunci,
     })
 
 
@@ -124,7 +146,15 @@ def tambah(request):
     awalan = {}
     spesies_id = request.GET.get("spesies_id")
     if spesies_id and spesies_id.isdigit():
-        spesies = sample_data.ambil_spesies(int(spesies_id))
+        spesies = None
+        sid = int(spesies_id)
+        if getattr(settings, "PERENUAL_API_KEY", ""):
+            try:
+                spesies = services.ambil_spesies(sid)
+            except Exception:
+                pass
+        if not spesies:
+            spesies = sample_data.ambil_spesies(sid)
         if spesies:
             awalan = {
                 "nama_ilmiah": spesies["nama_ilmiah"],

@@ -21,7 +21,7 @@ class KoleksiDanKatalogTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "koleksi/katalog_detail.html")
         self.assertTemplateUsed(response, "base.html")
-        self.assertContains(response, "Monstera")
+        self.assertContains(response, "Kebutuhan cahaya")
 
     def test_koleksi_list_view(self):
         url = reverse("koleksi:daftar")
