@@ -37,16 +37,13 @@ jobs:
 
       - name: Authenticate and Push to PWS
         env:
+          ENV_NAME: ${{ github.ref_name == 'main' && 'production' || 'development' }}
           RAW_URL: ${{ secrets.PWS_URL }}
           USER: ${{ secrets.PWS_USER }}
           PASS: ${{ secrets.PWS_PASS }}
         run: |
-          echo "Deploying branch '${{ github.ref_name }}' to environment '${{ github.job }}'..."
-
-          # Strip standard web headers to inject inline basic authentication safely
-          CLEAN_URL=$(echo "$RAW_URL" | sed 's|https://||')
-          AUTH_REMOTE_URL="https://${USER}:${PASS}@${CLEAN_URL}"
-
-          git remote add pws-target "$AUTH_REMOTE_URL"
-
+          echo "Deploying branch '${{ github.ref_name }}' to environment '${ENV_NAME}'..."
+          
+          CLEAN_URL=$(echo "$RAW_URL" | sed -E 's|https?://||')
+          git remote add pws-target "https://${USER}:${PASS}@${CLEAN_URL}"
           git push pws-target ${{ github.ref_name }}:master --force
