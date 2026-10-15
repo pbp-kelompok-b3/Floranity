@@ -78,11 +78,15 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .brand-logo {
-    font-size: 1.35rem;
-    font-weight: 700;
-    color: var(--color-primary);
+    display: block;
+    flex: 0 0 auto;
     text-decoration: none;
-    letter-spacing: -0.01em;
+}
+
+.brand-logo img {
+    display: block;
+    width: 140px;
+    height: auto;
 }
 
 .nav-menu {

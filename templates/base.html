@@ -8,6 +8,7 @@
     <title>{% block title %}Floranity{% endblock title %}</title>
 
     <link rel="stylesheet" href="{% static 'css/global.css' %}">
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
     {% block extra_css %}{% endblock extra_css %}
 </head>
 <body>
@@ -15,7 +16,9 @@
     <header class="site-header">
         {% block navbar %}
         <nav class="navbar-container">
-            <a href="/" class="brand-logo">Floranity</a>
+            <a class="brand-logo" href="\" aria-label="Floranity — Beranda">
+                <img src="{% static 'images/horizontal.svg' %}" alt="Floranity">
+            </a>
 
             <button class="nav-toggle" type="button" aria-label="Open Navigation Bar" aria-expanded="false" aria-controls="nav-menu">
                 <span></span>
