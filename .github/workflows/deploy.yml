@@ -43,7 +43,15 @@ jobs:
           PASS: ${{ secrets.PWS_PASS }}
         run: |
           echo "Deploying branch '${{ github.ref_name }}' to environment '${ENV_NAME}'..."
+
+          if [ -z "$RAW_URL" ] || [ -z "$USER" ] || [ -z "$PASS" ]; then
+            echo "::error::One or more Deployment secrets are missing in Environment '${ENV_NAME}'!"
+            exit 1
+          fi
           
           CLEAN_URL=$(echo "$RAW_URL" | sed -E 's|https?://||')
-          git remote add pws-target "https://${USER}:${PASS}@${CLEAN_URL}"
+
+          AUTH_REMOTE_URL="https://${USER}:${PASS}@${CLEAN_URL}"
+
+          git remote add pws-target "$AUTH_REMOTE_URL"
           git push pws-target ${{ github.ref_name }}:master --force
