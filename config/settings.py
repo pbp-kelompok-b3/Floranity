@@ -30,7 +30,7 @@ SECRET_KEY = 'django-insecure-)4-nu82q2(t!s3o@0r4rrr0sw9k&!%ab32z$-(3+!cfsd(+pud
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "testserver"]
 PRODUCTION = os.getenv('PRODUCTION', 'False').lower() == 'true'
 
 
@@ -43,6 +43,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'main',
+    'koleksi',
 ]
 
 MIDDLEWARE = [
@@ -145,3 +147,6 @@ MAILERS = {
         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
     },
 }
+
+# Perenual API Key
+PERENUAL_API_KEY = os.environ.get("PERENUAL_API_KEY", "")
