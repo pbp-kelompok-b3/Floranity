@@ -1,0 +1,446 @@
+/* Floranity - Koleksi & Katalog Tanaman
+   Semua kelas diberi awalan "fl-" supaya tidak bentrok dengan CSS anggota tim lain. */
+
+:root {
+  --fl-hijau: #14532d;
+  --fl-hijau-tua: #0f3d21;
+  --fl-hijau-muda: #e9f2ec;
+  --fl-teks: #1f2421;
+  --fl-abu: #6b7280;
+  --fl-garis: #e5e7eb;
+  --fl-latar: #ffffff;
+  --fl-latar-lembut: #f8faf8;
+  --fl-merah: #9b2c2c;
+  --fl-radius: 0.75rem;
+}
+
+/* ---------- Kerangka halaman ---------- */
+
+.fl-page {
+  max-width: 68rem;
+  margin: 0 auto;
+  padding: 2.5rem 1.25rem 4rem;
+  color: var(--fl-teks);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  box-sizing: border-box;
+}
+
+.fl-page *,
+.fl-page *::before,
+.fl-page *::after {
+  box-sizing: border-box;
+}
+
+/* Label yang hanya dibaca pembaca layar, misalnya pada kolom pencarian */
+.fl-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.fl-breadcrumb {
+  font-size: 0.875rem;
+  color: var(--fl-abu);
+  margin-bottom: 1rem;
+}
+
+.fl-breadcrumb a {
+  color: var(--fl-abu);
+}
+
+.fl-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.fl-header h1 {
+  margin: 0;
+  font-size: 1.875rem;
+  color: var(--fl-hijau);
+}
+
+.fl-header p {
+  margin: 0.25rem 0 0;
+  color: var(--fl-abu);
+}
+
+/* ---------- Tombol ---------- */
+
+.fl-btn {
+  display: inline-block;
+  padding: 0.625rem 1.125rem;
+  border: 1px solid var(--fl-hijau);
+  border-radius: var(--fl-radius);
+  background: var(--fl-hijau);
+  color: #ffffff;
+  font-size: 1rem;
+  font-family: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.fl-btn:hover {
+  background: var(--fl-hijau-tua);
+}
+
+.fl-btn--sekunder {
+  background: transparent;
+  color: var(--fl-hijau);
+}
+
+.fl-btn--sekunder:hover {
+  background: var(--fl-hijau-muda);
+}
+
+.fl-btn--bahaya {
+  background: transparent;
+  border-color: var(--fl-merah);
+  color: var(--fl-merah);
+}
+
+.fl-btn--bahaya:hover {
+  background: #fdf2f2;
+}
+
+.fl-btn:focus-visible,
+.fl-kartu:focus-visible,
+.fl-form input:focus-visible,
+.fl-form select:focus-visible,
+.fl-form textarea:focus-visible {
+  outline: 2px solid var(--fl-hijau);
+  outline-offset: 2px;
+}
+
+/* ---------- Pencarian ---------- */
+
+.fl-cari {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.75rem;
+}
+
+.fl-cari input[type="search"],
+.fl-cari select {
+  flex: 1 1 14rem;
+  min-width: 0;
+  padding: 0.625rem 0.875rem;
+  font: inherit;
+  color: inherit;
+  background: var(--fl-latar);
+  border: 1px solid var(--fl-garis);
+  border-radius: var(--fl-radius);
+}
+
+.fl-cari select {
+  /* Cukup lebar supaya teks pilihan tidak terpotong */
+  flex: 0 1 13.5rem;
+}
+
+/* ---------- Grid kartu ---------- */
+
+.fl-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+  gap: 1.25rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.fl-kartu {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--fl-latar);
+  border: 1px solid var(--fl-garis);
+  border-radius: var(--fl-radius);
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+}
+
+.fl-kartu:hover {
+  border-color: var(--fl-hijau);
+}
+
+.fl-kartu__gambar {
+  aspect-ratio: 4 / 3;
+  background: var(--fl-hijau-muda);
+  display: grid;
+  place-items: center;
+  font-size: 2rem;
+  color: var(--fl-hijau);
+}
+
+.fl-kartu__gambar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.fl-kartu__isi {
+  padding: 0.875rem 1rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+}
+
+.fl-kartu__nama {
+  font-weight: 600;
+  color: var(--fl-hijau);
+  line-height: 1.3;
+}
+
+.fl-kartu__ilmiah {
+  font-style: italic;
+  font-size: 0.875rem;
+  color: var(--fl-abu);
+}
+
+.fl-kartu__meta {
+  margin-top: auto;
+  padding-top: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--fl-abu);
+}
+
+/* ---------- Halaman detail ---------- */
+
+.fl-detail {
+  display: grid;
+  grid-template-columns: minmax(0, 20rem) minmax(0, 1fr);
+  gap: 2rem;
+  align-items: start;
+}
+
+.fl-detail__gambar {
+  aspect-ratio: 1 / 1;
+  background: var(--fl-hijau-muda);
+  border: 1px solid var(--fl-garis);
+  border-radius: var(--fl-radius);
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  font-size: 3rem;
+  color: var(--fl-hijau);
+}
+
+.fl-detail__gambar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.fl-detail h1 {
+  margin: 0;
+  font-size: 1.875rem;
+  color: var(--fl-hijau);
+}
+
+.fl-detail__ilmiah {
+  margin: 0.25rem 0 1.25rem;
+  font-style: italic;
+  color: var(--fl-abu);
+}
+
+.fl-detail__aksi {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+}
+
+.fl-fakta {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+  gap: 0.75rem;
+  margin: 0;
+}
+
+.fl-fakta > div {
+  padding: 0.75rem 0.875rem;
+  background: var(--fl-latar-lembut);
+  border: 1px solid var(--fl-garis);
+  border-radius: var(--fl-radius);
+}
+
+.fl-fakta dt {
+  font-size: 0.875rem;
+  color: var(--fl-abu);
+}
+
+.fl-fakta dd {
+  margin: 0.125rem 0 0;
+}
+
+.fl-seksi {
+  margin-top: 2.5rem;
+}
+
+.fl-seksi h2 {
+  font-size: 1.25rem;
+  color: var(--fl-hijau);
+  margin: 0 0 0.875rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--fl-garis);
+}
+
+/* ---------- Formulir ---------- */
+
+.fl-form {
+  max-width: 36rem;
+  display: grid;
+  gap: 1.125rem;
+}
+
+.fl-form label {
+  display: block;
+  font-size: 0.875rem;
+  color: var(--fl-abu);
+  margin-bottom: 0.25rem;
+}
+
+.fl-form input[type="text"],
+.fl-form input[type="date"],
+.fl-form input[type="file"],
+.fl-form select,
+.fl-form textarea {
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  font: inherit;
+  color: inherit;
+  background: var(--fl-latar);
+  border: 1px solid var(--fl-garis);
+  border-radius: var(--fl-radius);
+}
+
+.fl-form textarea {
+  min-height: 7rem;
+  resize: vertical;
+}
+
+.fl-form__bantuan {
+  font-size: 0.875rem;
+  color: var(--fl-abu);
+  margin: 0.25rem 0 0;
+}
+
+.fl-form__aksi {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding-top: 0.5rem;
+}
+
+/* ---------- Jurnal pertumbuhan ---------- */
+
+.fl-jurnal {
+  list-style: none;
+  margin: 1.25rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 1rem;
+}
+
+.fl-jurnal__item {
+  display: grid;
+  grid-template-columns: 7rem minmax(0, 1fr);
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--fl-garis);
+  border-radius: var(--fl-radius);
+  background: var(--fl-latar);
+}
+
+.fl-jurnal__foto {
+  aspect-ratio: 1 / 1;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  background: var(--fl-hijau-muda);
+  display: grid;
+  place-items: center;
+  font-size: 1.5rem;
+  color: var(--fl-hijau);
+}
+
+.fl-jurnal__foto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.fl-jurnal__tanggal {
+  font-size: 0.875rem;
+  color: var(--fl-abu);
+  margin: 0 0 0.25rem;
+}
+
+.fl-jurnal__catatan {
+  margin: 0;
+}
+
+/* ---------- Keadaan kosong & pesan ---------- */
+
+.fl-kosong {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  border: 1px dashed var(--fl-garis);
+  border-radius: var(--fl-radius);
+  background: var(--fl-latar-lembut);
+}
+
+.fl-kosong p {
+  color: var(--fl-abu);
+  margin: 0 0 1.25rem;
+}
+
+.fl-pesan {
+  padding: 0.875rem 1rem;
+  border: 1px solid var(--fl-garis);
+  border-left: 4px solid var(--fl-hijau);
+  border-radius: var(--fl-radius);
+  background: var(--fl-hijau-muda);
+  margin-bottom: 1.5rem;
+}
+
+/* ---------- Navigasi halaman ---------- */
+
+.fl-paginasi {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 2rem;
+  color: var(--fl-abu);
+}
+
+.fl-paginasi__mati {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+/* ---------- Layar kecil ---------- */
+
+@media (max-width: 48rem) {
+  .fl-detail {
+    grid-template-columns: 1fr;
+  }
+
+  .fl-jurnal__item {
+    grid-template-columns: 5rem minmax(0, 1fr);
+  }
+}
