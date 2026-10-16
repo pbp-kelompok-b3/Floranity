@@ -1,0 +1,57 @@
+name: Deploy Django ke PWS
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install & Run Linting
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+
+  deploy:
+    needs: lint
+    runs-on: ubuntu-latest
+    environment: ${{ github.ref_name == 'main' && 'production' || 'development' }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Authenticate and Push to PWS
+        env:
+          ENV_NAME: ${{ github.ref_name == 'main' && 'production' || 'development' }}
+          RAW_URL: ${{ secrets.PWS_URL }}
+          USER: ${{ secrets.PWS_USER }}
+          PASS: ${{ secrets.PWS_PASS }}
+        run: |
+          echo "Deploying branch '${{ github.ref_name }}' to environment '${ENV_NAME}'..."
+
+          if [ -z "$RAW_URL" ] || [ -z "$USER" ] || [ -z "$PASS" ]; then
+            echo "::error::One or more Deployment secrets are missing in Environment '${ENV_NAME}'!"
+            exit 1
+          fi
+          
+          CLEAN_URL=$(echo "$RAW_URL" | sed -E 's|https?://||')
+
+          AUTH_REMOTE_URL="https://${USER}:${PASS}@${CLEAN_URL}"
+
+          git remote add pws-target "$AUTH_REMOTE_URL"
+          git push pws-target ${{ github.ref_name }}:master --force
