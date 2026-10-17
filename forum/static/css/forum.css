@@ -48,17 +48,17 @@ h1 {
     background-color: var(--color-cream-hover);
 }
 
+.container {
+    margin: 32px 100px;
+    padding: 40px 20px;
+}
+
 
 /*
 --------------------------------------------
 Pengaturan Styling untuk Halaman Depan Forum
 --------------------------------------------
 */
-.forum-container {
-    margin: 32px 24px;
-    padding: 40px 20px;
-}
-
 .forum-header {
     display: flex;
     justify-content: space-between; 
@@ -79,6 +79,7 @@ Pengaturan Styling untuk Halaman Depan Forum
     text-align: center;
     align-content: center;
     font-weight: 500;
+    text-decoration: none;
 }
 
 #edit-post-button {
@@ -88,6 +89,7 @@ Pengaturan Styling untuk Halaman Depan Forum
     text-align: center;
     align-content: center;
     font-weight: 500;
+    text-decoration: none;
 }
 
 
@@ -116,3 +118,66 @@ Pengaturan Styling untuk Halaman Depan Forum
 }
 
 
+/*
+------------------------------------------------
+Pengaturan Styling untuk Halaman Edit/Bikin Post
+------------------------------------------------
+*/
+.post-form {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;               /* jarak antar form-group */
+}
+
+.post-form-container {
+    margin-top: 40px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;  /* label di atas, field di bawah */
+    gap: 8px;                /* jarak label ke field */
+}
+
+.form-group label {
+    font-weight: 600;
+    font-size: 20px;
+    color: var(--color-text-dark);
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    box-sizing: border-box;  /* supaya padding dan border tidak bikin lebar melebihi 100% */
+    padding: 14px 16px;
+    font-family: inherit;
+    font-size: 1rem;
+    border: 2px solid #ececec;
+    border-radius: 10px;
+    background-color: #fff;
+    transition: border-color 0.2s ease;
+}
+
+.form-group textarea {
+    min-height: 200px;
+    resize: vertical;        /* user hanya bisa tarik ke atas/bawah, tidak melebar keluar */
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--color-text-muted);
+}
+
+.form-error {
+    color: #b3261e;
+    font-size: 0.875rem;
+    margin: 0;
+}
+
+.post-form #create-post-button {
+    align-self: flex-start;
+    padding: 0px 32px;
+    font-weight: 500;
+    cursor: pointer;
+}
