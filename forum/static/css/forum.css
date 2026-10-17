@@ -54,6 +54,11 @@ h1 {
 Pengaturan Styling untuk Halaman Depan Forum
 --------------------------------------------
 */
+.forum-container {
+    margin: 32px 24px;
+    padding: 40px 20px;
+}
+
 .forum-header {
     display: flex;
     justify-content: space-between; 
@@ -85,10 +90,6 @@ Pengaturan Styling untuk Halaman Depan Forum
     font-weight: 500;
 }
 
-.forum-container {
-    margin: 32px 24px;
-    padding: 40px 20px;
-}
 
 #forum-search-btn {
     padding: 5px 25px;
