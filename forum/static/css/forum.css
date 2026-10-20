@@ -6,6 +6,7 @@
     --color-text-dark: #1b4d3e;
     --color-text-muted: #5a7369;
     --color-border: #edf2f7;
+    --color-grey: #ececec; 
 }
 
 
@@ -16,6 +17,10 @@ Pengaturan Styling yang Berlaku ke semua page
 */
 h1 {
     color: var(--color-primary);
+}
+
+a {
+    text-decoration: none;
 }
 
 .button-type-1 {
@@ -59,12 +64,12 @@ h1 {
     position: sticky;          /* ganti dari fixed */
     top: 100px;                 /* jarak dari atas saat di-scroll */
     flex: 0 0 180px;           /* lebar tetap, tidak menyusut */
-    background-color: #ececec;
+    background-color: var(--color-grey);
     border-radius: 10px;
-    padding: 20px 10px;
+    padding-top: 20px;
+    padding-bottom: 20px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
 }
 
 .forum-page-content {
@@ -73,11 +78,30 @@ h1 {
 }
 
 .home-page,
-.user-page,
+.user-post-page,
 .bookmark-page {
     display: flex;
     column-gap: 5px;
+    padding: 7px 10px 7px 7px;
+    color: var(--color-text-dark);
+    background-color: var(--color-grey);
+    transition: background-color 0.2s ease;
 }
+
+.home-page:hover,
+.user-post-page:hover,
+.bookmark-page:hover {
+    background-color: #dedede;
+}
+
+.nav-active {
+    border-left: 5px solid var(--color-text-dark);
+}
+
+.nav-inactive {
+    border-left: 5px solid transparent;
+}
+
 
 
 /*
@@ -115,7 +139,7 @@ Pengaturan Styling untuk Halaman Depan Forum
     margin-right: 5px;
     margin-top: 40px;
     padding-left: 10px;
-    border-color: #ececec;
+    border-color: var(--color-grey);
     border-style: solid;
     border-width: 2px;
     border-radius: 10px;
@@ -166,7 +190,7 @@ Pengaturan Styling untuk Halaman Edit/Bikin Post
     padding: 14px 16px;
     font-family: inherit;
     font-size: 1rem;
-    border: 2px solid #ececec;
+    border: 2px solid var(--color-grey);
     border-radius: 10px;
     background-color: #fff;
     transition: border-color 0.2s ease;
