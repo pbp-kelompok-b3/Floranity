@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/forum.css' %}">
+{% endblock extra_css %}
+
+{% block content %}
+<div class="forum-layout">
+    <nav class="forum-page-nav">
+        <div class="home-page">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-label="Home">
+                <path d="M12 2.5 1.5 11.5h3V21a1 1 0 0 0 1 1h4.5v-6.5h4V22H18.5a1 1 0 0 0 1-1v-9.5h3L12 2.5Z"/>
+            </svg>
+            <a>Beranda</a>
+        </div>
+        <div class="user-page">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-label="User">
+                <circle cx="12" cy="7.5" r="4.5"/>
+                <path d="M3 21a1 1 0 0 1-1-1v-.5A6.5 6.5 0 0 1 8.5 13h7a6.5 6.5 0 0 1 6.5 6.5v.5a1 1 0 0 1-1 1H3Z"/>
+            </svg>
+            <a>User</a>
+        </div>
+        <div class="bookmark-page">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-label="Bookmark">
+                <path d="M6 2.5h12a1.5 1.5 0 0 1 1.5 1.5v18.2a.5.5 0 0 1-.78.42L12 18l-6.72 4.62a.5.5 0 0 1-.78-.42V4A1.5 1.5 0 0 1 6 2.5Z"/>
+            </svg>
+            <a>Bookmark</a>
+        </div>
+    </nav>
+    <div class="forum-page-content">
+        {% block forum-page-content %}
+        {% endblock forum-page-content %}
+    </div>
+</div>
+
+
+{% endblock content %}
