@@ -10,6 +10,9 @@ def show_forum(request: HttpRequest):
 def show_user_post(request: HttpRequest):
     return render(request, 'forum/forum_page_user_post.html')
 
+def show_bookmarked_post(request: HttpRequest):
+    return render(request, "forum/forum_page_bookmark.html")
+
 def create_post(request: HttpRequest):
     form = PostForum(request.POST or None)
 
