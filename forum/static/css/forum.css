@@ -48,9 +48,35 @@ h1 {
     background-color: var(--color-cream-hover);
 }
 
-.container {
-    margin: 32px 100px;
-    padding: 40px 20px;
+.forum-layout {
+    display: flex;
+    align-items: flex-start;   /* supaya nav tidak ikut setinggi konten */
+    gap: 32px;
+    padding: 32px 40px;
+}
+
+.forum-page-nav {
+    position: sticky;          /* ganti dari fixed */
+    top: 100px;                 /* jarak dari atas saat di-scroll */
+    flex: 0 0 180px;           /* lebar tetap, tidak menyusut */
+    background-color: #ececec;
+    border-radius: 10px;
+    padding: 20px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.forum-page-content {
+    flex: 1;
+    min-width: 0;              /* mencegah konten meluber keluar */
+}
+
+.home-page,
+.user-page,
+.bookmark-page {
+    display: flex;
+    column-gap: 5px;
 }
 
 
@@ -67,11 +93,6 @@ Pengaturan Styling untuk Halaman Depan Forum
     gap: 16px;
 }
 
-.action-btn {
-    display: flex;
-    gap: 12px; 
-}
-
 #create-post-button {
     padding: 0px 35px;
     height: 45px;
@@ -81,17 +102,6 @@ Pengaturan Styling untuk Halaman Depan Forum
     font-weight: 500;
     text-decoration: none;
 }
-
-#edit-post-button {
-    padding: 0px 35px;
-    height: 45px;
-    width: fit-content;
-    text-align: center;
-    align-content: center;
-    font-weight: 500;
-    text-decoration: none;
-}
-
 
 #forum-search-btn {
     padding: 5px 25px;
@@ -117,6 +127,10 @@ Pengaturan Styling untuk Halaman Depan Forum
     border-color: var(--color-text-muted);
 }
 
+/*DEBUGGING: Simulasi Page Beranda Memanjang Ke Bawah Sehingga perlu Scrolling*/
+#post-container {
+    height: 300vh;
+}
 
 /*
 ------------------------------------------------
