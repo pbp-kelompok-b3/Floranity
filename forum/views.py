@@ -7,6 +7,9 @@ from forum.models import Post
 def show_forum(request: HttpRequest):
     return render(request, 'forum/forum_page_home.html')
 
+def show_user_post(request: HttpRequest):
+    return render(request, 'forum/forum_page_user_post.html')
+
 def create_post(request: HttpRequest):
     form = PostForum(request.POST or None)
 
