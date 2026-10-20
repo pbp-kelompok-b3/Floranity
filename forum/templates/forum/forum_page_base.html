@@ -17,12 +17,14 @@
             </svg>
             <p>Beranda</p>
         </a>
-        <a class="user-post-page">
+        {% url 'forum:show_user_post' as show_user_post_url %}
+        <a  href="{{ show_user_post_url }}"
+            class="user-post-page {% if request.path == show_user_post_url %}nav-active{% else %}nav-inactive{% endif %}">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1b4d3e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="My Posts">
                 <path d="M12 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6"/>
                 <path d="M18.4 2.6a2 2 0 0 1 2.8 2.8L12 14.6 8 16l1.4-4 9-9.4Z"/>
             </svg>
-            <p>Post Anda</p>
+            <p>Post Saya</p>
         </a>
         <a class="bookmark-page">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1b4d3e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="Bookmark">
