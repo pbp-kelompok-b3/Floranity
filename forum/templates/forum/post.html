@@ -1,43 +1,43 @@
 {% load static %}
-<!DOCTYPE html>
-<html lang="id">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="stylesheet" href="{% static 'css/forum.css' %}">
-    </head>
-    <article class="post">
-        <header>
-            <p class="username">{{ post.author.username }}</p>
-            <p class="post-date">{{ post.created_at }}</p>
-        </header>
-        <body>
-            <h3 class="post-title">{{ post.post_title }}</h3>
-            <p class="post-body">{{ post.post_body }}</p>
-        </body>
-        <footer>
-            <a class="likes-button">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#858383" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="Like">
-                    <path d="M7 10v11"/>
-                    <path d="M7 10l4-7a2 2 0 0 1 2 2v4h5.6a2 2 0 0 1 2 2.3l-1.2 7.4a2 2 0 0 1-2 1.7H7"/>
-                    <path d="M3 10h4v11H3z"/>
-                </svg>
-                <p> {{ post.likes_total }}</p>
-            </a>
-            <a class="comment-button">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#858383" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="Comment">
-                    <path d="M21 11.5a8.5 8.5 0 0 1-12.4 7.55L3 20.5l1.45-4.9A8.5 8.5 0 1 1 21 11.5Z"/>
-                </svg>
-                <p> {{ post.comments_total }}</p>
-            </a>
-            <a class="bookmark-button">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#858383" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="Bookmark">
-                    <path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4.5L5 21V4a1 1 0 0 1 1-1Z"/>
-                </svg>
-            </a>
-        </footer>
-    </article>
-    <script>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'css/forum.css' %}">
+</head>
+<article class="post">
+    <header class="post-header">
+        <p class="post-meta">
+            <span class="username">{{ post.author.username }}</span>
+            <span class="post-meta-separator"> &bull; </span>
+            <span class="post-date">{{ post.created_at }}</span>              <span class="post-date"></span>
+        </p>
+    </header>
+    <div class="post-body">
+        <h3 class="post-title"><a>{{ post.post_title }}</a></h3>
+        <p class="post-content">{{ post.post_body }}</p>
+    </div>
+    <footer class="post-action-button">
+        <a class="likes-button">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#858383" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="Like">
+                <path d="M7 10v11"/>
+                <path d="M7 10l4-7a2 2 0 0 1 2 2v4h5.6a2 2 0 0 1 2 2.3l-1.2 7.4a2 2 0 0 1-2 1.7H7"/>
+                <path d="M3 10h4v11H3z"/>
+            </svg>
+            <p class="counter likes-counter">{{ post.likes_total }}</p>
+        </a>
+        <a class="comment-button">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#858383" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="Comment">
+                <path d="M21 11.5a8.5 8.5 0 0 1-12.4 7.55L3 20.5l1.45-4.9A8.5 8.5 0 1 1 21 11.5Z"/>
+            </svg>
+            <p class="counter comments-counter">{{ post.comments_total }}</p>
+        </a>
+        <a class="bookmark-button">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#858383" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="Bookmark">
+                <path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4.5L5 21V4a1 1 0 0 1 1-1Z"/>
+            </svg>
+        </a>
+    </footer>
+</article>
+<script>
 
-    </script>
-</html>
+</script>
