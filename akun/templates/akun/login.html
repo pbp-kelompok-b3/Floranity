@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Masuk · Floranity{% endblock %}
+{% block extra_css %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Doppio+One&family=Gidole&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'akun/css/profile.css' %}?v=4">
+{% endblock %}
+{% block content %}
+<div class="account-page">
+    {% if messages %}
+    <div class="account-messages" role="status" aria-live="polite">
+        {% for message in messages %}<p class="account-message {{ message.tags }}">{{ message }}</p>{% endfor %}
+    </div>
+    {% endif %}
+    <section class="account-login">
+    <div class="account-story">
+        <span class="account-eyebrow">TUMBUH BERSAMA FLORANITY</span>
+        <h1>Ruang kecil untuk<br>tumbuh lebih baik.</h1>
+        <p>Rawat tanamanmu, temukan ritmemu, dan berbagi cerita dengan sesama pecinta hijau.</p>
+        <svg class="account-plant-art" viewBox="0 0 400 340" fill="none" aria-hidden="true">
+            <circle cx="200" cy="164" r="144" fill="#14532d" fill-opacity=".06"/>
+            <circle cx="200" cy="164" r="110" stroke="#14532d" stroke-opacity=".15"/>
+            <path d="M201 257C196 198 220 140 191 69" stroke="#C5D9A8" stroke-width="5" stroke-linecap="round"/>
+            <path d="M201 222C139 223 112 185 114 145C162 144 195 170 201 222Z" fill="#66A885"/>
+            <path d="M203 184C258 184 292 154 289 110C245 110 212 137 203 184Z" fill="#99BD8A"/>
+            <path d="M201 135C157 135 134 107 137 71C172 72 199 96 201 135Z" fill="#B7CE9D"/>
+            <path d="M198 99C223 79 230 53 213 27C190 42 182 70 198 99Z" fill="#E0E5B6"/>
+            <path d="M199 218L132 162M206 181L271 125M197 130L150 84" stroke="#1B4D3E" stroke-opacity=".35" stroke-width="2"/>
+            <path d="M153 254H249L235 313H168L153 254Z" fill="#14532d"/>
+            <path d="M150 254H252" stroke="#FFF3DB" stroke-width="9" stroke-linecap="round"/>
+            <path d="M176 266L182 300M225 266L219 300" stroke="#6B9A76" stroke-width="2" stroke-linecap="round"/>
+            <ellipse cx="201" cy="322" rx="76" ry="7" fill="#001524" fill-opacity=".15"/>
+        </svg>
+        <span class="account-story-note">Sedikit perhatian, setiap hari.</span>
+    </div>
+    <div class="account-login-form">
+        <span class="account-leaf-mark" aria-hidden="true">❧</span>
+        <span class="account-eyebrow">SELAMAT DATANG</span>
+        <h2>Mulai cerita hijaumu.</h2>
+        <p class="account-muted">Masuk atau daftar dengan akun Google untuk punya ruang tumbuhmu sendiri.</p>
+        {% if google_configured %}
+        <form action="{% url 'akun:google_login' %}" method="post">
+            {% csrf_token %}
+            {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+            <button class="account-button account-google" type="submit"><span class="account-google-mark" aria-hidden="true">G</span>Lanjutkan dengan Google<span aria-hidden="true">↗</span></button>
+        </form>
+        {% else %}
+        <button class="account-button account-google" type="button" disabled><span class="account-google-mark" aria-hidden="true">G</span>Lanjutkan dengan Google</button>
+        <p class="account-notice" role="status">Login Google belum tersedia. Hubungi pengelola untuk mengaktifkannya.</p>
+        {% endif %}
+        <div class="account-login-note"><span aria-hidden="true">◎</span><p>Satu akun, satu kebun cerita.<br><span class="account-muted">Profil otomatis dibuat saat pertama kali masuk.</span></p></div>
+        <p class="account-fine-print">Nama dan foto Google menjadi profil awalmu. Kamu bisa mengubahnya kapan saja.</p>
+        <a class="account-text-link" href="{% url 'show_home' %}">← Kembali ke beranda</a>
+    </div>
+</section>
+
+</div>
+{% endblock %}

@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'main',
+    'akun',
 ]
 
 MIDDLEWARE = [
@@ -122,3 +123,11 @@ MAILERS = {
         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
     },
 }
+
+# Authentication and user profiles.
+LOGIN_URL = 'akun:login'
+LOGIN_REDIRECT_URL = 'akun:my_profile'
+GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID', '')
+GOOGLE_CLIENT_SECRET = os.getenv('GOOGLE_CLIENT_SECRET', '')
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'

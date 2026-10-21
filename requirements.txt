@@ -3,3 +3,6 @@ psycopg2-binary
 gunicorn
 python-dotenv
 whitenoise
+Authlib>=1.9.1,<2
+Pillow>=11,<13
+requests>=2.32,<3
