@@ -6,9 +6,21 @@
     <h1 class="page-title">Forum Komunitas</h1>
     <a class="button button-type-1" id="create-post-button" href="{% url 'forum:create_post' %}">Buat Post</a>
 </div>
-<form class="search-post">
-    <input class="search-post__input" type="search" placeholder="🔍︎ Cari Post Berdasarkan Kata Kunci">
+<form class="search-post" 
+      hx-get="{% url 'forum:show_forum' %}"
+      hx-target="#post-container"
+      hx-trigger="input changed delay:300ms, submit">
+    <input class="search-post__input" 
+           type="search" 
+           name="content"
+           placeholder="🔍︎ Cari Post Berdasarkan Kata Kunci">
     <button class="button button-type-2" id="forum-search-btn" type="submit">Cari Post</button>
 </form>
-<div class="container" id="post-container"></div>
+<div class="container" id="post-container">
+    {% for post in post_list %}
+        {% include 'forum/post.html' %}
+    {% empty %}
+        <p>Belum ada post yang dibuat</p>
+    {% endfor %}
+</div>
 {% endblock forum-page-content %}

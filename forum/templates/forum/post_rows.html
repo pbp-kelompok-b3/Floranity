@@ -1,0 +1,5 @@
+{% for post in post_list %}
+    {% include 'forum/post.html' %}
+{% empty %}
+    <p>Belum ada post yang dibuat</p>
+{% endfor %}

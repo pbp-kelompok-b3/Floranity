@@ -5,9 +5,26 @@
 <div class="forum-header">
     <h1 class="page-title">Post Tersimpan</h1>
 </div>
-<form class="search-post">
-    <input class="search-post__input" type="search" placeholder="🔍︎ Cari Post Berdasarkan Kata Kunci">
-    <button class="button button-type-2" id="forum-search-btn" type="submit">Cari Post</button>
+<form class="search-post"
+      id="search-bookmark-post"
+      hx-get="{% url 'forum:show_bookmarked_post' %}"
+      hx-target="#post-container"
+      hx-trigger="input changed delay:300ms, submit">
+    <input class="search-post__input" 
+           type="search" 
+           name="content" 
+           placeholder="🔍︎ Cari Post Berdasarkan Kata Kunci">
+    <button class="button button-type-2" 
+            id="forum-search-btn" 
+            type="submit">
+            Cari Post
+    </button>
 </form>
-<div class="container" id="post-container"></div>
+<div class="container" id="post-container">
+    {% for post in post_list %}
+        {% include 'forum/post.html' %}
+    {% empty %}
+        <p>Belum ada post yang dibuat</p>
+    {% endfor %}
+</div>
 {% endblock forum-page-content %}

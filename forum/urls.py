@@ -8,5 +8,5 @@ urlpatterns = [
     path("forum/post_saya/", show_user_post, name="show_user_post"),
     path("forum/koleksi_post_saya/", show_bookmarked_post, name="show_bookmarked_post"),
     path("forum/create/", create_post, name="create_post"),
-    path("forum/<uuid:post_id>/edit/", edit_post, name="edit_post")
+    path("forum/<uuid:post_id>/edit/", edit_post, name="edit_post"),
 ]
