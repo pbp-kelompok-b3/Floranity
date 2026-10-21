@@ -57,7 +57,7 @@ a {
     display: flex;
     align-items: flex-start;   /* supaya nav tidak ikut setinggi konten */
     gap: 32px;
-    padding: 32px 40px;
+    padding: 32px 100px;
 }
 
 .forum-page-nav {
@@ -100,6 +100,10 @@ a {
 
 .nav-inactive {
     border-left: 5px solid transparent;
+}
+
+#post-container {
+    margin-top: 30px;
 }
 
 
@@ -149,11 +153,6 @@ Pengaturan Styling untuk Halaman Depan Forum
 .search-post__input:focus{
     outline: none;
     border-color: var(--color-text-muted);
-}
-
-/*DEBUGGING: Simulasi Page Beranda Memanjang Ke Bawah Sehingga perlu Scrolling*/
-#post-container {
-    height: 300vh;
 }
 
 
@@ -277,4 +276,50 @@ Pengaturan Styling untuk Halaman Edit/Bikin Post
     padding: 0px 32px;
     font-weight: 500;
     cursor: pointer;
+}
+
+
+/*
+-----------------------------
+Pengaturan Styling untuk Post
+-----------------------------
+*/
+.post {
+    background-color: var(--color-grey);
+    border-radius: 10px;
+    padding: 10px 10px;
+    margin-top: 10px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.post-header {
+    display: flex;
+}
+
+.post-meta .username {
+    font-weight: 500;
+}
+
+.post-body .post-title a {
+    color: var(--color-text-dark);
+    text-decoration: none;
+}
+
+.post-body .post-title a:hover {
+    text-decoration: underline var(--color-text-dark);
+}
+
+.post-action-button {
+    display: flex;
+    gap: 20px;
+}
+
+.likes-button,
+.comment-button,
+.bookmark-button {
+    display: flex;
+    gap: 5px;
 }
