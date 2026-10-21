@@ -3,14 +3,15 @@
 <div class="forum-header">
     <h1 class="page-title">Post Saya</h1>
 </div>
-<form class="search-post" id="search-user-post" hx-headers="{'X-CSRFToken' : '{{ csrf_token }}'}">
+<form class="search-post" 
+      id="search-user-post" 
+      hx-get="{% url 'forum:show_user_post' %}"
+      hx-target="#post-container"
+      hx-trigger="keyup changed delay:300ms, submit">
     <input class="search-post__input" 
            type="search" 
-           placeholder="🔍︎ Cari Post Berdasarkan Kata Kunci"
-           hx-post=""
-           hx-target="#post-container"
-           hx-swap="outerHTML"
-           hx-trigger="keyup changed delay:300ms, search">
+           name="content"
+           placeholder="🔍︎ Cari Post Berdasarkan Kata Kunci">
     <select name="recent_post" class="search-post__recent">
         <option value="most_recent">Paling Terbaru</option>
         <option value="oldest">Paling Terdahulu</option>
@@ -21,12 +22,15 @@
     </select>
     <button class="button button-type-2" 
             id="forum-search-btn" 
-            type="submit"
-            hx-post=""
-            hx-target="#post-container"
-            hx-swap="outerHTML">
+            type="submit">
             Cari Post
     </button>
 </form>
-<div class="container" id="post-container"></div>
+<div class="container" id="post-container">
+    {% for post in post_list %}
+        {% include 'forum/post.html' %}
+    {% empty %}
+        <p>Belum ada post yang dibuat</p>
+    {% endfor %}
+</div>
 {% endblock forum-page-content %}
