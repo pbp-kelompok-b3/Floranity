@@ -1,0 +1,117 @@
+:root {
+    --color-primary: #1b4d3e;
+    --color-primary-hover: #143b30;
+    --color-cream: #faf2e2;
+    --color-cream-hover: #f3e8d2;
+    --color-text-dark: #1b4d3e;
+    --color-text-muted: #5a7369;
+    --color-border: #edf2f7;
+}
+
+
+/*
+----------------------------------------------
+Pengaturan Styling yang Berlaku ke semua page
+----------------------------------------------
+*/
+h1 {
+    color: var(--color-primary);
+}
+
+.button-type-1 {
+    background-color: var(--color-primary);
+    border: none;
+    border-radius: 10px;
+    
+    color: var(--color-border);
+    
+    transition: background-color 0.2s ease;
+}
+
+.button-type-1:hover {
+    background-color: var(--color-primary-hover);
+}
+
+.button-type-2 {
+    background-color: var(--color-cream);
+    border-radius: 10px;
+    border-color: #5a7369;
+    border-style: solid;
+    border-width: 2px;
+    
+    color: var(--color-text-dark);
+
+    transition: background-color 0.2s ease;
+}
+
+.button-type-2:hover {
+    background-color: var(--color-cream-hover);
+}
+
+
+/*
+--------------------------------------------
+Pengaturan Styling untuk Halaman Depan Forum
+--------------------------------------------
+*/
+.forum-header {
+    display: flex;
+    justify-content: space-between; 
+    align-items: center;          
+    flex-wrap: wrap;      
+    gap: 16px;
+}
+
+.action-btn {
+    display: flex;
+    gap: 12px; 
+}
+
+#create-post-button {
+    padding: 0px 35px;
+    height: 45px;
+    width: fit-content;
+    text-align: center;
+    align-content: center;
+    font-weight: 500;
+}
+
+#edit-post-button {
+    padding: 0px 35px;
+    height: 45px;
+    width: fit-content;
+    text-align: center;
+    align-content: center;
+    font-weight: 500;
+}
+
+.forum-container {
+    margin: 32px 24px;
+    padding: 40px 20px;
+}
+
+#forum-search-btn {
+    padding: 5px 25px;
+    margin-left: 5px;
+    height: 40px;
+}
+
+.search-post__input {
+    width: 400px;
+    height: 40px;
+    margin-right: 5px;
+    margin-top: 40px;
+    padding-left: 10px;
+    border-color: #ececec;
+    border-style: solid;
+    border-width: 2px;
+    border-radius: 10px;
+    transition: border-color 0.2s ease;
+}
+
+.search-post__input:focus{
+    outline: none;
+    border-color: var(--color-text-muted);
+}
+
+
