@@ -2,6 +2,9 @@
 
 Floranity dirancang bagi para penggemar tanaman hias yang ingin mempraktikkan perawatan tanaman yang penuh perhatian dan berkelanjutan. Pada intinya, Floranity bertujuan untuk mengurangi hilangnya tanaman, menghemat air, serta menumbuhkan hubungan yang lebih mendalam dan menenangkan antara manusia dan ruang hijau yang mereka ciptakan.
 
+## Tautan Deployment PWS
+[Link PWS](https://pws.cs.ui.ac.id/rama.sanjaya/floranity)
+
 ## Anggota Kelompok - B03
 * Aksara Putra Fachruddin (2506597284)
 * Rama Sanjaya (2506604421)
@@ -53,3 +56,4 @@ Menyediakan fungsi **CRUD** untuk entitas Profil Pengguna yang terhubung *one-to
 
 ## Tautan Desain Figma
 [Link Figma](https://www.figma.com/design/qbUWPRG2hfBVHtiduK0h2W/Floranity---UI-UX?node-id=0-1&t=jYRySARAl85jCrX0-1)
+

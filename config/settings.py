@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'main',
+    'koleksi',
 ]
 
 MIDDLEWARE = [
@@ -122,3 +123,8 @@ MAILERS = {
         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
     },
 }
+
+# Plant APIs Configuration
+PERENUAL_API_KEY = os.environ.get("PERENUAL_API_KEY", "") or os.environ.get("PERENUAL_KEY", "")
+PERMAPEOPLE_KEY_ID = os.environ.get("PERMAPEOPLE_KEY_ID", "")
+PERMAPEOPLE_KEY_SECRET = os.environ.get("PERMAPEOPLE_KEY_SECRET", "")
