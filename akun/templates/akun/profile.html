@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+{% block title %}{{ profile.display_name }} · Floranity{% endblock %}
+{% block extra_css %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Doppio+One&family=Gidole&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'akun/css/profile.css' %}?v=4">
+{% endblock %}
+{% block content %}
+<div class="account-page">
+    {% if messages %}
+    <div class="account-messages" role="status" aria-live="polite">
+        {% for message in messages %}<p class="account-message {{ message.tags }}">{{ message }}</p>{% endfor %}
+    </div>
+    {% endif %}
+    <div class="account-topline"><div><span class="account-eyebrow">RUANG TUMBUH</span><h1>{% if is_owner %}Profil saya{% else %}Profil anggota{% endif %}</h1></div><a href="{% url 'show_home' %}" class="account-text-link">← Beranda</a></div>
+<section class="account-profile-card">
+    <div class="account-cover"><span>Setiap daun punya cerita.</span><span class="account-cover-leaf" aria-hidden="true">❧</span></div>
+    <div class="account-profile-main">
+        <div class="account-profile-heading">
+            {% if profile.avatar_url %}
+            <img class="account-avatar" src="{{ profile.avatar_url }}" alt="Foto profil {{ profile.display_name }}" width="112" height="112" referrerpolicy="no-referrer">
+            {% else %}
+            <span class="account-avatar account-initials" role="img" aria-label="Inisial {{ profile.display_name }}">{{ profile.initials }}</span>
+            {% endif %}
+            {% if is_owner %}<a class="account-button account-button-outline" href="{% url 'akun:edit_profile' %}">Edit profil <span aria-hidden="true">↗</span></a>{% endif %}
+        </div>
+        <span class="account-pill">ANGGOTA FLORANITY</span>
+        <h2>{{ profile.display_name }}</h2>
+        <p class="account-muted">Tumbuh bersama sejak {% language 'id' %}{{ profile.user.date_joined|date:'F Y' }}{% endlanguage %}</p>
+        <div class="account-bio"><h3>Tentang saya</h3>{% if profile.bio %}<div>{{ profile.bio|linebreaksbr }}</div>{% else %}<p class="account-muted">{% if is_owner %}Cerita hijaumu dimulai di sini. Tambahkan bio untuk memperkenalkan dirimu.{% else %}Anggota ini belum menambahkan bio.{% endif %}</p>{% endif %}</div>
+    </div>
+</section>
+{% if is_owner %}
+<section class="account-personal"><div><span class="account-eyebrow">AKUN PRIBADI</span><h3>Terhubung dan siap tumbuh.</h3><p class="account-muted">{{ profile.user.email }}</p><p class="account-fine-print">Email hanya terlihat olehmu.</p></div><form action="{% url 'akun:logout' %}" method="post">{% csrf_token %}<button class="account-button account-button-outline" type="submit">Keluar akun <span aria-hidden="true">↗</span></button></form></section>
+<a class="account-text-link account-danger-link" href="{% url 'akun:remove_account' %}">Hapus akun permanen</a>
+{% endif %}
+
+</div>
+{% endblock %}
