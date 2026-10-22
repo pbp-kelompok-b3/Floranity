@@ -10,6 +10,7 @@ class Post(models.Model):
     post_body = models.TextField(null=False, blank=False)
     created_at = models.DateField(auto_now_add=True)
     liked = models.ManyToManyField(User, related_name="liked_post")
+    bookmarked = models.ManyToManyField(User, related_name="bookmarked_post")
 
 class Comment(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

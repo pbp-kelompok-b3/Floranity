@@ -62,7 +62,7 @@ a {
 
 .forum-page-nav {
     position: sticky;          /* ganti dari fixed */
-    top: 100px;                 /* jarak dari atas saat di-scroll */
+    top: 130px;                 /* jarak dari atas saat di-scroll */
     flex: 0 0 180px;           /* lebar tetap, tidak menyusut */
     background-color: var(--color-grey);
     border-radius: 10px;
@@ -322,4 +322,19 @@ Pengaturan Styling untuk Post
 .bookmark-button {
     display: flex;
     gap: 5px;
+    border: none;
+    padding: 5px 5px;
+    background-color: transparent;
+}
+
+.likes-button:hover,
+.comment-button:hover,
+.bookmark-button:hover {
+    border-radius: 10px;
+    background-color: #dfdfdf;
+}
+
+.post-action-button .active svg {
+    fill: #858383;
+    stroke: none;
 }
