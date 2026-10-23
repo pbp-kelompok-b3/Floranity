@@ -2,7 +2,8 @@ from django.http import HttpRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 from django.db.models import Count, Q
-from forum.forms import PostForum
+from django.utils import timezone
+from forum.forms import PostForm, CommentForm
 from forum.models import Post
 
 # Create your views here.
@@ -32,7 +33,7 @@ def show_bookmarked_post(request: HttpRequest):
 
 # Request handler untuk menampilkan form membuat post baru
 def create_post(request: HttpRequest):
-    form = PostForum(request.POST or None)
+    form = PostForm(request.POST or None)
 
     if request.method == "POST" and form.is_valid():
         post = form.save(commit=False)
@@ -57,7 +58,7 @@ def edit_post(request: HttpRequest, post_id):
         "post_body" : post_obj.post_body,
     }
 
-    form = PostForum(request.POST or None, initial=post_obj_data, instance=post_obj)
+    form = PostForm(request.POST or None, initial=post_obj_data, instance=post_obj)
 
     if request.method == "POST" and form.is_valid():
         post = form.save(commit=False)
@@ -85,6 +86,7 @@ def get_post_queryset(request: HttpRequest, show_user_only: bool = False):
     # if show_user_only:
     #     all_post.filter(author=request.user)
 
+    # Untuk filter berdasarkan query "search bar"
     q = request.GET.get("content", "").strip()
     if q:
         for word in q.split():
@@ -92,6 +94,22 @@ def get_post_queryset(request: HttpRequest, show_user_only: bool = False):
                 Q(post_title__icontains=word) |
                 Q(post_body__icontains=word)
             )
+
+    # Untuk sorting berdasarkan value select "recent_post"
+    q = request.GET.get("recent_post", "").strip()
+    if q:
+        if q == "oldest":
+            all_post = all_post.order_by("created_at")
+        else:
+            all_post = all_post.order_by("-created_at")
+
+    # Untuk sorting berdasarkan value select "most_likes"
+    q = request.GET.get("most_likes", "").strip()
+    if q:
+        if q == "most_likes":
+            all_post = all_post.order_by("-likes_total")
+        else:
+            all_post = all_post.order_by("likes_total")
 
     return all_post
 
@@ -124,5 +142,32 @@ def toggle_bookmark_button(request: HttpRequest, post_id):
     # post.bookmarked.add(request.user)
     # return JsonResponse({"toggle_command" : "toggle"})
 
-    # NOTE: Kode sementara, untuk melihat toggle berhasil
+    # NOTE: Kode sementara, untuk melihat toggle active berhasil
     return JsonResponse({"toggle_command" : "toggle"})
+
+# Request handler untuk menampilkan comment section pada sebuah post
+def show_comment_section(request: HttpRequest, post_id):
+    post = get_object_or_404(Post, pk=post_id)
+    all_comments = post.post_comments.all().order_by("-created_at")
+
+    context = {
+        "comment_list" : all_comments,
+        "form" : CommentForm(),
+        "post_id" : post_id
+    }
+
+    return render(request, "forum/comment_section.html", context)
+
+# Request handler untuk menambahkan komen pada sebuah post
+@require_POST
+def add_comment(request: HttpRequest, post_id):
+    form = CommentForm(request.POST or None)
+    post = get_object_or_404(Post, pk=post_id)
+    
+    if form.is_valid():
+        created_comment = form.save(commit=False)
+        created_comment.commented_at = post
+        created_comment.save()
+
+    all_comments = post.post_comments.all().order_by("-created_at")
+    return render(request, "forum/comment_rows.html", context={"comment_list" : all_comments})

@@ -286,6 +286,7 @@ Pengaturan Styling untuk Post
 */
 .post {
     background-color: var(--color-grey);
+    border: 10px;
     border-radius: 10px;
     padding: 10px 10px;
     margin-top: 10px;
@@ -295,11 +296,17 @@ Pengaturan Styling untuk Post
     gap: 16px;
 }
 
+.post-comment-shown {
+    border-bottom-left-radius: 0px;
+    border-bottom-right-radius: 0px;
+}
+
 .post-header {
     display: flex;
 }
 
-.post-meta .username {
+.post-meta .username,
+.comment-meta .username {
     font-weight: 500;
 }
 
@@ -314,7 +321,7 @@ Pengaturan Styling untuk Post
 
 .post-action-button {
     display: flex;
-    gap: 20px;
+    gap: 10px;
 }
 
 .likes-button,
@@ -325,6 +332,7 @@ Pengaturan Styling untuk Post
     border: none;
     padding: 5px 5px;
     background-color: transparent;
+    cursor: pointer;
 }
 
 .likes-button:hover,
@@ -337,4 +345,50 @@ Pengaturan Styling untuk Post
 .post-action-button .active svg {
     fill: #858383;
     stroke: none;
+}
+
+.comment-section {
+    background-color: var(--color-grey);
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+
+.comment-form,
+.comment-section-title,
+.comment-section .no-comment,
+.comment {
+    padding: 10px;
+}
+
+.comment-form {
+    background-color: #dfdfdf;
+}
+
+.comment-form .form-group textarea {
+    min-height: fit-content;
+    padding: 5px;
+    border: none;
+    field-sizing: content;
+}
+
+.comment-form .submit-comment-button {
+    cursor: pointer;
+    padding: 5px 10px;
+    margin-top: 5px;
+    font-weight: 500;
+    font-size: small;
+}
+
+.comment-section-title {
+    color: var(--color-text-dark);
+}
+
+
+/*
+--------------------------------
+Pengaturan Styling untuk Comment
+--------------------------------
+*/
+.comment {
+    border-top: 2px solid #dfdfdf;
 }

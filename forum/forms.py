@@ -1,7 +1,7 @@
 from django.forms import ModelForm, TextInput, Textarea
-from forum.models import Post
+from forum.models import Post, Comment
 
-class PostForum(ModelForm):
+class PostForm(ModelForm):
     class Meta:
         model = Post
         
@@ -26,6 +26,22 @@ class PostForum(ModelForm):
                 attrs={
                     "placeholder" : "Tulis pertanyaan atau ceritakan pengalaman terkait dengan perawatan tanaman",
                     "rows" : 8
+                }
+            )
+        }
+
+class CommentForm(ModelForm):
+    class Meta:
+        model = Comment
+
+        fields = [
+            "comment_body",
+        ]
+
+        widgets = {
+            "comment_body" : Textarea(
+                attrs={
+                    "placeholder" : "Tulis komentar",
                 }
             )
         }
