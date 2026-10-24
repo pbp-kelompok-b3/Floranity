@@ -1,5 +1,8 @@
+from django.contrib.auth.models import User
 from django.test import TestCase, Client
 from django.urls import reverse
+
+from .models import Tanaman
 
 
 class KoleksiDanKatalogTests(TestCase):
@@ -110,3 +113,17 @@ class KoleksiDanKatalogTests(TestCase):
         self.assertEqual(spesies["famili"], "Pinaceae")
         self.assertEqual(spesies["dalam_ruangan"], "Tidak")
         self.assertEqual(spesies["deskripsi"], "Pyramidalis Silver Fir is an amazing coniferous tree.")
+
+    def test_tanaman_model(self):
+        user = User.objects.create_user(username="testuser", password="password123")
+        tanaman = Tanaman.objects.create(
+            pemilik=user,
+            spesies_id=1,
+            nama_panggilan="Monstera Cantik",
+            nama_ilmiah="Monstera deliciosa",
+            lokasi="Balkon Depan",
+            cahaya="Matahari Sebagian",
+            penyiraman="Sedang",
+        )
+        self.assertEqual(str(tanaman), "Monstera Cantik")
+        self.assertEqual(tanaman.pemilik.username, "testuser")
