@@ -14,6 +14,7 @@ function getCookie(name) {
     return cookieValue;
 }
 
+// Men-toggle tombol like dan bookmark pada post
 document.addEventListener("click", async(event) => {
     const button = event.target.closest(".likes-button, .bookmark-button");
     if (!button) {
@@ -38,4 +39,21 @@ document.addEventListener("click", async(event) => {
         const counter = button.querySelector(".likes-counter");
         counter.textContent = parseInt(counter.textContent) + (button_active ? 1 : -1);
     }
+});
+
+// Membuka/menutup comment section pada post (untuk page beranda)
+document.addEventListener("click", function(event) {
+    const button = event.target.closest(".comment-button");
+    if(!button) {
+        return;
+    }
+
+    const post_wrapper = button.closest(".post-wrapper"); 
+    const post = post_wrapper.querySelector(".post");
+    const comment_section = post_wrapper.querySelector(".comment-section");
+    
+    comment_section.hidden = !comment_section.hidden;
+    button.setAttribute("aria-pressed", String(!comment_section.hidden));
+    button.classList.toggle("active", !comment_section.hidden);
+    post.classList.toggle("post-comment-shown", !comment_section.hidden);
 });

@@ -369,6 +369,12 @@ Pengaturan Styling untuk Post
     padding: 5px;
     border: none;
     field-sizing: content;
+    resize: none;
+}
+
+.comment-form .submit-comment-button {
+    display: block;
+    margin-left: auto;
 }
 
 .comment-form .submit-comment-button {
@@ -383,12 +389,67 @@ Pengaturan Styling untuk Post
     color: var(--color-text-dark);
 }
 
-
-/*
---------------------------------
-Pengaturan Styling untuk Comment
---------------------------------
-*/
 .comment {
     border-top: 2px solid #dfdfdf;
+}
+
+
+/*
+----------------------------------
+Pengaturan Styling untuk Page Post
+----------------------------------
+*/
+.post-page .post,
+.post-page .comment-form,
+.post-page .comment-section-title,
+.post-page .comment-section .no-comment,
+.post-page .comment {
+    padding: 0px;
+}
+
+.post-page .post,
+.post-page .comment-section,
+.post-page .comment-form {
+    background-color: transparent;
+}
+
+.post-page .post-header {
+    display: flex;
+    flex-direction: column;
+}
+
+.post-page .post-title {
+    color: var(--color-text-dark);
+}
+
+.post-page .comment-form .submit-comment-button {
+    display: block;
+    margin-left: auto;
+}
+
+.post-page .comment-section {
+    border-top: 2px solid #dfdfdf;
+    margin-top: 40px;
+}
+
+.post-page .comment-rows {
+    margin-top: 20px;
+}
+
+.post-page .comment-form textarea {
+    border-bottom: 2px solid var(--color-grey);
+    border-radius: 0px;
+    transition: border-bottom 0.2s ease;
+}
+
+.post-page .comment-form textarea:focus {
+    border-bottom: 2px solid var(--color-text-muted);
+}
+
+.post-page .comment {
+    background-color: var(--color-grey);
+    border-color: transparent;
+    border-radius: 10px;
+    padding: 10px;
+    margin-top: 10px;
 }

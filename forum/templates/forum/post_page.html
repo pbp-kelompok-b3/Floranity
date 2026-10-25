@@ -1,0 +1,50 @@
+{% extends 'forum/forum_page_base.html' %}
+{% load static %}
+
+{% block forum-page-content %}
+    <article class="post-page">
+        <section class="post">
+            <header class="post-header">
+                <h2 class="post-title">{{ post.post_title }}</h2>
+                <p class="post-meta">
+                    <span class="username">{{ post.author.username }}</span>
+                    <span class="post-meta-separator"> &bull; </span>
+                    <span class="post-date">{{ post.created_at }}</span>
+                </p>
+            </header>
+            <div class="post-body">
+                <p class="post-content">{{ post.post_body }}</p>
+            </div>
+        </section>
+        <section class="comment-section">
+            <h2 class="comment-section-title">Komentar</h2>
+            <div class="comment-form-container">
+                <form class="comment-form"
+                      hx-post="{% url 'forum:add_comment' post.id %}"
+                      hx-target=".comment-rows"
+                      hx-on::after-request="if (event.detail.successful) this.reset()">
+                    {% csrf_token %}
+                    {% for field in form %}
+                    <div class="form-group">
+                        {{ field }}
+                        {% for error in field.errors %}
+                        <p class="form-error">{{ error }}</p>
+                        {% endfor %}
+                    </div>    
+                    {% endfor %}
+                    <button class="submit-comment-button button-type-1"
+                            type="submit">
+                        Kirim
+                    </button>
+                </form>
+            </div>
+            <div class="comment-rows">
+                {% for comment in comment_list %}
+                    {% include 'forum/comment.html' %}
+                {% empty %}
+                    <p class="no-comment">Belum ada komentar...</p>
+                {% endfor %}
+            </div>
+        </section>
+    </article>
+{% endblock forum-page-content %}

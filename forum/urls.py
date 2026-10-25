@@ -7,6 +7,7 @@ urlpatterns = [
     path("forum/", show_forum, name="show_forum"),
     path("forum/post_saya/", show_user_post, name="show_user_post"),
     path("forum/koleksi_post_saya/", show_bookmarked_post, name="show_bookmarked_post"),
+    path("forum/post/<uuid:post_id>/", show_post_page, name="show_post_page"),
     path("forum/create/", create_post, name="create_post"),
     path("forum/<uuid:post_id>/edit/", edit_post, name="edit_post"),
     path("forum/<uuid:post_id>/like/", toggle_like_button, name="toggle_like_button"),

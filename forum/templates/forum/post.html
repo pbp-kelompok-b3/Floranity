@@ -9,7 +9,7 @@
             </p>
         </header>
         <div class="post-body">
-            <h3 class="post-title"><a>{{ post.post_title }}</a></h3>
+            <h3 class="post-title"><a href="{% url 'forum:show_post_page' post.id %}">{{ post.post_title }}</a></h3>
             <p class="post-content">{{ post.post_body }}</p>
         </div>
         <footer class="post-action-button">

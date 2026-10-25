@@ -8,7 +8,7 @@ class Post(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     post_title = models.CharField(max_length=250, null=False, blank=False)
     post_body = models.TextField(null=False, blank=False)
-    created_at = models.DateField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)
     liked = models.ManyToManyField(User, related_name="liked_post")
     bookmarked = models.ManyToManyField(User, related_name="bookmarked_post")
 

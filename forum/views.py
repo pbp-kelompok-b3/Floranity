@@ -2,7 +2,6 @@ from django.http import HttpRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 from django.db.models import Count, Q
-from django.utils import timezone
 from forum.forms import PostForm, CommentForm
 from forum.models import Post
 
@@ -30,6 +29,19 @@ def show_bookmarked_post(request: HttpRequest):
         return render(request, 'forum/post_rows.html', context)
     
     return render(request, "forum/forum_page_bookmark.html", context)
+
+# Request handler untuk menampilkan page dari post
+def show_post_page(request: HttpRequest, post_id):
+    post = get_object_or_404(Post, pk=post_id)
+    all_comment = post.post_comments.all().order_by("-created_at")
+
+    context = {
+        "post" : post,
+        "comment_list" : all_comment,
+        "form" : CommentForm()
+    }
+
+    return render(request, "forum/post_page.html", context)
 
 # Request handler untuk menampilkan form membuat post baru
 def create_post(request: HttpRequest):
