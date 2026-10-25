@@ -128,6 +128,7 @@ Pengaturan Styling untuk Halaman Depan Forum
     align-content: center;
     font-weight: 500;
     text-decoration: none;
+    cursor: pointer;
 }
 
 #forum-search-btn {
@@ -135,6 +136,7 @@ Pengaturan Styling untuk Halaman Depan Forum
     margin-left: 5px;
     font-weight: 500;
     height: 40px;
+    cursor: pointer;
 }
 
 .search-post__input {
@@ -219,6 +221,38 @@ Pengaturan Styling untuk Halaman Post User
 Pengaturan Styling untuk Halaman Edit/Bikin Post
 ------------------------------------------------
 */
+#post-form-popover {
+    margin: auto;
+    inset: 0;
+    width: min(75vw, 960px);
+    max-height: 90vh;
+    box-sizing: border-box;
+    padding: 36px 36px;
+    border: none;
+    border-radius: 10px;
+    background-color: var(--color-cream);
+    overflow-y: auto;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+}
+
+#post-form-popover::backdrop {
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.post-form-header {
+    display: flex;
+    justify-content: space-between;
+}
+
+.popover-close {
+    background-color: transparent;
+    padding: 0px;
+    border: none;
+    color: black;
+    font-size: 2rem;
+    cursor: pointer;
+}
+
 .post-form {
     display: flex;
     flex-direction: column;
@@ -226,10 +260,12 @@ Pengaturan Styling untuk Halaman Edit/Bikin Post
 }
 
 .post-form-container {
+    width: 100%;
     margin-top: 40px;
 }
 
 .form-group {
+    width: 100%;
     display: flex;
     flex-direction: column;  /* label di atas, field di bawah */
     gap: 8px;                /* jarak label ke field */
@@ -245,18 +281,19 @@ Pengaturan Styling untuk Halaman Edit/Bikin Post
 .form-group textarea {
     width: 100%;
     box-sizing: border-box;  /* supaya padding dan border tidak bikin lebar melebihi 100% */
-    padding: 14px 16px;
+    padding: 5px;
     font-family: inherit;
     font-size: 1rem;
     border: 2px solid var(--color-grey);
     border-radius: 10px;
     background-color: #fff;
+    resize: none;
+    field-sizing: content;
     transition: border-color 0.2s ease;
 }
 
 .form-group textarea {
     min-height: 200px;
-    resize: vertical;        /* user hanya bisa tarik ke atas/bawah, tidak melebar keluar */
 }
 
 .form-group input:focus,
@@ -271,9 +308,9 @@ Pengaturan Styling untuk Halaman Edit/Bikin Post
     margin: 0;
 }
 
-.post-form #create-post-button {
+.post-form #submit-post-button {
     align-self: flex-start;
-    padding: 0px 32px;
+    padding: 10px 32px;
     font-weight: 500;
     cursor: pointer;
 }

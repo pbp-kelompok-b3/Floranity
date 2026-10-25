@@ -1,13 +1,12 @@
-{% extends 'base.html' %}
-{% load static %}
-
-{% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/forum.css' %}">
-{% endblock extra_css %}
-
-{% block content %}
-<div class="container">
-    <h1>{{ page_title }}</h1>
+<div id="post-form-popover" popover="auto">
+    <header class="post-form-header">
+        <h1>{{ page_title }}</h1>
+        <button type="button"
+                class="popover-close"
+                popovertarget="post-form-popover"
+                popovertargetaction="hide"
+                aria-label="Tutup">&times;</button>
+    </header>
     <div class="post-form-container">
         <form method="post"
               action="{% if is_editing_post %}
@@ -28,7 +27,7 @@
             {% endfor %}
             <button type="submit"
                     class="button button-type-1"
-                    id="create-post-button">
+                    id="submit-post-button">
                 {% if is_editing_post %}
                     Simpan Perubahan
                 {% else %}
@@ -38,4 +37,3 @@
         </form>
     </div>
 </div>
-{% endblock content %}

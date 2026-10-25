@@ -12,6 +12,9 @@ def show_forum(request: HttpRequest):
     if request.headers.get("HX-Request"):
         return render(request, "forum/post_rows.html", context)
 
+    context["form"] = PostForm()
+    context["page_title"] = "Buat Post"
+    context["is_editing"] = False
     return render(request, 'forum/forum_page_home.html', context)
 
 # Request handler untuk menampilkan page semua post milik user
@@ -49,17 +52,12 @@ def create_post(request: HttpRequest):
 
     if request.method == "POST" and form.is_valid():
         post = form.save(commit=False)
-        post.author = request.user
+        
+        # NOTE: Ketika sistem autentikasi udah ada, uncomment kode di bawah 
+        # post.author = request.user
+
         post.save()
-        return redirect("forum:show_forum")
-
-    context = {
-        "is_editing_post" : False,
-        "page_title" : "Membuat Post",
-        "form" : form
-    }
-
-    return render(request, 'forum/post_form.html', context)
+        return redirect("forum:show_post_page", post_id=post.id)
 
 # Request handler untuk menampilkan form mengedit post milik user
 # Form yang ditampilkan bukan form kosongan, tapi udah ada isi sesuai sama data post yang di-edit
@@ -80,7 +78,7 @@ def edit_post(request: HttpRequest, post_id):
 
     context = {
         "is_editing_post" : True,
-        "page_title" : "Mengedit Post",
+        "page_title" : "Edit Post",
         "form" : form
     }
 

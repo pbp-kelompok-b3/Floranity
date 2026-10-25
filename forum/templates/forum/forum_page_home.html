@@ -4,8 +4,12 @@
 {% block forum-page-content %}
 <div class="forum-header">
     <h1 class="page-title">Forum Komunitas</h1>
-    <a class="button button-type-1" id="create-post-button" href="{% url 'forum:create_post' %}">Buat Post</a>
+    <button type="button"
+            class="button button-type-1"
+            id="create-post-button"
+            popovertarget="post-form-popover">Buat Post</button>
 </div>
+{% include 'forum/post_form.html' %}
 <form class="search-post" 
       hx-get="{% url 'forum:show_forum' %}"
       hx-target="#post-container"
