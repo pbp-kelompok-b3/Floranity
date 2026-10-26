@@ -28,7 +28,7 @@
 </form>
 <div class="container" id="post-container">
     {% for post in post_list %}
-        {% include 'forum/post.html' %}
+        {% include 'forum/post.html' with form=post.update_form popover_id=post.id %}
     {% empty %}
         <p>Belum ada post yang dibuat</p>
     {% endfor %}

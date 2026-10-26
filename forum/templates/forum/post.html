@@ -7,6 +7,24 @@
                 <span class="post-meta-separator"> &bull; </span>
                 <span class="post-date">{{ post.created_at | date:"j M Y" }}</span>
             </p>
+            {% url 'forum:show_user_post' as show_user_post_url %}
+            {% if request.path == show_user_post_url %}
+            <div class="post-edit-action">
+                <button class="edit-tooltip-button">&bull; &bull; &bull;</button>
+                <div class="edit-action-tooltip">
+                    <button class="edit-post-button" 
+                            type="button"
+                            popovertarget="{{ popover_id }}">Edit</button>
+                    <button class="delete-post-button" 
+                            type="button"
+                            hx-delete="{% url 'forum:delete_post' post.id %}"
+                            hx-target="closest .post-wrapper"
+                            hx-swap="outerHTML"
+                            hx-confirm="Apakah Anda yakin untuk menghapus post?">Hapus</button>
+                </div>
+            </div>
+            {% include 'forum/post_form.html' %}
+            {% endif %}
         </header>
         <div class="post-body">
             <h3 class="post-title"><a href="{% url 'forum:show_post_page' post.id %}">{{ post.post_title }}</a></h3>

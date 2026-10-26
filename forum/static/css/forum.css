@@ -221,7 +221,7 @@ Pengaturan Styling untuk Halaman Post User
 Pengaturan Styling untuk Halaman Edit/Bikin Post
 ------------------------------------------------
 */
-#post-form-popover {
+.post-form-popover {
     margin: auto;
     inset: 0;
     width: min(75vw, 960px);
@@ -235,7 +235,7 @@ Pengaturan Styling untuk Halaman Edit/Bikin Post
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
 }
 
-#post-form-popover::backdrop {
+.post-form-popover::backdrop {
     background-color: rgba(0, 0, 0, 0.5);
 }
 
@@ -340,6 +340,46 @@ Pengaturan Styling untuk Post
 
 .post-header {
     display: flex;
+    justify-content: space-between;
+}
+
+.post-header .edit-tooltip-button {
+    color: #858383;
+    padding: 0px;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.post-header .edit-action-tooltip {
+    gap: 0px;
+    display: flex;
+    flex-direction: column;
+    visibility: hidden;
+    width: fit-content;
+    border-radius: 10px;
+    z-index: 1;
+    position: absolute;
+}
+
+.post-header .edit-post-button,
+.post-header .delete-post-button {
+    border-radius: 0px;
+    padding: 5px 30px;
+    background-color: #dedede;
+    border: 2px solid #858383;
+    color: var(--color-text-dark);
+    font-weight: 400;
+    cursor: pointer;
+}
+
+.post-header .edit-post-button:hover,
+.post-header .delete-post-button:hover {
+    background-color: #858383;
+}
+
+.post-header .post-edit-action:focus-within .edit-action-tooltip {
+    visibility: visible;
 }
 
 .post-meta .username,

@@ -1,6 +1,6 @@
-from django.http import HttpRequest, JsonResponse
+from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_http_methods
 from django.db.models import Count, Q
 from forum.forms import PostForm, CommentForm
 from forum.models import Post
@@ -14,15 +14,21 @@ def show_forum(request: HttpRequest):
 
     context["form"] = PostForm()
     context["page_title"] = "Buat Post"
-    context["is_editing"] = False
+    context["is_editing_post"] = False
     return render(request, 'forum/forum_page_home.html', context)
 
 # Request handler untuk menampilkan page semua post milik user
 def show_user_post(request: HttpRequest):
-    context = {"post_list" : get_post_queryset(request, True)}
+    all_post = get_post_queryset(request, True)
+    for post in all_post:
+        post.update_form = PostForm(instance=post)
+
+    context = {"post_list" : all_post}
     if request.headers.get("HX-Request"):
         return render(request, "forum/post_rows.html", context)
-    
+
+    context['page_title'] = "Edit Post"
+    context['is_editing_post'] = True
     return render(request, 'forum/forum_page_user_post.html', context)
 
 # Request handler untuk menampilkan page semua post yang disimpan oleh user (bookmarked post)
@@ -61,28 +67,25 @@ def create_post(request: HttpRequest):
 
 # Request handler untuk menampilkan form mengedit post milik user
 # Form yang ditampilkan bukan form kosongan, tapi udah ada isi sesuai sama data post yang di-edit
+@require_POST
 def edit_post(request: HttpRequest, post_id):
     post_obj = get_object_or_404(Post, pk=post_id)
-    post_obj_data = {
-        "post_title" : post_obj.post_title,
-        "post_body" : post_obj.post_body,
-    }
+    form = PostForm(request.POST or None, instance=post_obj)
 
-    form = PostForm(request.POST or None, initial=post_obj_data, instance=post_obj)
-
-    if request.method == "POST" and form.is_valid():
+    if form.is_valid():
         post = form.save(commit=False)
-        post.author = request.user
+
+        # NOTE: Ketika sistem autentikasi udah ada, uncomment kode di bawah 
+        # post.author = request.user
+        
         post.save()
-        return redirect("forum:show_forum")
+        return redirect("forum:show_user_post")
 
-    context = {
-        "is_editing_post" : True,
-        "page_title" : "Edit Post",
-        "form" : form
-    }
-
-    return render(request, 'forum/post_form.html', context)
+@require_http_methods(["DELETE"])
+def delete_post(request: HttpRequest, post_id):
+    post = get_object_or_404(Post, pk=post_id)
+    post.delete()
+    return HttpResponse("")
 
 # Request handler untuk mendapatkan semua data post
 # Proses filtering (user only, query search) dilakukan di sini

@@ -1,9 +1,11 @@
-<div id="post-form-popover" popover="auto">
+<div class="post-form-popover"
+     id="{{popover_id | default:'post-form-popover' }}" 
+     popover="auto">
     <header class="post-form-header">
         <h1>{{ page_title }}</h1>
         <button type="button"
                 class="popover-close"
-                popovertarget="post-form-popover"
+                popovertarget="{{popover_id | default:'post-form-popover' }}"
                 popovertargetaction="hide"
                 aria-label="Tutup">&times;</button>
     </header>

@@ -10,6 +10,7 @@ urlpatterns = [
     path("forum/post/<uuid:post_id>/", show_post_page, name="show_post_page"),
     path("forum/create/", create_post, name="create_post"),
     path("forum/<uuid:post_id>/edit/", edit_post, name="edit_post"),
+    path("forum/<uuid:post_id>/delete/", delete_post, name="delete_post"),
     path("forum/<uuid:post_id>/like/", toggle_like_button, name="toggle_like_button"),
     path("forum/<uuid:post_id>/bookmark/", toggle_bookmark_button, name="toggle_bookmark_button"),
     path("forum/<uuid:post_id>/comment_section/", show_comment_section, name="show_comment_section"),
