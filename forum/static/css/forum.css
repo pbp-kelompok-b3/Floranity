@@ -126,8 +126,12 @@ a {
     text-decoration: underline;
 }
 
-
-
+.search-post {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 40px; 
+}
 /*
 --------------------------------------------
 Pengaturan Styling untuk Halaman Depan Forum
@@ -153,19 +157,21 @@ Pengaturan Styling untuk Halaman Depan Forum
 }
 
 #forum-search-btn {
+    flex-shrink: 0;         /*tombol tidak ikut mengecil */
     padding: 5px 25px;
-    margin-left: 5px;
+    margin-left: 0;
     font-weight: 500;
     height: 40px;
     cursor: pointer;
 }
 
 .search-post__input {
-    width: 100%;
+    flex: 1 1 0;            /* melebar/menyusut mengikuti ruang */
+    min-width: 0;           /* penting: supaya input boleh lebih kecil dari isi bawaannya */
     max-width: 400px;
     height: 40px;
-    margin-right: 5px;
-    margin-top: 40px;
+    box-sizing: border-box;
+    margin: 0;              /* jarak diatur oleh gap */
     padding-left: 10px;
     border-color: var(--color-grey);
     border-style: solid;
@@ -194,7 +200,8 @@ Pengaturan Styling untuk Halaman Post User
 }
 
 #search-user-post .search-post__input {
-    flex: 0 0 300px;       /* searchbar melebar mengisi sisa ruang */
+    flex: 1 1 200px;       /* searchbar melebar mengisi sisa ruang */
+    max-width: 300px;
     min-width: 0;
     height: 40px;
     box-sizing: border-box;
@@ -551,4 +558,105 @@ Pengaturan Styling untuk Page Post
     border-radius: 10px;
     padding: 10px;
     margin-top: 10px;
+}
+
+
+/*
+Untuk tampilan tablet
+*/
+@media (max-width: 768px) {
+    .forum-layout {
+        display: block;
+        padding: 32px 20px;
+    }
+
+    .forum-page-nav {
+        position: sticky;          /* ganti dari fixed */
+        top: 120px;                 /* jarak dari atas saat di-scroll */
+        background-color: var(--color-primary);
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: row;
+        justify-content:space-evenly;
+        justify-self: center;
+        width: 100%;
+    }
+
+    .forum-page-nav p {
+        font-size: 0.9rem;
+    }
+
+    .home-page,
+    .user-post-page,
+    .bookmark-page {
+        display: flex;
+        column-gap: 5px;
+        flex: 1 1 0;
+        padding: 10px 8px;
+        color: var(--color-cream-hover);
+        background-color: transparent;
+        justify-content: center;
+        transition: background-color 0.2s ease;
+    }
+
+    .home-page svg,
+    .user-post-page svg,
+    .bookmark-page svg {
+        stroke: var(--color-cream-hover);
+    }
+
+    .nav-active {
+        border: none;
+        border-bottom: 5px solid var(--color-cream-hover);
+    }
+    
+    .nav-inactive {
+        border: none;
+        border-bottom: 5px solid transparent;
+    }
+
+    .forum-page-content {
+        margin-top: 50px;
+    }
+
+    .edit-action-tooltip {
+        right: 1rem;
+    }
+}
+
+
+/*
+Untuk tampilan mobile
+*/
+@media (max-width: 426px) {
+    html {
+        font-size: 75%;
+    }
+
+    .forum-page-nav p {
+        display: none;
+    }
+
+    .search-post__input,
+    #forum-search-btn {
+        height: 35px;
+    }
+
+    #search-user-post .search-post__input,
+    #search-user-post select,
+    #search-user-post #forum-search-btn {
+        height: 35px;
+    }
+
+    #forum-search-btn,
+    #search-user-post #forum-search-btn {
+        padding: 5px 10px;
+    }
+
+    #create-post-button {
+        padding: 0px 15px;
+        height: 35px;
+    }
 }
