@@ -57,3 +57,18 @@ document.addEventListener("click", function(event) {
     button.classList.toggle("active", !comment_section.hidden);
     post.classList.toggle("post-comment-shown", !comment_section.hidden);
 });
+
+document.addEventListener("click", function(event) {
+    const button = event.target.closest(".collapse-toggle-btn");
+    if (!button) {
+        return;
+    }
+
+    const post_content = button.closest(".post-body").querySelector(".post-content");
+    const isCollapsed = post_content.classList.toggle("collapsed");
+    if (!isCollapsed) {
+        button.textContent = "Lihat Lebih Sedikit"
+    } else {
+        button.textContent = "Lihat Lebih Banyak"
+    }
+});

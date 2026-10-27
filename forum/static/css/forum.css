@@ -106,6 +106,27 @@ a {
     margin-top: 30px;
 }
 
+.collapsed {
+    display: -webkit-box;
+    line-clamp: 3;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.collapse-toggle-btn {
+    color: var(--color-text-muted);
+    border: none;
+    background: transparent;
+    padding: 0;
+    cursor: pointer;
+}
+
+.collapse-toggle-btn:hover {
+    text-decoration: underline;
+}
+
+
 
 /*
 --------------------------------------------
@@ -140,7 +161,8 @@ Pengaturan Styling untuk Halaman Depan Forum
 }
 
 .search-post__input {
-    width: 400px;
+    width: 100%;
+    max-width: 400px;
     height: 40px;
     margin-right: 5px;
     margin-top: 40px;

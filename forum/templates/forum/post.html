@@ -28,7 +28,8 @@
         </header>
         <div class="post-body">
             <h3 class="post-title"><a href="{% url 'forum:show_post_page' post.id %}">{{ post.post_title }}</a></h3>
-            <p class="post-content">{{ post.post_body }}</p>
+            <p class="post-content collapsed">{{ post.post_body | linebreaksbr }}</p>
+            <button type="button" class="collapse-toggle-btn">Lihat Lebih Banyak</button>
         </div>
         <footer class="post-action-button">
             <button type="button"
