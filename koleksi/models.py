@@ -78,3 +78,42 @@ class Tanaman(models.Model):
 
     def __str__(self):
         return self.nama_panggilan
+
+    @property
+    def jumlah_jurnal(self):
+        """Menghitung total entri jurnal pertumbuhan untuk tanaman ini."""
+        return self.jurnals.count()
+
+
+class JurnalPertumbuhan(models.Model):
+    """Model untuk mencatat perkembangan berkala (jurnal) suatu tanaman."""
+
+    tanaman = models.ForeignKey(
+        Tanaman,
+        on_delete=models.CASCADE,
+        related_name="jurnals",
+        help_text="Tanaman yang dicatat",
+    )
+    tanggal = models.DateField(
+        help_text="Tanggal pencatatan jurnal",
+    )
+    catatan = models.TextField(
+        blank=True,
+        default="",
+        help_text="Catatan perkembangan atau perawatan tanaman",
+    )
+    foto = models.CharField(
+        max_length=500,
+        blank=True,
+        default="",
+        help_text="URL atau path foto perkembangan tanaman",
+    )
+    dibuat_pada = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-tanggal", "-dibuat_pada"]
+        verbose_name = "Jurnal Pertumbuhan"
+        verbose_name_plural = "Jurnal Pertumbuhan"
+
+    def __str__(self):
+        return f"Jurnal {self.tanaman.nama_panggilan} - {self.tanggal}"

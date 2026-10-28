@@ -15,14 +15,18 @@
       <h1>Koleksi Saya</h1>
       <p>{{ total }} tanaman dirawat oleh {{ request.user.username|default:"kamu" }}.</p>
     </div>
-    <a class="fl-btn" href="{% url 'koleksi:create' %}">Tambah tanaman</a>
+    <a class="fl-btn" href="{% url 'koleksi:create_tanaman' %}">Tambah tanaman</a>
   </div>
 
-  {% if pesan %}
-    <p class="fl-pesan">{{ pesan }}</p>
+  {% if messages %}
+    <div class="fl-pesan-container">
+      {% for message in messages %}
+        <p class="fl-pesan">{{ message }}</p>
+      {% endfor %}
+    </div>
   {% endif %}
 
-  <form class="fl-cari" method="get" action="{% url 'koleksi:collection_list' %}">
+  <form class="fl-cari" method="get" action="{% url 'koleksi:show_collection' %}">
     <label class="fl-sr-only" for="cari-koleksi">Cari tanaman di koleksi</label>
     <input type="search" id="cari-koleksi" name="q" value="{{ q|default:'' }}"
            placeholder="Cari nama panggilan atau spesies">
@@ -35,40 +39,40 @@
     <button class="fl-btn" type="submit">Terapkan</button>
   </form>
 
-  {% if tanaman_list %}
-    <ul class="fl-grid">
-      {% for tanaman in tanaman_list %}
-        <li>
-          <a class="fl-kartu" href="{% url 'koleksi:detail' tanaman.id %}">
-            <span class="fl-kartu__gambar">
-              {% if tanaman.foto %}
-                <img src="{{ tanaman.foto }}" alt="Foto {{ tanaman.nama_panggilan }}" loading="lazy">
-              {% else %}
-                🪴
-              {% endif %}
+  <ul class="fl-grid">
+    {% for tanaman in tanaman_list %}
+      <li>
+        <a class="fl-kartu" href="{% url 'koleksi:detail' tanaman.id %}">
+          <span class="fl-kartu__gambar">
+            {% if tanaman.foto %}
+              <img src="{{ tanaman.foto }}" alt="Foto {{ tanaman.nama_panggilan }}" loading="lazy">
+            {% else %}
+              🪴
+            {% endif %}
+          </span>
+          <span class="fl-kartu__isi">
+            <span class="fl-kartu__nama">{{ tanaman.nama_panggilan }}</span>
+            <span class="fl-kartu__ilmiah">{{ tanaman.nama_ilmiah }}</span>
+            <span class="fl-kartu__meta">
+              {{ tanaman.lokasi }} · dirawat sejak {{ tanaman.tanggal_mulai }}<br>
+              {{ tanaman.jumlah_jurnal }} catatan jurnal
             </span>
-            <span class="fl-kartu__isi">
-              <span class="fl-kartu__nama">{{ tanaman.nama_panggilan }}</span>
-              <span class="fl-kartu__ilmiah">{{ tanaman.nama_ilmiah }}</span>
-              <span class="fl-kartu__meta">
-                {{ tanaman.lokasi }} · dirawat sejak {{ tanaman.tanggal_mulai }}<br>
-                {{ tanaman.jumlah_jurnal }} catatan jurnal
-              </span>
-            </span>
-          </a>
-        </li>
-      {% endfor %}
-    </ul>
-  {% else %}
-    <div class="fl-kosong">
-      {% if q %}
-        <p>Tidak ada tanaman di koleksimu yang cocok dengan "{{ q }}".</p>
-        <a class="fl-btn fl-btn--sekunder" href="{% url 'koleksi:collection_list' %}">Tampilkan semua koleksi</a>
-      {% else %}
-        <p>Belum ada tanaman di koleksimu.</p>
-        <a class="fl-btn" href="{% url 'koleksi:catalog' %}">Cari spesies di katalog</a>
-      {% endif %}
-    </div>
-  {% endif %}
+          </span>
+        </a>
+      </li>
+    {% empty %}
+      <li style="grid-column: 1 / -1; list-style: none;">
+        <div class="fl-kosong">
+          {% if q %}
+            <p>Tidak ada tanaman di koleksimu yang cocok dengan "{{ q }}".</p>
+            <a class="fl-btn fl-btn--sekunder" href="{% url 'koleksi:show_collection' %}">Tampilkan semua koleksi</a>
+          {% else %}
+            <p>Belum ada tanaman di koleksimu.</p>
+            <a class="fl-btn" href="{% url 'koleksi:catalog' %}">Cari spesies di katalog</a>
+          {% endif %}
+        </div>
+      </li>
+    {% endfor %}
+  </ul>
 </div>
 {% endblock %}
