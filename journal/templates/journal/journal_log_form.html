@@ -1,0 +1,20 @@
+<form method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+  {{ form.non_field_errors }}
+
+  {% for title, fields in form.sections %}
+    <fieldset class="journal-form-section">
+      <legend>{{ title }}</legend>
+      {% for field in fields %}
+        <div class="journal-form-field">
+          {{ field.errors }}
+          {{ field.label_tag }}
+          {{ field }}
+          {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+        </div>
+      {% endfor %}
+    </fieldset>
+  {% endfor %}
+
+  <button type="submit">Save journal entry</button>
+</form>
