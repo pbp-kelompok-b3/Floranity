@@ -27,6 +27,7 @@
 
       <form method="post" enctype="multipart/form-data" class="journal-form">
         {% csrf_token %}
+        {% if plant_id %}<input type="hidden" name="plant_id" value="{{ plant_id }}">{% endif %}
         {% if form.non_field_errors %}<div class="journal-errors">{{ form.non_field_errors }}</div>{% endif %}
 
         {% for title, fields in form.sections %}

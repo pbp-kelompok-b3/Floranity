@@ -5,13 +5,15 @@ dulu. Setiap tempat yang nanti diganti model atau panggilan Perenual sudah
 ditandai dengan komentar TODO.
 """
 
-from datetime import date
 from urllib.parse import urlencode
 
 from django.conf import settings
 from django.http import Http404
 from django.shortcuts import redirect, render
 from django.urls import reverse
+
+from journal.forms import JournalLogForm
+from journal.models import JournalLog
 
 from . import sample_data, services
 
@@ -35,14 +37,16 @@ def katalog(request):
     spesies_list = []
     ada_berikut = False
 
-    if getattr(settings, "PERENUAL_API_KEY", ""):
+    if settings.PRODUCTION and getattr(settings, "PERENUAL_API_KEY", ""):
         try:
             spesies_list = services.cari_spesies(q=q, halaman=halaman, air=air, cahaya=cahaya)
             ada_berikut = len(spesies_list) >= JUMLAH_PER_HALAMAN
         except Exception:
             spesies_list = []
 
-    if not spesies_list and not (getattr(settings, "PERENUAL_API_KEY", "") and q):
+    if not spesies_list and not (
+        settings.PRODUCTION and getattr(settings, "PERENUAL_API_KEY", "") and q
+    ):
         hasil = sample_data.cari_spesies(q, air=air, cahaya=cahaya)
         awal = (halaman - 1) * JUMLAH_PER_HALAMAN
         akhir = awal + JUMLAH_PER_HALAMAN
@@ -72,7 +76,7 @@ def katalog_detail(request, spesies_id):
     spesies = None
     detail_terkunci = False
 
-    if getattr(settings, "PERENUAL_API_KEY", ""):
+    if settings.PRODUCTION and getattr(settings, "PERENUAL_API_KEY", ""):
         try:
             spesies = services.ambil_spesies(spesies_id)
             if spesies is None and spesies_id > services.BATAS_DETAIL_GRATIS:
@@ -96,14 +100,25 @@ def katalog_detail(request, spesies_id):
 # Koleksi pribadi (CRUD)
 # --------------------------------------------------------------------------
 
-# TODO: pasang @login_required di semua view koleksi setelah fitur auth siap.
+# TODO(OAuth): apply Django's @login_required to private collection and journal
+# views after OAuth login is merged; OAuth should authenticate into request.user.
 def daftar(request):
     """Koleksi milik pengguna yang sedang login."""
     q = request.GET.get("q", "").strip().lower()
     urut = request.GET.get("urut", "terbaru")
 
     # TODO: ganti dengan Tanaman.objects.filter(pemilik=request.user)
-    tanaman_list = list(sample_data.TANAMAN)
+    tanaman_list = [dict(tanaman) for tanaman in sample_data.TANAMAN]
+    if request.user.is_authenticated:
+        for tanaman in tanaman_list:
+            tanaman["jumlah_jurnal"] = JournalLog.objects.filter(
+                owner=request.user,
+                plant_name__iexact=tanaman["nama_panggilan"],
+                plant_species__iexact=tanaman["nama_ilmiah"],
+            ).count()
+    else:
+        for tanaman in tanaman_list:
+            tanaman["jumlah_jurnal"] = 0
     total = len(tanaman_list)
 
     if q:
@@ -123,17 +138,85 @@ def daftar(request):
     })
 
 
+def jurnal(request):
+    """Show the current user's journal entries, newest first."""
+    jurnal_list = JournalLog.objects.none()
+    if request.user.is_authenticated:
+        jurnal_list = JournalLog.objects.filter(owner=request.user).order_by(
+            "-occurred_at", "-created_at",
+        )
+
+    return render(request, "koleksi/journal_list.html", {
+        "jurnal_list": jurnal_list,
+    })
+
+
+def jurnal_tambah(request):
+    """Create a journal entry, optionally linked to a sample collection plant."""
+    plant_id = request.POST.get("plant_id") or request.GET.get("plant_id", "")
+    plant = (
+        sample_data.ambil_tanaman(int(plant_id))
+        if plant_id.isdigit()
+        else None
+    )
+    initial = {
+        "plant_name": request.GET.get("plant_name", ""),
+        "plant_species": request.GET.get("plant_species", ""),
+        "plant_type": request.GET.get("plant_type", ""),
+    }
+    if plant:
+        initial.update({
+            "plant_name": plant["nama_panggilan"],
+            "plant_species": plant["nama_ilmiah"],
+        })
+
+    if request.method == "POST":
+        form = JournalLogForm(request.POST, request.FILES, initial=initial)
+        if plant:
+            form.fields["plant_name"].disabled = True
+            form.fields["plant_species"].disabled = True
+        if form.is_valid():
+            # TODO(OAuth): Require Django-authenticated users after the OAuth login
+            if request.user.is_authenticated:
+                form.save_for_owner(request.user)
+                if plant:
+                    return redirect("koleksi:detail", tanaman_id=int(plant_id))
+                return redirect("koleksi:jurnal")
+            form.add_error(None, "Sign in before saving a journal entry.")
+    else:
+        form = JournalLogForm(initial=initial)
+        if plant:
+            form.fields["plant_name"].disabled = True
+            form.fields["plant_species"].disabled = True
+
+    return render(request, "journal/journal_log_form.html", {
+        "form": form,
+        "plant_id": int(plant_id) if plant else "",
+    })
+
+
 def detail(request, tanaman_id):
-    """Detail satu tanaman beserta jurnal pertumbuhannya."""
+    """Detail one plant and its newest journal entries."""
     tanaman = sample_data.ambil_tanaman(tanaman_id)
     if tanaman is None:
         raise Http404("Tanaman tidak ditemukan")
 
-    # TODO: pastikan tanaman.pemilik == request.user, kalau bukan kembalikan 404.
+    jurnal_list = JournalLog.objects.none()
+    if request.user.is_authenticated:
+        jurnal_list = JournalLog.objects.filter(
+            owner=request.user,
+            plant_name__iexact=tanaman["nama_panggilan"],
+            plant_species__iexact=tanaman["nama_ilmiah"],
+        ).order_by("-occurred_at", "-created_at")
+
     return render(request, "koleksi/koleksi_detail.html", {
         "tanaman": tanaman,
-        "jurnal_list": sample_data.JURNAL.get(tanaman_id, []),
-        "hari_ini": date.today().isoformat(),
+        "jurnal_list": jurnal_list,
+        "journal_create_url": reverse("koleksi:jurnal_tambah") + "?" + urlencode({
+            "plant_id": tanaman["id"],
+            "plant_name": tanaman["nama_panggilan"],
+            "plant_species": tanaman["nama_ilmiah"],
+        }),
     })
 
 
@@ -148,7 +231,7 @@ def tambah(request):
     if spesies_id and spesies_id.isdigit():
         spesies = None
         sid = int(spesies_id)
-        if getattr(settings, "PERENUAL_API_KEY", ""):
+        if settings.PRODUCTION and getattr(settings, "PERENUAL_API_KEY", ""):
             try:
                 spesies = services.ambil_spesies(sid)
             except Exception:
@@ -197,11 +280,3 @@ def hapus(request, tanaman_id):
         return redirect(f"{reverse('koleksi:daftar')}?pesan=Tanaman+berhasil+dihapus")
 
     return render(request, "koleksi/koleksi_hapus.html", {"tanaman": tanaman})
-
-
-def jurnal_tambah(request, tanaman_id):
-    """Menerima satu entri jurnal (foto dan catatan) dari halaman detail."""
-    if request.method == "POST":
-        # TODO: simpan lewat JurnalForm dengan tanaman_id sebagai foreign key.
-        pass
-    return redirect("koleksi:detail", tanaman_id=tanaman_id)

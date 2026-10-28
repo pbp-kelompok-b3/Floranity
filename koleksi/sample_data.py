@@ -101,7 +101,6 @@ TANAMAN = [
         "penyiraman": "Sedang",
         "tingkat_kesulitan": "Mudah",
         "foto": "",
-        "jumlah_jurnal": 3,
     },
     {
         "id": 2,
@@ -115,7 +114,6 @@ TANAMAN = [
         "penyiraman": "Sedang",
         "tingkat_kesulitan": "Mudah",
         "foto": "",
-        "jumlah_jurnal": 1,
     },
     {
         "id": 3,
@@ -129,22 +127,8 @@ TANAMAN = [
         "penyiraman": "Jarang",
         "tingkat_kesulitan": "Sangat mudah",
         "foto": "",
-        "jumlah_jurnal": 0,
     },
 ]
-
-JURNAL = {
-    1: [
-        {"tanggal": "28 September 2026", "catatan": "Dua daun baru terbuka. Daun paling bawah mulai menguning, dipangkas.", "foto": ""},
-        {"tanggal": "5 September 2026", "catatan": "Dipindah ke pot 25 cm, media diganti campuran baru.", "foto": ""},
-        {"tanggal": "12 Maret 2026", "catatan": "Masuk koleksi, tinggi sekitar 30 cm dengan empat daun.", "foto": ""},
-    ],
-    2: [
-        {"tanggal": "14 Oktober 2026", "catatan": "Panen pertama tiga tangkai untuk masak.", "foto": ""},
-    ],
-    3: [],
-}
-
 
 # Kode filter Perenual dipetakan ke teks data contoh, supaya dropdown di katalog
 # bisa dicoba sebelum API disambungkan
