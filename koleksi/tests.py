@@ -14,6 +14,7 @@ class KoleksiDanKatalogTests(TestCase):
     def setUp(self):
         self.client = Client()
         self.user = User.objects.create_user(username="testuser", password="password123")
+        self.user2 = User.objects.create_user(username="testuser2", password="password123")
         seed_sample_data_if_empty()
 
     def test_katalog_list_view(self):
@@ -119,6 +120,92 @@ class KoleksiDanKatalogTests(TestCase):
         messages_list = [m.message for m in get_messages(res_delete.wsgi_request)]
         self.assertIn("Tanaman berhasil dihapus dari koleksi!", messages_list)
         self.assertFalse(Tanaman.objects.filter(id=kaktus.id).exists())
+
+    def test_photo_upload_and_url(self):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+
+        # Upload file foto langsung
+        dummy_image = SimpleUploadedFile("test_tanaman.jpg", b"dummy_content", content_type="image/jpeg")
+        data_foto_file = {
+            "nama_panggilan": "Tanaman Berfoto File",
+            "foto": dummy_image,
+        }
+        res1 = self.client.post(reverse("koleksi:create_tanaman"), data_foto_file, follow=True)
+        self.assertEqual(res1.status_code, 200)
+        t1 = Tanaman.objects.get(nama_panggilan="Tanaman Berfoto File")
+        self.assertTrue(t1.foto.startswith("/media/tanaman/"))
+
+        # Menggunakan foto URL
+        data_foto_url = {
+            "nama_panggilan": "Tanaman Berfoto URL",
+            "foto_url": "https://images.unsplash.com/photo-example.jpg",
+        }
+        res2 = self.client.post(reverse("koleksi:create_tanaman"), data_foto_url, follow=True)
+        self.assertEqual(res2.status_code, 200)
+        t2 = Tanaman.objects.get(nama_panggilan="Tanaman Berfoto URL")
+        self.assertEqual(t2.foto, "https://images.unsplash.com/photo-example.jpg")
+
+    def test_security_object_level_authorization(self):
+        # Buat tanaman milik self.user
+        tanaman_user1 = Tanaman.objects.create(
+            pemilik=self.user,
+            nama_panggilan="Tanaman Rahasia User1",
+            nama_ilmiah="Secretus plantus",
+        )
+
+        # 1. Login sebagai user lain (user2)
+        self.client.login(username="testuser2", password="password123")
+
+        # User2 mencoba mengakses detail -> 403 Forbidden & gunakan template 403.html
+        res_detail = self.client.get(reverse("koleksi:detail", args=[tanaman_user1.id]))
+        self.assertEqual(res_detail.status_code, 403)
+        self.assertTemplateUsed(res_detail, "403.html")
+
+        # User2 mencoba mengubah tanaman user1 -> 403 Forbidden
+        res_update = self.client.post(reverse("koleksi:update", args=[tanaman_user1.id]), {
+            "nama_panggilan": "Dibajak User2",
+        })
+        self.assertEqual(res_update.status_code, 403)
+
+        # User2 mencoba menghapus tanaman user1 -> 403 Forbidden
+        res_delete = self.client.post(reverse("koleksi:delete", args=[tanaman_user1.id]))
+        self.assertEqual(res_delete.status_code, 403)
+
+        # User2 mencoba menambahkan jurnal ke tanaman user1 -> 403 Forbidden
+        res_jurnal = self.client.post(reverse("koleksi:add_journal", args=[tanaman_user1.id]), {
+            "tanggal": "2026-10-28",
+            "catatan": "Jurnal ilegal",
+        })
+        self.assertEqual(res_jurnal.status_code, 403)
+
+        # 2. Pengguna anonim (belum login) juga harus diblokir (403 Forbidden)
+        self.client.logout()
+
+        res_anon_detail = self.client.get(reverse("koleksi:detail", args=[tanaman_user1.id]))
+        self.assertEqual(res_anon_detail.status_code, 403)
+
+        res_anon_update = self.client.post(reverse("koleksi:update", args=[tanaman_user1.id]), {
+            "nama_panggilan": "Dibajak Anon",
+        })
+        self.assertEqual(res_anon_update.status_code, 403)
+
+        res_anon_delete = self.client.post(reverse("koleksi:delete", args=[tanaman_user1.id]))
+        self.assertEqual(res_anon_delete.status_code, 403)
+
+    def test_security_rate_limiting(self):
+        from django.core.cache import cache
+        cache.clear()
+
+        # Uji rate limiting pada endpoint create_tanaman
+        for _ in range(20):
+            res = self.client.get(reverse("koleksi:create_tanaman"))
+            self.assertEqual(res.status_code, 200)
+
+        # Request ke-21 harus ditolak dengan status 429 Too Many Requests
+        res_blocked = self.client.get(reverse("koleksi:create_tanaman"))
+        self.assertEqual(res_blocked.status_code, 429)
+        self.assertIn("Terlalu banyak permintaan", res_blocked.content.decode())
+        cache.clear()
 
     def test_forms_validation_and_xss_sanitization(self):
         # Valid TanamanForm
