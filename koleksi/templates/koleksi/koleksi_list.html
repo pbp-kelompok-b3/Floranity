@@ -13,7 +13,7 @@
   <div class="fl-header">
     <div>
       <h1>Koleksi Saya</h1>
-      <p>{{ total }} tanaman dirawat oleh {{ request.user.username|default:"kamu" }}.</p>
+      <p>{{ total }} tanaman dirawat oleh {{ request.user.username|default:"Anda" }}.</p>
     </div>
     <a class="fl-btn" href="{% url 'koleksi:create_tanaman' %}">Tambah tanaman</a>
   </div>
