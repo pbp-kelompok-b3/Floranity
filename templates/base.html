@@ -29,7 +29,7 @@
                 <li><a href="{% url 'home' %}" class="nav-link" {% if request.path == '/' %}aria-current="page"{% endif %}>Beranda</a></li>
                 <li><a href="{% url 'koleksi:daftar' %}" class="nav-link" {% if request.path == '/koleksi/' %}aria-current="page"{% endif %}>Koleksi</a></li>
                 <li><a href="{% url 'koleksi:katalog' %}" class="nav-link" {% if '/katalog/' in request.path %}aria-current="page"{% endif %}>Katalog</a></li>
-                <li><a href="{% url 'koleksi:jurnal' %}" class="nav-link" {% if '/jurnal/' in request.path %}aria-current="page"{% endif %}>Jurnal</a></li>
+                <li><a href="{% url 'koleksi:jurnal' %}" class="nav-link" {% if '/jurnal/' in request.path %}aria-current="page"{% endif %}>Forum</a></li>
             </ul>
             <a href="{% url 'koleksi:daftar' %}" class="nav-cta">Lihat koleksi</a>
         </nav>

@@ -130,6 +130,31 @@ TANAMAN = [
     },
 ]
 
+# Contoh log untuk Monstera meja belajar (tanaman contoh dengan id 1).
+SAMPLE_JOURNAL_LOG = {
+    "id": "DEMO-LOG-001",
+    "plant_id": 1,
+    "owner_display": "Pengguna contoh",
+    "created_at_display": "27 Oktober 2026, 08.15",
+    "occurred_at_display": "27 Oktober 2026, 08.15",
+    "plant_name": "Monstera meja belajar",
+    "plant_species": "Monstera deliciosa",
+    "plant_type": "Tanaman hias dalam ruangan",
+    "activity_display": "Penyiraman",
+    "water_volume_ml": "250 ml",
+    "fertilizer_type": "",
+    "health_status_display": "Sehat",
+    "health_tags": "Daun baru terbuka",
+    "weather_temperature_c": "28 °C",
+    "weather_humidity_percent": "70%",
+    "weather_rainfall_mm": "0 mm",
+    "notes": (
+        "Media tanam mulai terasa kering. Saya menyiram perlahan sampai air keluar "
+        "dari dasar pot, lalu memindahkan tanaman kembali ke dekat jendela."
+    ),
+    "photo": "",
+}
+
 # Kode filter Perenual dipetakan ke teks data contoh, supaya dropdown di katalog
 # bisa dicoba sebelum API disambungkan
 KODE_AIR = {"frequent": "Sering", "average": "Sedang", "minimum": "Jarang", "none": "Sangat jarang"}

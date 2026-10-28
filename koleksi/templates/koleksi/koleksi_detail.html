@@ -59,21 +59,85 @@
       <ul class="fl-jurnal">
         {% for catatan in jurnal_list %}
           <li class="fl-jurnal__item">
-            <span class="fl-jurnal__foto">
-              {% if catatan.photo %}
-                <img src="{{ catatan.photo.url }}" alt="Foto jurnal {{ catatan.plant_name }}" loading="lazy">
-              {% else %}
-                <span aria-hidden="true">Plant</span>
-              {% endif %}
-            </span>
-            <div>
+            <div class="fl-jurnal__preview">
               <p class="fl-jurnal__tanggal">{{ catatan.occurred_at|date:"d M Y, H:i" }} · {{ catatan.get_activity_display }}</p>
-              {% if catatan.notes %}<p class="fl-jurnal__catatan">{{ catatan.notes }}</p>{% endif %}
-              {% if catatan.health_status != "unknown" %}<p>Status: {{ catatan.get_health_status_display }}</p>{% endif %}
+              <p><strong>{{ catatan.plant_name }}</strong>{% if catatan.plant_species %} · {{ catatan.plant_species }}{% endif %}</p>
+              <p class="fl-jurnal__catatan">{{ catatan.notes|default:"Tidak ada catatan tambahan."|truncatewords:22 }}</p>
+              <button class="fl-btn fl-btn--sekunder" type="button" data-journal-dialog="journal-dialog-{{ catatan.pk }}" aria-haspopup="dialog">Lihat detail</button>
             </div>
           </li>
         {% endfor %}
       </ul>
+      {% for catatan in jurnal_list %}
+        <dialog class="fl-jurnal-dialog" id="journal-dialog-{{ catatan.pk }}" aria-labelledby="journal-title-{{ catatan.pk }}">
+          <div class="fl-jurnal-dialog__header">
+            <div>
+              <p class="fl-jurnal__tanggal">{{ catatan.occurred_at|date:"d M Y, H:i" }}</p>
+              <h3 id="journal-title-{{ catatan.pk }}">{{ catatan.get_activity_display }} · {{ catatan.plant_name }}</h3>
+            </div>
+            <form method="dialog"><button class="fl-jurnal-dialog__close" aria-label="Tutup detail jurnal">×</button></form>
+          </div>
+          <dl class="fl-jurnal-dialog__fields">
+            <div><dt>ID</dt><dd>{{ catatan.id }}</dd></div>
+            <div><dt>Pemilik</dt><dd>{{ catatan.owner.username }}</dd></div>
+            <div><dt>Dibuat</dt><dd>{{ catatan.created_at|date:"d M Y, H:i" }}</dd></div>
+            <div><dt>Waktu kejadian</dt><dd>{{ catatan.occurred_at|date:"d M Y, H:i" }}</dd></div>
+            <div><dt>Nama tanaman</dt><dd>{{ catatan.plant_name }}</dd></div>
+            <div><dt>Spesies</dt><dd>{{ catatan.plant_species|default:"Tidak dicatat" }}</dd></div>
+            <div><dt>Jenis tanaman</dt><dd>{{ catatan.plant_type|default:"Tidak dicatat" }}</dd></div>
+            <div><dt>Aktivitas</dt><dd>{{ catatan.get_activity_display }}</dd></div>
+            <div><dt>Volume air</dt><dd>{% if catatan.water_volume_ml != None %}{{ catatan.water_volume_ml }} ml{% else %}Tidak dicatat{% endif %}</dd></div>
+            <div><dt>Jenis pupuk</dt><dd>{{ catatan.fertilizer_type|default:"Tidak dicatat" }}</dd></div>
+            <div><dt>Status kesehatan</dt><dd>{{ catatan.get_health_status_display }}</dd></div>
+            <div><dt>Pengamatan</dt><dd>{{ catatan.health_tags|default:"Tidak dicatat" }}</dd></div>
+            <div><dt>Suhu</dt><dd>{% if catatan.weather_temperature_c != None %}{{ catatan.weather_temperature_c }} °C{% else %}Tidak dicatat{% endif %}</dd></div>
+            <div><dt>Kelembapan</dt><dd>{% if catatan.weather_humidity_percent != None %}{{ catatan.weather_humidity_percent }}%{% else %}Tidak dicatat{% endif %}</dd></div>
+            <div><dt>Curah hujan</dt><dd>{% if catatan.weather_rainfall_mm != None %}{{ catatan.weather_rainfall_mm }} mm{% else %}Tidak dicatat{% endif %}</dd></div>
+            <div class="fl-jurnal-dialog__wide"><dt>Catatan</dt><dd>{{ catatan.notes|default:"Tidak ada catatan."|linebreaksbr }}</dd></div>
+            <div class="fl-jurnal-dialog__wide"><dt>Foto</dt><dd>{% if catatan.photo %}<a href="{{ catatan.photo.url }}" target="_blank" rel="noopener"><img class="fl-jurnal-dialog__photo" src="{{ catatan.photo.url }}" alt="Foto jurnal {{ catatan.plant_name }}"></a>{% else %}Tidak ada foto{% endif %}</dd></div>
+          </dl>
+        </dialog>
+      {% endfor %}
+    {% elif sample_log %}
+      <ul class="fl-jurnal">
+        <li class="fl-jurnal__item fl-jurnal__item--sample">
+          <div class="fl-jurnal__preview">
+            <span class="fl-jurnal__badge">Contoh data</span>
+            <p class="fl-jurnal__tanggal">{{ sample_log.occurred_at_display }} · {{ sample_log.activity_display }}</p>
+            <p><strong>{{ sample_log.plant_name }}</strong> · {{ sample_log.plant_species }}</p>
+            <p class="fl-jurnal__catatan">{{ sample_log.notes|truncatewords:22 }}</p>
+            <button class="fl-btn fl-btn--sekunder" type="button" data-journal-dialog="sample-journal-dialog" aria-haspopup="dialog">Lihat detail</button>
+          </div>
+        </li>
+      </ul>
+      <dialog class="fl-jurnal-dialog" id="sample-journal-dialog" aria-labelledby="sample-journal-title">
+        <div class="fl-jurnal-dialog__header">
+          <div>
+            <span class="fl-jurnal__badge">Contoh data</span>
+            <h3 id="sample-journal-title">{{ sample_log.activity_display }} · {{ sample_log.plant_name }}</h3>
+          </div>
+          <form method="dialog"><button class="fl-jurnal-dialog__close" aria-label="Tutup detail jurnal">×</button></form>
+        </div>
+        <dl class="fl-jurnal-dialog__fields">
+          <div><dt>ID</dt><dd>{{ sample_log.id }}</dd></div>
+          <div><dt>Pemilik</dt><dd>{{ sample_log.owner_display }}</dd></div>
+          <div><dt>Dibuat</dt><dd>{{ sample_log.created_at_display }}</dd></div>
+          <div><dt>Waktu kejadian</dt><dd>{{ sample_log.occurred_at_display }}</dd></div>
+          <div><dt>Nama tanaman</dt><dd>{{ sample_log.plant_name }}</dd></div>
+          <div><dt>Spesies</dt><dd>{{ sample_log.plant_species }}</dd></div>
+          <div><dt>Jenis tanaman</dt><dd>{{ sample_log.plant_type }}</dd></div>
+          <div><dt>Aktivitas</dt><dd>{{ sample_log.activity_display }}</dd></div>
+          <div><dt>Volume air</dt><dd>{{ sample_log.water_volume_ml }}</dd></div>
+          <div><dt>Jenis pupuk</dt><dd>{{ sample_log.fertilizer_type|default:"Tidak dicatat" }}</dd></div>
+          <div><dt>Status kesehatan</dt><dd>{{ sample_log.health_status_display }}</dd></div>
+          <div><dt>Pengamatan</dt><dd>{{ sample_log.health_tags }}</dd></div>
+          <div><dt>Suhu</dt><dd>{{ sample_log.weather_temperature_c }}</dd></div>
+          <div><dt>Kelembapan</dt><dd>{{ sample_log.weather_humidity_percent }}</dd></div>
+          <div><dt>Curah hujan</dt><dd>{{ sample_log.weather_rainfall_mm }}</dd></div>
+          <div class="fl-jurnal-dialog__wide"><dt>Catatan</dt><dd>{{ sample_log.notes }}</dd></div>
+          <div class="fl-jurnal-dialog__wide"><dt>Foto</dt><dd>{{ sample_log.photo|default:"Tidak ada foto" }}</dd></div>
+        </dl>
+      </dialog>
     {% else %}
       <div class="fl-kosong">
         <p>Belum ada catatan. Tambahkan catatan pertama untuk mulai merekam pertumbuhan tanaman ini.</p>
@@ -82,3 +146,20 @@
   </section>
 </div>
 {% endblock content %}
+
+{% block extra_js %}
+<script>
+  document.querySelectorAll("[data-journal-dialog]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const dialog = document.getElementById(button.dataset.journalDialog);
+      if (dialog && typeof dialog.showModal === "function") dialog.showModal();
+    });
+  });
+
+  document.querySelectorAll(".fl-jurnal-dialog").forEach((dialog) => {
+    dialog.addEventListener("click", (event) => {
+      if (event.target === dialog) dialog.close();
+    });
+  });
+</script>
+{% endblock extra_js %}

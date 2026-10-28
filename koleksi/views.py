@@ -216,6 +216,11 @@ def detail(request, tanaman_id):
     return render(request, "koleksi/koleksi_detail.html", {
         "tanaman": tanaman,
         "jurnal_list": jurnal_list,
+        "sample_log": (
+            sample_data.SAMPLE_JOURNAL_LOG
+            if tanaman_id == sample_data.SAMPLE_JOURNAL_LOG["plant_id"]
+            else None
+        ),
         "journal_create_url": reverse("koleksi:jurnal_tambah") + "?" + urlencode({
             "plant_id": tanaman["id"],
             "plant_name": tanaman["nama_panggilan"],
