@@ -39,6 +39,7 @@
   </form>
 
   {% if spesies_list %}
+    <p class="fl-hasil" role="status" aria-live="polite">Menampilkan {{ spesies_list|length }} spesies pada halaman {{ halaman }}.</p>
     <ul class="fl-grid">
       {% for spesies in spesies_list %}
         <li>
@@ -60,15 +61,21 @@
     </ul>
 
     <nav class="fl-paginasi" aria-label="Navigasi halaman katalog">
-      <a class="fl-btn fl-btn--sekunder {% if halaman <= 1 %}fl-paginasi__mati{% endif %}"
-         href="?{{ query_filter }}&page={{ halaman|add:'-1' }}">Sebelumnya</a>
+      {% if halaman > 1 %}
+        <a class="fl-btn fl-btn--sekunder" href="?{{ query_filter }}&amp;page={{ halaman|add:'-1' }}">Sebelumnya</a>
+      {% else %}
+        <span class="fl-btn fl-btn--sekunder fl-paginasi__mati" aria-disabled="true">Sebelumnya</span>
+      {% endif %}
       <span>Halaman {{ halaman }}</span>
-      <a class="fl-btn fl-btn--sekunder {% if not ada_halaman_berikut %}fl-paginasi__mati{% endif %}"
-         href="?{{ query_filter }}&page={{ halaman|add:'1' }}">Berikutnya</a>
+      {% if ada_halaman_berikut %}
+        <a class="fl-btn fl-btn--sekunder" href="?{{ query_filter }}&amp;page={{ halaman|add:'1' }}">Berikutnya</a>
+      {% else %}
+        <span class="fl-btn fl-btn--sekunder fl-paginasi__mati" aria-disabled="true">Berikutnya</span>
+      {% endif %}
     </nav>
   {% else %}
     <div class="fl-kosong">
-      <p>Tidak ada spesies yang cocok dengan pencarian dan filter yang dipakai.</p>
+      <p role="status" aria-live="polite">Tidak ada spesies yang cocok dengan pencarian dan filter yang dipakai.</p>
       <a class="fl-btn fl-btn--sekunder" href="{% url 'koleksi:katalog' %}">Hapus filter</a>
     </div>
   {% endif %}

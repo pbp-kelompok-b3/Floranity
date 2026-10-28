@@ -12,7 +12,6 @@
     {% block extra_css %}{% endblock extra_css %}
 </head>
 <body>
-
     <header class="site-header">
         {% block navbar %}
         <nav class="navbar-container">
@@ -27,18 +26,25 @@
             </button>
 
             <ul class="nav-menu" id="nav-menu">
-                <li><a href="/" class="nav-link">Beranda</a></li>
-                <li><a href="/koleksi/" class="nav-link">Koleksi</a></li>
-                <li><a href="/katalog/" class="nav-link">Katalog</a></li>
-                <li><a href="/kalender/" class="nav-link">Kalender</a></li>
-                <li><a href="/forum/" class="nav-link">Forum</a></li>
+                <li><a href="{% url 'home' %}" class="nav-link" {% if request.path == '/' %}aria-current="page"{% endif %}>Beranda</a></li>
+                <li><a href="{% url 'koleksi:daftar' %}" class="nav-link" {% if request.path == '/koleksi/' %}aria-current="page"{% endif %}>Koleksi</a></li>
+                <li><a href="{% url 'koleksi:katalog' %}" class="nav-link" {% if '/katalog/' in request.path %}aria-current="page"{% endif %}>Katalog</a></li>
+                <li><a href="{% url 'koleksi:jurnal' %}" class="nav-link" {% if '/jurnal/' in request.path %}aria-current="page"{% endif %}>Jurnal</a></li>
             </ul>
-            <a href="/" class="nav-cta">Get Started</a>
+            <a href="{% url 'koleksi:daftar' %}" class="nav-cta">Lihat koleksi</a>
         </nav>
         {% endblock navbar %}
     </header>
 
-    <main class="main-content">
+    {% if messages %}
+        <div class="site-messages" aria-live="polite" aria-atomic="true">
+            {% for message in messages %}
+                <p class="site-message site-message--{{ message.tags }}">{{ message }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <main class="main-content" id="main-content" tabindex="-1">
         {% block content %}
         {% endblock content %}
     </main>
@@ -47,13 +53,12 @@
         {% block footer %}
         <div class="footer-container">
             <ul class="footer-links">
-                <li><a href="/">Beranda</a></li>
-                <li><a href="/koleksi/">Koleksi</a></li>
-                <li><a href="/katalog/">Katalog</a></li>
-                <li><a href="/kalender/">Kalender</a></li>
-                <li><a href="/forum/">Forum</a></li>
+                <li><a href="{% url 'home' %}">Beranda</a></li>
+                <li><a href="{% url 'koleksi:daftar' %}">Koleksi</a></li>
+                <li><a href="{% url 'koleksi:katalog' %}">Katalog</a></li>
+                <li><a href="{% url 'koleksi:jurnal' %}">Jurnal</a></li>
             </ul>
-            <p class="copyright-text">&copy; {% now "Y" %} Floranity. All rights reserved.</p>
+            <p class="copyright-text">&copy; {% now "Y" %} Floranity. Hak cipta dilindungi.</p>
         </div>
         {% endblock footer %}
     </footer>

@@ -19,7 +19,7 @@
   </div>
 
   {% if pesan %}
-    <p class="fl-pesan">{{ pesan }}</p>
+    <p class="fl-pesan" role="status" aria-live="polite">{{ pesan }}</p>
   {% endif %}
 
   <form class="fl-cari" method="get" action="{% url 'koleksi:daftar' %}">
@@ -30,12 +30,15 @@
     <select id="urut" name="urut">
       <option value="terbaru" {% if urut == 'terbaru' %}selected{% endif %}>Terbaru ditambahkan</option>
       <option value="nama" {% if urut == 'nama' %}selected{% endif %}>Nama A–Z</option>
-      <option value="lama" {% if urut == 'lama' %}selected{% endif %}>Paling lama dirawat</option>
     </select>
     <button class="fl-btn" type="submit">Terapkan</button>
+    {% if q or urut != 'terbaru' %}
+      <a class="fl-btn fl-btn--sekunder" href="{% url 'koleksi:daftar' %}">Hapus filter</a>
+    {% endif %}
   </form>
 
   {% if tanaman_list %}
+    <p class="fl-hasil" role="status" aria-live="polite">Menampilkan {{ total }} tanaman{% if q %} untuk “{{ q }}”{% endif %}.</p>
     <ul class="fl-grid">
       {% for tanaman in tanaman_list %}
         <li>

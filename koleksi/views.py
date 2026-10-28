@@ -8,6 +8,7 @@ ditandai dengan komentar TODO.
 from urllib.parse import urlencode
 
 from django.conf import settings
+from django.contrib import messages
 from django.http import Http404
 from django.shortcuts import redirect, render
 from django.urls import reverse
@@ -119,8 +120,6 @@ def daftar(request):
     else:
         for tanaman in tanaman_list:
             tanaman["jumlah_jurnal"] = 0
-    total = len(tanaman_list)
-
     if q:
         tanaman_list = [
             t for t in tanaman_list
@@ -131,7 +130,7 @@ def daftar(request):
 
     return render(request, "koleksi/koleksi_list.html", {
         "tanaman_list": tanaman_list,
-        "total": total,
+        "total": len(tanaman_list),
         "q": request.GET.get("q", ""),
         "urut": urut,
         "pesan": request.GET.get("pesan", ""),
@@ -179,10 +178,11 @@ def jurnal_tambah(request):
             # TODO(OAuth): Require Django-authenticated users after the OAuth login
             if request.user.is_authenticated:
                 form.save_for_owner(request.user)
+                messages.success(request, "Catatan jurnal berhasil disimpan.")
                 if plant:
                     return redirect("koleksi:detail", tanaman_id=int(plant_id))
                 return redirect("koleksi:jurnal")
-            form.add_error(None, "Sign in before saving a journal entry.")
+            form.add_error(None, "Masuk terlebih dahulu untuk menyimpan catatan jurnal.")
     else:
         form = JournalLogForm(initial=initial)
         if plant:
@@ -192,6 +192,10 @@ def jurnal_tambah(request):
     return render(request, "journal/journal_log_form.html", {
         "form": form,
         "plant_id": int(plant_id) if plant else "",
+        "url_batal": (
+            reverse("koleksi:detail", kwargs={"tanaman_id": int(plant_id)})
+            if plant else reverse("koleksi:jurnal")
+        ),
     })
 
 

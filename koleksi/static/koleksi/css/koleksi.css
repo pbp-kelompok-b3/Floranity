@@ -428,19 +428,39 @@
   color: var(--fl-abu);
 }
 
+.fl-hasil {
+  margin: 0 0 1rem;
+  color: var(--fl-abu);
+  font-size: 0.9375rem;
+}
+
 .fl-paginasi__mati {
+  display: inline-flex;
+  align-items: center;
   opacity: 0.45;
-  pointer-events: none;
+  cursor: default;
 }
 
 /* ---------- Layar kecil ---------- */
 
 @media (max-width: 48rem) {
+  .fl-page {
+    padding-top: 1.5rem;
+  }
+
   .fl-detail {
     grid-template-columns: 1fr;
   }
 
   .fl-jurnal__item {
     grid-template-columns: 5rem minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fl-btn,
+  .fl-kartu {
+    scroll-behavior: auto;
+    transition: none;
   }
 }
