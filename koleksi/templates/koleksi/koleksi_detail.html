@@ -11,7 +11,7 @@
 
 <div class="fl-page">
   <p class="fl-breadcrumb">
-    <a href="{% url 'koleksi:daftar' %}">Koleksi saya</a> / {{ tanaman.nama_panggilan }}
+    <a href="{% url 'koleksi:collection_list' %}">Koleksi saya</a> / {{ tanaman.nama_panggilan }}
   </p>
 
   <div class="fl-detail">
@@ -55,10 +55,10 @@
       {% endif %}
 
       <div class="fl-detail__aksi">
-        <a class="fl-btn fl-btn--sekunder" href="{% url 'koleksi:ubah' tanaman.id %}">Ubah info</a>
-        <a class="fl-btn fl-btn--bahaya" href="{% url 'koleksi:hapus' tanaman.id %}">Hapus tanaman</a>
+        <a class="fl-btn fl-btn--sekunder" href="{% url 'koleksi:update' tanaman.id %}">Ubah info</a>
+        <a class="fl-btn fl-btn--bahaya" href="{% url 'koleksi:delete' tanaman.id %}">Hapus tanaman</a>
         {% if tanaman.spesies_id %}
-          <a class="fl-btn fl-btn--sekunder" href="{% url 'koleksi:katalog_detail' tanaman.spesies_id %}">
+          <a class="fl-btn fl-btn--sekunder" href="{% url 'koleksi:catalog_detail' tanaman.spesies_id %}">
             Lihat spesies di katalog
           </a>
         {% endif %}
@@ -68,7 +68,7 @@
 
   <section class="fl-seksi">
     <h2>Tambah catatan jurnal</h2>
-    <form class="fl-form" method="post" action="{% url 'koleksi:jurnal_tambah' tanaman.id %}"
+    <form class="fl-form" method="post" action="{% url 'koleksi:add_journal' tanaman.id %}"
           enctype="multipart/form-data">
       {% csrf_token %}
       <div>

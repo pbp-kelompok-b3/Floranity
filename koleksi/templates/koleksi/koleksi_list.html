@@ -15,14 +15,14 @@
       <h1>Koleksi Saya</h1>
       <p>{{ total }} tanaman dirawat oleh {{ request.user.username|default:"kamu" }}.</p>
     </div>
-    <a class="fl-btn" href="{% url 'koleksi:tambah' %}">Tambah tanaman</a>
+    <a class="fl-btn" href="{% url 'koleksi:create' %}">Tambah tanaman</a>
   </div>
 
   {% if pesan %}
     <p class="fl-pesan">{{ pesan }}</p>
   {% endif %}
 
-  <form class="fl-cari" method="get" action="{% url 'koleksi:daftar' %}">
+  <form class="fl-cari" method="get" action="{% url 'koleksi:collection_list' %}">
     <label class="fl-sr-only" for="cari-koleksi">Cari tanaman di koleksi</label>
     <input type="search" id="cari-koleksi" name="q" value="{{ q|default:'' }}"
            placeholder="Cari nama panggilan atau spesies">
@@ -63,10 +63,10 @@
     <div class="fl-kosong">
       {% if q %}
         <p>Tidak ada tanaman di koleksimu yang cocok dengan "{{ q }}".</p>
-        <a class="fl-btn fl-btn--sekunder" href="{% url 'koleksi:daftar' %}">Tampilkan semua koleksi</a>
+        <a class="fl-btn fl-btn--sekunder" href="{% url 'koleksi:collection_list' %}">Tampilkan semua koleksi</a>
       {% else %}
         <p>Belum ada tanaman di koleksimu.</p>
-        <a class="fl-btn" href="{% url 'koleksi:katalog' %}">Cari spesies di katalog</a>
+        <a class="fl-btn" href="{% url 'koleksi:catalog' %}">Cari spesies di katalog</a>
       {% endif %}
     </div>
   {% endif %}

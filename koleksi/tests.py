@@ -10,7 +10,7 @@ class KoleksiDanKatalogTests(TestCase):
         self.client = Client()
 
     def test_katalog_list_view(self):
-        url = reverse("koleksi:katalog")
+        url = reverse("koleksi:catalog")
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "koleksi/katalog_list.html")
@@ -19,7 +19,7 @@ class KoleksiDanKatalogTests(TestCase):
         self.assertContains(response, "koleksi/css/koleksi.css")
 
     def test_katalog_detail_view(self):
-        url = reverse("koleksi:katalog_detail", args=[1])
+        url = reverse("koleksi:catalog_detail", args=[1])
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "koleksi/katalog_detail.html")
@@ -27,7 +27,7 @@ class KoleksiDanKatalogTests(TestCase):
         self.assertContains(response, "Kebutuhan cahaya")
 
     def test_koleksi_list_view(self):
-        url = reverse("koleksi:daftar")
+        url = reverse("koleksi:collection_list")
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "koleksi/koleksi_list.html")
@@ -43,7 +43,7 @@ class KoleksiDanKatalogTests(TestCase):
         self.assertContains(response, "Monstera meja belajar")
 
     def test_koleksi_tambah_view(self):
-        url = reverse("koleksi:tambah")
+        url = reverse("koleksi:create")
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "koleksi/koleksi_form.html")
@@ -51,7 +51,7 @@ class KoleksiDanKatalogTests(TestCase):
         self.assertContains(response, "Tambah tanaman")
 
     def test_koleksi_ubah_view(self):
-        url = reverse("koleksi:ubah", args=[1])
+        url = reverse("koleksi:update", args=[1])
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "koleksi/koleksi_form.html")
@@ -59,12 +59,20 @@ class KoleksiDanKatalogTests(TestCase):
         self.assertContains(response, "Ubah info tanaman")
 
     def test_koleksi_hapus_view(self):
-        url = reverse("koleksi:hapus", args=[1])
+        url = reverse("koleksi:delete", args=[1])
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "koleksi/koleksi_hapus.html")
         self.assertTemplateUsed(response, "base.html")
         self.assertContains(response, "Hapus tanaman")
+
+    def test_backward_compatible_routes(self):
+        self.assertEqual(self.client.get(reverse("koleksi:katalog")).status_code, 200)
+        self.assertEqual(self.client.get(reverse("koleksi:katalog_detail", args=[1])).status_code, 200)
+        self.assertEqual(self.client.get(reverse("koleksi:daftar")).status_code, 200)
+        self.assertEqual(self.client.get(reverse("koleksi:tambah")).status_code, 200)
+        self.assertEqual(self.client.get(reverse("koleksi:ubah", args=[1])).status_code, 200)
+        self.assertEqual(self.client.get(reverse("koleksi:hapus", args=[1])).status_code, 200)
 
     def test_terjemahan_perenual(self):
         from . import services

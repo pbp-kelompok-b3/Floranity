@@ -11,7 +11,7 @@
 
 <div class="fl-page">
   <p class="fl-breadcrumb">
-    <a href="{% url 'koleksi:katalog' %}">Katalog</a> / {{ spesies.nama_umum }}
+    <a href="{% url 'koleksi:catalog' %}">Katalog</a> / {{ spesies.nama_umum }}
   </p>
 
   <div class="fl-detail">
@@ -62,10 +62,10 @@
       </dl>
 
       <div class="fl-detail__aksi">
-        <a class="fl-btn" href="{% url 'koleksi:tambah' %}?spesies_id={{ spesies.id }}">
+        <a class="fl-btn" href="{% url 'koleksi:create' %}?spesies_id={{ spesies.id }}">
           Tambah ke koleksi saya
         </a>
-        <a class="fl-btn fl-btn--sekunder" href="{% url 'koleksi:katalog' %}">Kembali ke katalog</a>
+        <a class="fl-btn fl-btn--sekunder" href="{% url 'koleksi:catalog' %}">Kembali ke katalog</a>
       </div>
     </div>
   </div>

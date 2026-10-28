@@ -22,7 +22,7 @@ JUMLAH_PER_HALAMAN = 6
 # Katalog (data referensi spesies dari Perenual)
 # --------------------------------------------------------------------------
 
-def katalog(request):
+def catalog(request):
     """Daftar spesies dengan pencarian, filter, dan paginasi sederhana."""
     q = request.GET.get("q", "").strip()
     air = request.GET.get("air", "")
@@ -63,7 +63,7 @@ def katalog(request):
     })
 
 
-def katalog_detail(request, spesies_id):
+def catalog_detail(request, spesies_id):
     """Detail satu spesies.
 
     Pada paket gratis Perenual, detail hanya tersedia untuk id <= 3000. Kalau
@@ -97,7 +97,7 @@ def katalog_detail(request, spesies_id):
 # --------------------------------------------------------------------------
 
 # TODO: pasang @login_required di semua view koleksi setelah fitur auth siap.
-def daftar(request):
+def collection_list(request):
     """Koleksi milik pengguna yang sedang login."""
     q = request.GET.get("q", "").strip().lower()
     urut = request.GET.get("urut", "terbaru")
@@ -137,11 +137,11 @@ def detail(request, tanaman_id):
     })
 
 
-def tambah(request):
+def create(request):
     """Formulir tambah tanaman. Spesies bisa diisi otomatis dari katalog."""
     if request.method == "POST":
         # TODO: validasi lewat TanamanForm, simpan dengan pemilik=request.user.
-        return redirect(f"{reverse('koleksi:daftar')}?pesan=Tanaman+berhasil+ditambahkan")
+        return redirect(f"{reverse('koleksi:collection_list')}?pesan=Tanaman+berhasil+ditambahkan")
 
     awalan = {}
     spesies_id = request.GET.get("spesies_id")
@@ -165,11 +165,11 @@ def tambah(request):
     return render(request, "koleksi/koleksi_form.html", {
         "judul": "Tambah tanaman",
         "tanaman": awalan,
-        "url_batal": reverse("koleksi:daftar"),
+        "url_batal": reverse("koleksi:collection_list"),
     })
 
 
-def ubah(request, tanaman_id):
+def update(request, tanaman_id):
     """Formulir ubah info tanaman."""
     tanaman = sample_data.ambil_tanaman(tanaman_id)
     if tanaman is None:
@@ -186,7 +186,7 @@ def ubah(request, tanaman_id):
     })
 
 
-def hapus(request, tanaman_id):
+def delete(request, tanaman_id):
     """Konfirmasi lalu hapus tanaman dari koleksi."""
     tanaman = sample_data.ambil_tanaman(tanaman_id)
     if tanaman is None:
@@ -194,14 +194,24 @@ def hapus(request, tanaman_id):
 
     if request.method == "POST":
         # TODO: tanaman.delete()
-        return redirect(f"{reverse('koleksi:daftar')}?pesan=Tanaman+berhasil+dihapus")
+        return redirect(f"{reverse('koleksi:collection_list')}?pesan=Tanaman+berhasil+dihapus")
 
     return render(request, "koleksi/koleksi_hapus.html", {"tanaman": tanaman})
 
 
-def jurnal_tambah(request, tanaman_id):
+def add_journal(request, tanaman_id):
     """Menerima satu entri jurnal (foto dan catatan) dari halaman detail."""
     if request.method == "POST":
         # TODO: simpan lewat JurnalForm dengan tanaman_id sebagai foreign key.
         pass
     return redirect("koleksi:detail", tanaman_id=tanaman_id)
+
+
+# Alias untuk kompatibilitas ke belakang
+katalog = catalog
+katalog_detail = catalog_detail
+daftar = collection_list
+tambah = create
+ubah = update
+hapus = delete
+jurnal_tambah = add_journal
