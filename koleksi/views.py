@@ -10,10 +10,11 @@ from urllib.parse import urlencode
 from django.conf import settings
 from django.contrib import messages
 from django.db.models import Q
-from django.http import Http404
+from django.http import Http404, HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 
+from .decorators import plant_owner_required, rate_limit_sensitive
 from .forms import JurnalPertumbuhanForm, TanamanForm
 from .models import JurnalPertumbuhan, Tanaman
 from .seed import seed_sample_data_if_empty
@@ -136,6 +137,20 @@ def detail(request, tanaman_id):
     seed_sample_data_if_empty()
     tanaman = get_object_or_404(Tanaman, id=tanaman_id)
 
+    # Object-level authorization: cegah akses jika tanaman milik user lain atau diakses oleh anonim
+    if tanaman.pemilik and (not request.user.is_authenticated or tanaman.pemilik != request.user):
+        if request.headers.get("x-requested-with") == "XMLHttpRequest" or "application/json" in request.headers.get("Accept", ""):
+            return JsonResponse({"message": "Anda tidak memiliki izin untuk melihat koleksi tanaman ini."}, status=403)
+        return render(
+            request,
+            "403.html",
+            {
+                "pesan": "Anda tidak memiliki izin untuk melihat koleksi tanaman ini.",
+                "tanaman": tanaman,
+            },
+            status=403,
+        )
+
     context = {
         "tanaman": tanaman,
         "jurnal_list": tanaman.jurnals.all(),
@@ -144,6 +159,7 @@ def detail(request, tanaman_id):
     return render(request, "koleksi/koleksi_detail.html", context)
 
 
+@rate_limit_sensitive(max_requests=20, window_seconds=60)
 def create_tanaman(request):
     """Formulir penambahan tanaman baru ke dalam database."""
     post_data = None
@@ -151,6 +167,15 @@ def create_tanaman(request):
         post_data = request.POST.copy()
         if "spesies" in post_data and not post_data.get("nama_ilmiah"):
             post_data["nama_ilmiah"] = post_data["spesies"]
+
+        # Menangani unggahan file foto lokal atau input URL
+        if request.FILES.get("foto"):
+            uploaded_file = request.FILES["foto"]
+            from django.core.files.storage import default_storage
+            file_path = default_storage.save(f"tanaman/{uploaded_file.name}", uploaded_file)
+            post_data["foto"] = default_storage.url(file_path)
+        elif post_data.get("foto_url"):
+            post_data["foto"] = post_data.get("foto_url")
 
     form = TanamanForm(post_data or None)
 
@@ -211,6 +236,8 @@ def create_tanaman(request):
     return render(request, "koleksi/koleksi_form.html", context)
 
 
+@plant_owner_required
+@rate_limit_sensitive(max_requests=25, window_seconds=60)
 def update(request, tanaman_id):
     """Formulir pembaruan data tanaman di database."""
     tanaman = get_object_or_404(Tanaman, id=tanaman_id)
@@ -220,6 +247,16 @@ def update(request, tanaman_id):
         post_data = request.POST.copy()
         if "spesies" in post_data and not post_data.get("nama_ilmiah"):
             post_data["nama_ilmiah"] = post_data["spesies"]
+
+        if request.FILES.get("foto"):
+            uploaded_file = request.FILES["foto"]
+            from django.core.files.storage import default_storage
+            file_path = default_storage.save(f"tanaman/{uploaded_file.name}", uploaded_file)
+            post_data["foto"] = default_storage.url(file_path)
+        elif post_data.get("foto_url"):
+            post_data["foto"] = post_data.get("foto_url")
+        elif not post_data.get("foto"):
+            post_data["foto"] = tanaman.foto
 
     form = TanamanForm(post_data or None, instance=tanaman)
 
@@ -237,6 +274,8 @@ def update(request, tanaman_id):
     return render(request, "koleksi/koleksi_form.html", context)
 
 
+@plant_owner_required
+@rate_limit_sensitive(max_requests=15, window_seconds=60)
 def delete(request, tanaman_id):
     """Konfirmasi dan penghapusan data tanaman dari database."""
     tanaman = get_object_or_404(Tanaman, id=tanaman_id)
@@ -252,12 +291,23 @@ def delete(request, tanaman_id):
     return render(request, "koleksi/koleksi_hapus.html", context)
 
 
+@plant_owner_required
+@rate_limit_sensitive(max_requests=25, window_seconds=60)
 def add_journal(request, tanaman_id):
     """Menyimpan entri jurnal pertumbuhan ke dalam database untuk tanaman yang ditentukan."""
     tanaman = get_object_or_404(Tanaman, id=tanaman_id)
 
     if request.method == "POST":
-        form = JurnalPertumbuhanForm(request.POST)
+        post_data = request.POST.copy()
+        if request.FILES.get("foto"):
+            uploaded_file = request.FILES["foto"]
+            from django.core.files.storage import default_storage
+            file_path = default_storage.save(f"jurnal/{uploaded_file.name}", uploaded_file)
+            post_data["foto"] = default_storage.url(file_path)
+        elif post_data.get("foto_url"):
+            post_data["foto"] = post_data.get("foto_url")
+
+        form = JurnalPertumbuhanForm(post_data)
         if form.is_valid():
             jurnal = form.save(commit=False)
             jurnal.tanaman = tanaman
