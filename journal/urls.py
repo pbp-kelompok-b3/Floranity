@@ -5,5 +5,6 @@ from . import views
 app_name = "journal"
 
 urlpatterns = [
+    path("journal/", views.journal_log_create, name="index"),
     path("journal/new/", views.journal_log_create, name="create"),
 ]
