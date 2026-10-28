@@ -1,7 +1,7 @@
-{% extends 'base.html' %}
+﻿{% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Floranity — Grow with intention{% endblock title %}
+{% block title %}Floranity{% endblock title %}
 
 {% block extra_css %}
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -10,32 +10,33 @@
 <link rel="stylesheet" href="{% static 'css/home.css' %}">
 {% endblock extra_css %}
 
-{% block navbar %}
-<nav class="navbar-container" aria-label="Navigasi utama">
-  <a class="brand-logo" href="/" aria-label="Floranity — Beranda"><img src="{% static 'images/horizontal.svg' %}" alt="Floranity"></a>
-  <button class="nav-toggle" type="button" aria-label="Buka navigasi" aria-expanded="false" aria-controls="nav-menu"><span></span><span></span><span></span></button>
-  <ul class="nav-menu" id="nav-menu">
-    <li><a href="#tentang" class="nav-link">Tentang</a></li>
-    <li><a href="#fitur" class="nav-link">Fitur</a></li>
-    <li><a href="/katalog/" class="nav-link">Katalog</a></li>
-    <li><a href="#komunitas" class="nav-link">Komunitas</a></li>
-  </ul>
-  <a class="nav-cta" href="/koleksi/">Mulai merawat <span>↗</span></a>
-</nav>
-{% endblock navbar %}
-
 {% block content %}
 <div class="landing">
   <section class="hero" id="tentang">
     <div class="hero-text">
       <h1>Ruang hijau yang tumbuh <em>bersamamu.</em></h1>
       <p class="hero-copy">Rawat tanaman dengan lebih tenang. Floranity menyatukan panduan personal, pengingat yang peka cuaca, dan komunitas yang selalu punya cerita untuk dibagikan.</p>
-      <div class="hero-actions"><a class="button-primary" href="/koleksi/">Kenali ruang hijau <span>↗</span></a><a class="button-secondary" href="#fitur">Jelajahi Floranity <span>↓</span></a></div>
+      <div class="hero-actions">
+        <a class="button-primary" href="/koleksi/">Kenali ruang hijau</a>
+        <a class="button-secondary" href="#fitur">Explore Floranity <span>↓</span></a>
+      </div>
     </div>
     <div class="hero-visual" aria-label="Tanaman hijau di dalam ruangan">
-      <div class="hero-photo"><img src="https://images.unsplash.com/photo-1494438639946-1ebd1d20bf85?auto=format&fit=crop&w=1100&q=85" alt="Tanaman hias di sudut rumah yang terang"><div class="photo-wash"></div><span class="photo-caption">A slower, greener kind of living</span></div>
-      <div class="floating-card care-card"><div class="card-label">Rencana hari ini</div><div class="care-row"><span class="care-icon">♧</span><span><b>Periksa monstera</b><small>Kelembapan tanah · 2 menit</small></span></div><div class="care-row"><span class="care-icon">☼</span><span><b>Putar ke arah cahaya</b><small>Tempat terang tidak langsung</small></span></div></div>
-      <div class="floating-card weather-card"><div class="weather-top"><span>Cuaca lokal</span><span>⌖</span></div><div class="weather-temp">28° <small style="font-size:.68rem;font-weight:500">C</small></div><div class="weather-tip">Hujan sore ini, cek tanah sebelum menyiram.</div><div class="weather-status">Jadwal disesuaikan</div></div>
+      <div class="hero-photo">
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRVeEFTHMv3x1x7mrL8YvgidDwWLbAVI6mKaRC3-SKdiKq-gMl4k0r8ExQ&s=10" alt="Tanaman hias di sudut rumah yang terang">
+        <div class="photo-wash"></div>
+      </div>
+      <div class="floating-card care-card">
+        <div class="card-label">Rencana hari ini</div>
+        <div class="care-row"><span class="care-icon">♧</span><span><b>Periksa monstera</b><small>Kelembapan tanah · 2 menit</small></span></div>
+        <div class="care-row"><span class="care-icon">☼</span><span><b>Putar ke arah cahaya</b><small>Tempat terang tidak langsung</small></span></div>
+      </div>
+      <div class="floating-card weather-card">
+        <div class="weather-top"><span>Cuaca lokal</span><span>⌖</span></div>
+        <div class="weather-temp">28° <small style="font-size:.68rem;font-weight:500">C</small></div>
+        <div class="weather-tip">Hujan sore ini, cek tanah sebelum menyiram.</div>
+        <div class="weather-status">Jadwal disesuaikan</div>
+      </div>
     </div>
   </section>
 
@@ -50,15 +51,35 @@
     </div>
   </section>
 
-  <section class="section" id="komunitas"><div class="section-inner community">
-    <div><h2>Temukan teman di setiap daun baru.</h2><p class="community-copy">Bagikan perkembangan, bertanya saat ragu, atau temukan inspirasi dari sesama plant people. Ruang hijau terasa lebih hidup saat ceritanya dibagikan.</p><a href="#komunitas" class="community-link">Jelajahi komunitas <span>→</span></a></div>
-    <div class="community-image"><img src="https://images.unsplash.com/photo-1485955900006-10f4d324d411?auto=format&fit=crop&w=1000&q=85" alt="Koleksi tanaman hias hijau"><span class="image-note">Cerita kecil, tumbuh bersama.</span></div>
-  </div></section>
+  <section class="section" id="komunitas">
+    <div class="section-inner community">
+      <div>
+        <h2>Temukan teman di setiap daun baru.</h2>
+        <p class="community-copy">Bagikan perkembangan, bertanya saat ragu, atau temukan inspirasi dari sesama plant people. Ruang hijau terasa lebih hidup saat ceritanya dibagikan.</p>
+        <a href="#komunitas" class="community-link">Jelajahi komunitas <span>→</span></a>
+      </div>
+      <div class="community-image">
+        <img src="https://images.unsplash.com/photo-1485955900006-10f4d324d411?auto=format&fit=crop&w=1000&q=85" alt="Koleksi tanaman hias hijau">
+      </div>
+    </div>
+  </section>
 
-  <section class="closing"><h2>Satu tanaman. Satu kebiasaan baik.</h2><p>Mulai dari ruang hijau yang sudah kamu punya.</p><a href="/koleksi/" class="button-primary">Mulai perjalananmu <span>↗</span></a></section>
+  <section class="closing">
+    <h2>Satu tanaman. Satu kebiasaan baik.</h2>
+    <p>Mulai dari ruang hijau yang sudah kamu punya.</p>
+    <a href="/koleksi/" class="button-primary">Mulai perjalananmu <span>↗</span></a>
+  </section>
 </div>
 {% endblock content %}
 
 {% block footer %}
-<div class="footer-container"><ul class="footer-links"><li><a href="#tentang">Tentang</a></li><li><a href="#fitur">Fitur</a></li><li><a href="/katalog/">Katalog</a></li><li><a href="#komunitas">Komunitas</a></li></ul><p class="copyright-text">&copy; {% now "Y" %} Floranity. Tumbuh dengan perhatian.</p></div>
+<div class="footer-container">
+  <ul class="footer-links">
+    <li><a href="#tentang">Tentang</a></li>
+    <li><a href="#fitur">Fitur</a></li>
+    <li><a href="/katalog/">Katalog</a></li>
+    <li><a href="#komunitas">Komunitas</a></li>
+  </ul>
+  <p class="copyright-text">&copy; {% now "Y" %} Floranity. Tumbuh dengan perhatian.</p>
+</div>
 {% endblock footer %}
