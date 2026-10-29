@@ -1,31 +1,16 @@
-from django.test import TestCase
-from django.test import Client, override_settings
 from io import BytesIO
 from tempfile import TemporaryDirectory
-from urllib.parse import parse_qs, urlparse
-from unittest.mock import Mock, patch
-from time import time
 
-from joserfc import jwt
-from joserfc.jwk import RSAKey
-
-import requests
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 from PIL import Image
 
-from .models import DeletedGoogleAccount, Profile
-
-# Create your tests here.
+from .models import DeletedAccount, Profile
 
 
 User = get_user_model()
-GOOGLE_SETTINGS = {
-    'GOOGLE_CLIENT_ID': 'test-client.apps.googleusercontent.com',
-    'GOOGLE_CLIENT_SECRET': 'test-secret',
-
-}
 
 
 def uploaded_photo(name='plant.png'):
@@ -141,9 +126,9 @@ class ProfileTests(TestCase):
         self.user.profile.refresh_from_db()
         self.assertFalse(self.user.profile.photo)
 
-    def test_remove_photo_clears_google_and_upload(self):
+    def test_remove_photo_clears_saved_url_and_upload(self):
         self.login()
-        self.user.profile.google_photo_url = 'https://example.com/avatar.jpg'
+        self.user.profile.photo_url = 'https://example.com/avatar.jpg'
         self.user.profile.photo = uploaded_photo()
         self.user.profile.save()
         name, storage = self.user.profile.photo.name, self.user.profile.photo.storage
@@ -216,229 +201,199 @@ class ProfileTests(TestCase):
         self.client.get(reverse('akun:my_profile'))
         self.assertEqual(Profile.objects.filter(user=self.user).count(), 1)
 
-    @override_settings(GOOGLE_CLIENT_ID='', GOOGLE_CLIENT_SECRET='')
-    def test_login_without_credentials_is_available_but_disabled(self):
-        response = self.client.get(reverse('akun:login'))
-        self.assertContains(response, 'disabled')
-        self.assertContains(response, 'Login Google belum tersedia')
 
+class AuthenticationTests(TestCase):
+    password = 'Tanaman!Hujan#4729'
 
-@override_settings(**GOOGLE_SETTINGS)
-class GoogleLoginTests(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        cls.signing_key = RSAKey.generate_key(2048, parameters={'kid': 'test-google'})
+    def register(self, username='pecintadaun', **extra):
+        return self.client.post(reverse('akun:register'), {
+            'username': username,
+            'password1': self.password,
+            'password2': self.password,
+            **extra,
+        })
 
-    def setUp(self):
-        self.claims = {
-            'sub': 'google-id-1', 'email': 'fatih@example.com', 'email_verified': True,
-            'name': 'Nama OAuth', 'given_name': 'Fatih', 'picture': 'https://example.com/oauth.jpg',
-        }
-        self.token_key = self.signing_key
-        metadata = {
-            'issuer': 'https://accounts.google.com',
-            'authorization_endpoint': 'https://accounts.google.com/o/oauth2/v2/auth',
-            'token_endpoint': 'https://oauth2.googleapis.com/token',
-            'jwks_uri': 'https://www.googleapis.com/oauth2/v3/certs',
-            'id_token_signing_alg_values_supported': ['RS256'],
-        }
-        app = 'authlib.integrations.django_client.apps.DjangoOAuth2App'
-        patches = [
-            patch(app + '.load_server_metadata', return_value=metadata),
-            patch(app + '.fetch_jwk_set', return_value={'keys': [self.signing_key.as_dict()]}),
-            patch(app + '.fetch_access_token', side_effect=self.google_token),
-            patch('akun.views.requests.get', return_value=Mock(**{
-                'json.return_value': {'names': [{'displayName': 'Fatih dari Google'}], 'photos': [{'url': 'https://example.com/people.jpg'}]},
-            })),
-        ]
-        mocks = []
-        for item in patches:
-            mocks.append(item.start())
-            self.addCleanup(item.stop)
-        self.mock_token, self.mock_people = mocks[2:]
+    def create_user(self, **extra):
+        return User.objects.create_user('pecintadaun', password=self.password, **extra)
 
-    def google_token(self, **kwargs):
-        claims = {
-            'iss': 'https://accounts.google.com', 'aud': GOOGLE_SETTINGS['GOOGLE_CLIENT_ID'],
-            'iat': int(time()), 'exp': int(time()) + 300, 'nonce': self.nonce, **self.claims,
-        }
-        return {
-            'access_token': 'test-token', 'token_type': 'Bearer',
-            'id_token': jwt.encode({'alg': 'RS256', 'kid': 'test-google'}, claims, self.token_key),
-        }
+    def test_auth_pages_offer_username_password_without_google(self):
+        for name in ('login', 'register'):
+            response = self.client.get(reverse(f'akun:{name}'))
+            self.assertContains(response, 'name="username"')
+            self.assertContains(response, 'type="password"')
+            self.assertNotContains(response, 'Lanjutkan dengan Google')
+            self.assertNotContains(response, 'disabled')
+        self.assertContains(self.client.get(reverse('akun:login')), reverse('akun:register'))
+        self.assertContains(self.client.get(reverse('akun:register')), reverse('akun:login'))
 
-    def begin_login(self, next_url=''):
-        response = self.client.post(reverse('akun:google_login'), {'next': next_url})
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(urlparse(response.url).hostname, 'accounts.google.com')
-        params = parse_qs(urlparse(response.url).query)
-        self.assertEqual(params['code_challenge_method'], ['S256'])
-        self.assertIn('openid', params['scope'][0])
-        self.assertEqual(params['redirect_uri'], ['http://testserver/login/google/callback/'])
-        self.nonce = params['nonce'][0]
-        return params['state'][0]
-
-    def complete_login(self, state=None):
-        state = state or self.begin_login()
-        return self.client.get(reverse('akun:google_callback'), {'code': 'test-code', 'state': state})
-
-    def test_first_login_creates_user_profile_from_people_api(self):
-        response = self.complete_login()
-        self.assertRedirects(response, reverse('akun:my_profile'), fetch_redirect_response=False)
-        user = User.objects.get(email='fatih@example.com')
-        self.assertEqual(user.profile.display_name, 'Fatih dari Google')
-        self.assertEqual(user.profile.google_photo_url, 'https://example.com/people.jpg')
-        self.assertEqual(user.profile.google_id, 'google-id-1')
-        self.assertFalse(user.has_usable_password())
-        self.assertEqual(int(self.client.session['_auth_user_id']), user.pk)
-        self.assertNotIn('test-token', str(dict(self.client.session)))
-        self.assertNotIn('id_token', self.client.session)
-        self.assertIn('code_verifier', self.mock_token.call_args.kwargs)
-        self.mock_people.assert_called_once_with(
-            'https://people.googleapis.com/v1/people/me', params={'personFields': 'names,photos'},
-            headers={'Authorization': 'Bearer test-token'}, timeout=5,
-        )
-
-    def test_repeat_login_does_not_duplicate_or_overwrite_profile(self):
-        self.complete_login()
-        user = User.objects.get()
-        user.profile.display_name = 'Nama pilihanku'
-        user.profile.bio = 'Bio pilihanku'
-        user.profile.save()
-        self.client.logout()
-        self.complete_login()
-        user.profile.refresh_from_db()
-        self.assertEqual(user.profile.display_name, 'Nama pilihanku')
-        self.assertEqual(user.profile.bio, 'Bio pilihanku')
-        self.assertEqual(User.objects.count(), 1)
-        self.assertEqual(self.mock_people.call_count, 1)
-
-    def test_people_api_failure_uses_oauth_profile(self):
-        self.mock_people.side_effect = requests.Timeout()
-        self.complete_login()
-        profile = Profile.objects.get()
-        self.assertEqual(profile.display_name, 'Nama OAuth')
-        self.assertEqual(profile.google_photo_url, 'https://example.com/oauth.jpg')
-
-    def test_unexpected_people_api_data_uses_oauth_profile(self):
-        self.mock_people.return_value.json.return_value = {'names': [None], 'photos': 'unexpected'}
-        self.complete_login()
-        self.assertEqual(Profile.objects.get().display_name, 'Nama OAuth')
-
-    def test_non_https_google_photo_is_not_displayed(self):
-        self.mock_people.return_value.json.return_value = {'photos': [{'url': 'javascript:alert(1)'}]}
-        self.complete_login()
-        self.assertEqual(Profile.objects.get().google_photo_url, '')
-
-    def test_invalid_state_does_not_exchange_code_or_create_user(self):
-        self.begin_login()
-        response = self.complete_login('invalid-state')
-        self.assertContains(response, 'Belum berhasil masuk', status_code=401)
-        self.assertFalse(User.objects.exists())
-        self.mock_token.assert_not_called()
-
-    def test_state_cannot_be_replayed(self):
-        state = self.begin_login()
-        self.complete_login(state)
-        self.client.logout()
-        self.mock_token.reset_mock()
-        response = self.complete_login(state)
-        self.assertContains(response, 'Belum berhasil masuk', status_code=401)
-        self.mock_token.assert_not_called()
+    def test_registration_hashes_password_and_creates_profile(self):
+        response = self.register(is_staff='on', is_superuser='on')
+        self.assertRedirects(response, reverse('akun:login'))
+        user = User.objects.get(username='pecintadaun')
+        self.assertTrue(user.check_password(self.password))
+        self.assertNotEqual(user.password, self.password)
+        self.assertFalse(user.is_staff)
+        self.assertFalse(user.is_superuser)
+        self.assertEqual(user.profile.display_name, 'pecintadaun')
         self.assertNotIn('_auth_user_id', self.client.session)
 
-    def test_wrong_nonce_is_rejected(self):
-        self.claims['nonce'] = 'wrong-nonce'
-        response = self.complete_login()
-        self.assertContains(response, 'Belum berhasil masuk', status_code=401)
-        self.assertFalse(User.objects.exists())
-
-    def test_wrong_signature_is_rejected(self):
-        self.token_key = RSAKey.generate_key(2048, parameters={'kid': 'test-google'})
-        response = self.complete_login()
-        self.assertContains(response, 'Belum berhasil masuk', status_code=401)
-        self.assertFalse(User.objects.exists())
-
-    def test_wrong_issuer_audience_and_expiry_are_rejected(self):
-        for claim, value in [('iss', 'https://untrusted.example'), ('aud', 'another-client'), ('exp', int(time()) - 3600)]:
-            with self.subTest(claim=claim):
-                self.claims[claim] = value
-                response = self.complete_login()
-                self.assertContains(response, 'Belum berhasil masuk', status_code=401)
+    def test_registration_validates_passwords_and_username(self):
+        for values in (
+            {'password2': 'Different!Password#4729'},
+            {'password1': '123', 'password2': '123'},
+            {'username': ''},
+            {'username': '<script>bad</script>'},
+        ):
+            with self.subTest(values=values):
+                response = self.register(**values)
+                self.assertEqual(response.status_code, 200)
+                self.assertTrue(response.context['form'].errors)
                 self.assertFalse(User.objects.exists())
-                del self.claims[claim]
+                self.assertFalse(Profile.objects.exists())
 
-    def test_unverified_email_is_rejected(self):
-        self.claims['email_verified'] = False
-        response = self.complete_login()
-        self.assertContains(response, 'Belum berhasil masuk', status_code=401)
+    def test_duplicate_username_cannot_overwrite_account(self):
+        user = self.create_user()
+        response = self.register(username='PECINTADAUN')
+        self.assertTrue(response.context['form'].errors.get('username'))
+        self.assertEqual(User.objects.count(), 1)
+        user.refresh_from_db()
+        self.assertTrue(user.check_password(self.password))
+
+    def test_empty_posts_show_required_errors(self):
+        for name in ('login', 'register'):
+            response = self.client.post(reverse(f'akun:{name}'), {})
+            self.assertTrue(response.context['form'].is_bound)
+            self.assertTrue(response.context['form'].errors)
         self.assertFalse(User.objects.exists())
 
-    def test_email_match_does_not_link_to_existing_django_account(self):
-        existing = User.objects.create_user('admin-user', email='fatih@example.com')
-        self.complete_login()
-        user = User.objects.get(profile__google_id='google-id-1')
-        self.assertNotEqual(user.pk, existing.pk)
-        self.assertEqual(int(self.client.session['_auth_user_id']), user.pk)
+    def test_login_creates_session_and_opens_own_profile(self):
+        user = self.create_user()
+        response = self.client.post(reverse('akun:login'), {
+            'username': user.username, 'password': self.password,
+        })
+        self.assertRedirects(response, reverse('akun:my_profile'), fetch_redirect_response=False)
+        self.assertEqual(self.client.session['_auth_user_id'], str(user.pk))
+        self.assertRedirects(self.client.get(reverse('akun:my_profile')), user.profile.get_absolute_url())
 
-    def test_google_cancellation_has_friendly_message(self):
-        state = self.begin_login()
-        response = self.client.get(reverse('akun:google_callback'), {'error': 'access_denied', 'state': state})
-        self.assertContains(response, 'Proses masuk dibatalkan', status_code=401)
-        self.assertFalse(User.objects.exists())
+    def test_wrong_password_or_missing_user_cannot_login(self):
+        self.create_user()
+        for username, password in [('pecintadaun', 'wrong'), ('unknown', self.password)]:
+            response = self.client.post(reverse('akun:login'), {
+                'username': username, 'password': password,
+            })
+            self.assertTrue(response.context['form'].non_field_errors())
+            self.assertNotIn('_auth_user_id', self.client.session)
 
-    def test_deleted_google_account_cannot_login_or_register_again(self):
-        self.complete_login()
-        user = User.objects.get()
+    def test_inactive_user_cannot_login(self):
+        user = self.create_user(is_active=False)
+        response = self.client.post(reverse('akun:login'), {
+            'username': user.username, 'password': self.password,
+        })
+        self.assertTrue(response.context['form'].non_field_errors())
+        self.assertNotIn('_auth_user_id', self.client.session)
+
+    def test_existing_account_needs_usable_password(self):
+        user = User.objects.create_user('akunlama')
+        response = self.client.post(reverse('akun:login'), {
+            'username': user.username, 'password': self.password,
+        })
+        self.assertTrue(response.context['form'].errors)
+        user.set_password(self.password)
+        user.save()
+        response = self.client.post(reverse('akun:login'), {
+            'username': user.username, 'password': self.password,
+        })
+        self.assertRedirects(response, reverse('akun:my_profile'), fetch_redirect_response=False)
+        self.assertEqual(User.objects.count(), 1)
+
+    def test_login_preserves_local_next_even_after_invalid_password(self):
+        user = self.create_user()
+        next_url = reverse('akun:edit_profile')
+        response = self.client.post(reverse('akun:login'), {
+            'username': user.username, 'password': 'wrong', 'next': next_url,
+        })
+        self.assertContains(response, f'value="{next_url}"')
+        response = self.client.post(reverse('akun:login'), {
+            'username': user.username, 'password': self.password, 'next': next_url,
+        })
+        self.assertRedirects(response, next_url)
+
+    def test_login_rejects_external_redirects(self):
+        user = self.create_user()
+        for next_url in ('https://example.com/', '//example.com/', 'javascript:alert(1)', r'/\example.com/'):
+            with self.subTest(next=next_url):
+                self.client.logout()
+                response = self.client.post(reverse('akun:login'), {
+                    'username': user.username, 'password': self.password, 'next': next_url,
+                })
+                self.assertRedirects(response, reverse('akun:my_profile'), fetch_redirect_response=False)
+
+    def test_authenticated_users_skip_login_and_registration(self):
+        self.client.force_login(self.create_user())
+        for name in ('login', 'register'):
+            self.assertRedirects(
+                self.client.get(reverse(f'akun:{name}')),
+                reverse('akun:my_profile'), fetch_redirect_response=False,
+            )
+        self.assertEqual(User.objects.count(), 1)
+
+    def test_registration_and_login_require_csrf(self):
+        client = Client(enforce_csrf_checks=True)
+        for name in ('login', 'register'):
+            self.assertEqual(client.post(reverse(f'akun:{name}'), {}).status_code, 403)
+
+    def test_register_login_logout_with_csrf(self):
+        client = Client(enforce_csrf_checks=True)
+        client.get(reverse('akun:register'))
+        response = client.post(reverse('akun:register'), {
+            'username': 'kebunbaru', 'password1': self.password, 'password2': self.password,
+            'csrfmiddlewaretoken': client.cookies['csrftoken'].value,
+        })
+        self.assertRedirects(response, reverse('akun:login'))
+        response = client.post(reverse('akun:login'), {
+            'username': 'kebunbaru', 'password': self.password,
+            'csrfmiddlewaretoken': client.cookies['csrftoken'].value,
+        })
+        self.assertRedirects(response, reverse('akun:my_profile'), fetch_redirect_response=False)
+        response = client.get(reverse('akun:edit_profile'))
+        self.assertContains(response, 'Informasi profil')
+        response = client.post(reverse('akun:logout'), {
+            'csrfmiddlewaretoken': client.cookies['csrftoken'].value,
+        })
+        self.assertRedirects(response, reverse('akun:login'))
+        self.assertNotIn('_auth_user_id', client.session)
+
+    def test_deleted_account_cannot_login_or_register_again(self):
+        user = self.create_user()
+        self.client.force_login(user)
         self.client.post(reverse('akun:remove_account'), {'confirmation': user.profile.display_name})
         self.assertFalse(User.objects.exists())
         self.assertFalse(Profile.objects.exists())
-        record = DeletedGoogleAccount.objects.get()
-        self.assertEqual(record.fingerprint, DeletedGoogleAccount.fingerprint_for('google-id-1'))
-        for _ in range(2):
-            response = self.complete_login()
-            self.assertContains(response, 'Akun ini telah dihapus permanen', status_code=403)
-            self.assertNotIn('_auth_user_id', self.client.session)
+        self.assertEqual(
+            DeletedAccount.objects.get().fingerprint,
+            DeletedAccount.fingerprint_for(user.username),
+        )
+        response = self.client.post(reverse('akun:login'), {
+            'username': user.username, 'password': self.password,
+        })
+        self.assertTrue(response.context['form'].errors)
+        self.assertNotIn('_auth_user_id', self.client.session)
+        for username in ('pecintadaun', 'PECINTADAUN', 'ｐｅｃｉｎｔａｄａｕｎ'):
+            response = self.register(username=username)
+            self.assertTrue(response.context['form'].errors.get('username'))
             self.assertFalse(User.objects.exists())
-            self.assertFalse(Profile.objects.exists())
+        self.assertRedirects(self.register(username='kebunlain'), reverse('akun:login'))
 
-    def test_another_google_identity_can_still_register(self):
-        self.complete_login()
-        user = User.objects.get()
-        self.client.post(reverse('akun:remove_account'), {'confirmation': user.profile.display_name})
-        self.claims.update(sub='different-google-id', email='another@example.com')
-        response = self.complete_login()
-        self.assertRedirects(response, reverse('akun:my_profile'), fetch_redirect_response=False)
-        self.assertEqual(User.objects.count(), 1)
-        self.assertEqual(Profile.objects.get().google_id, 'different-google-id')
-
-    def test_admin_deletion_also_blocks_deleted_google_identity(self):
-        self.complete_login()
-        User.objects.get().delete()
-        self.client.logout()
-        response = self.complete_login()
-        self.assertContains(response, 'Akun ini telah dihapus permanen', status_code=403)
+    def test_admin_deletion_also_prevents_username_reuse(self):
+        user = self.create_user()
+        user.delete()
+        response = self.register()
+        self.assertTrue(response.context['form'].errors.get('username'))
         self.assertFalse(User.objects.exists())
 
-    def test_external_next_cannot_redirect_outside_site(self):
-        state = self.begin_login('https://untrusted.example/steal')
-        response = self.complete_login(state)
-        self.assertRedirects(response, reverse('akun:my_profile'), fetch_redirect_response=False)
-
-    def test_local_next_is_preserved(self):
-        next_url = reverse('akun:edit_profile')
-        state = self.begin_login(next_url)
-        self.assertRedirects(self.complete_login(state), next_url, fetch_redirect_response=False)
-
-    def test_oauth_start_requires_post_and_csrf(self):
-        client = Client(enforce_csrf_checks=True)
-        self.assertEqual(client.post(reverse('akun:google_login')).status_code, 403)
-        self.assertEqual(client.get(reverse('akun:google_login')).status_code, 405)
-        self.assertEqual(client.get(reverse('akun:google_callback')).status_code, 401)
-
-    def test_auth_routes_have_no_account_prefix(self):
+    def test_auth_routes_have_no_account_prefix_or_google_flow(self):
         self.assertEqual(reverse('akun:login'), '/login/')
+        self.assertEqual(reverse('akun:register'), '/register/')
         self.assertEqual(reverse('akun:logout'), '/logout/')
-        self.assertEqual(reverse('akun:my_profile'), '/profil/')
-        self.assertEqual(self.client.get('/akun/login/').status_code, 404)
+        for path in ('/akun/login/', '/login/google/', '/login/google/callback/'):
+            self.assertEqual(self.client.get(path).status_code, 404)
