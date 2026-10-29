@@ -1,14 +1,23 @@
 from io import BytesIO
 
 from django import forms
+from django.contrib.auth.forms import UserCreationForm
 from django.core.files.base import ContentFile
 from PIL import Image, ImageOps
 
-from .models import Profile
+from .models import DeletedAccount, Profile
+
+
+class RegisterForm(UserCreationForm):
+    def clean_username(self):
+        username = super().clean_username()
+        if username and DeletedAccount.objects.filter(fingerprint=DeletedAccount.fingerprint_for(username)).exists():
+            raise forms.ValidationError('Username ini tidak dapat digunakan kembali. Pilih username lain.')
+        return username
 
 
 class ProfileForm(forms.ModelForm):
-    remove_photo = forms.BooleanField(required=False, label='Hapus foto profil (termasuk foto Google)')
+    remove_photo = forms.BooleanField(required=False, label='Hapus foto profil')
 
     class Meta:
         model = Profile
@@ -51,7 +60,7 @@ class ProfileForm(forms.ModelForm):
         profile = super().save(commit=False)
         if self.cleaned_data.get('remove_photo'):
             profile.photo = ''
-            profile.google_photo_url = ''
+            profile.photo_url = ''
         if commit:
             profile.save()
         return profile
