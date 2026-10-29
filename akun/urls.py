@@ -5,8 +5,7 @@ from . import views
 app_name = 'akun'
 urlpatterns = [
     path('login/', views.login_view, name='login'),
-    path('login/google/', views.google_login, name='google_login'),
-    path('login/google/callback/', views.google_callback, name='google_callback'),
+    path('register/', views.register, name='register'),
     path('logout/', views.logout_view, name='logout'),
     path('profil/', views.my_profile, name='my_profile'),
     path('profil/edit/', views.edit_profile, name='edit_profile'),
