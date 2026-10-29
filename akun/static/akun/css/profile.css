@@ -41,9 +41,8 @@
 .account-login-form { display: flex; flex-direction: column; justify-content: center; padding: 3rem; background: var(--account-surface); }
 .account-leaf-mark { display: flex; align-items: center; justify-content: center; width: 52px; height: 52px; border-radius: 50%; color: var(--account-primary); background: var(--account-soft); font-size: 2rem; margin-bottom: 2rem; }
 .account-login-form > .account-muted { margin: 1rem 0 2rem; }
-.account-google { width: 100%; color: var(--account-text); background: var(--account-surface); border-color: var(--account-line); justify-content: space-between; }
-.account-google-mark { font-family: system-ui, sans-serif; font-weight: 700; font-size: 1.3rem; color: #4285f4; }
-.account-login-note { display: flex; gap: 1rem; align-items: center; border-top: 1px solid var(--account-line); padding-top: 1.7rem; margin-top: 2rem; font-size: .95rem; }
+.account-auth-submit { width: 100%; margin-top: 1.5rem; }
+.account-login-note { display: flex; gap: 1rem; align-items: center; border-top: 1px solid var(--account-line); padding-top: 1.7rem; margin-top: 2rem; font-size: .95rem; flex-wrap: wrap; }
 .account-login-note > span { color: var(--account-secondary); font-size: 1.8rem; }
 .account-login-form > .account-fine-print { margin: 1.6rem 0; }
 .account-topline { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 2rem; }
