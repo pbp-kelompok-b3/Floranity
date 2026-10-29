@@ -1,5 +1,6 @@
 from hashlib import sha256
 from pathlib import Path
+from unicodedata import normalize
 from uuid import uuid4
 
 from django.conf import settings
@@ -19,11 +20,10 @@ class Profile(models.Model):
     id = models.BigAutoField(primary_key=True)
 
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='profile')
-    google_id = models.CharField(max_length=255, unique=True, null=True, blank=True)
     display_name = models.CharField('Nama tampilan', max_length=100)
     bio = models.TextField('Bio', max_length=500, blank=True)
     photo = models.ImageField('Foto profil', upload_to=profile_photo_path, blank=True)
-    google_photo_url = models.URLField(max_length=1000, blank=True)
+    photo_url = models.URLField(max_length=1000, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -32,7 +32,7 @@ class Profile(models.Model):
 
     @property
     def avatar_url(self):
-        return self.photo.url if self.photo else self.google_photo_url
+        return self.photo.url if self.photo else self.photo_url
 
     @property
     def initials(self):
@@ -42,14 +42,15 @@ class Profile(models.Model):
         return reverse('akun:public_profile', args=[self.user_id])
 
 
-class DeletedGoogleAccount(models.Model):
+class DeletedAccount(models.Model):
     # Keep only a stable fingerprint, without retaining the deleted profile.
     fingerprint = models.CharField(max_length=64, primary_key=True)
     deleted_at = models.DateTimeField(auto_now_add=True)
 
     @staticmethod
-    def fingerprint_for(uid):
-        return sha256(f'google:{uid}'.encode()).hexdigest()
+    def fingerprint_for(username):
+        username = normalize('NFKC', username).casefold()
+        return sha256(f'username:{username}'.encode()).hexdigest()
 
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
@@ -61,12 +62,10 @@ def create_profile(sender, instance, created, raw=False, **kwargs):
 
 
 @receiver(pre_delete, sender=settings.AUTH_USER_MODEL)
-def block_deleted_google_account(sender, instance, using, **kwargs):
-    identities = Profile.objects.using(using).filter(user_id=instance.pk).exclude(google_id=None)
-    for uid in identities.values_list('google_id', flat=True):
-        DeletedGoogleAccount.objects.using(using).get_or_create(
-            fingerprint=DeletedGoogleAccount.fingerprint_for(uid),
-        )
+def block_deleted_account(sender, instance, using, **kwargs):
+    DeletedAccount.objects.using(using).get_or_create(
+        fingerprint=DeletedAccount.fingerprint_for(instance.get_username()),
+    )
 
 
 def delete_after_commit(photo):
