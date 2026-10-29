@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}Masuk · Floranity{% endblock %}
+{% block title %}{% if is_register %}Daftar{% else %}Masuk{% endif %} · Floranity{% endblock %}
 {% block extra_css %}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Doppio+One&family=Gidole&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{% static 'akun/css/profile.css' %}?v=4">
+<link rel="stylesheet" href="{% static 'akun/css/profile.css' %}?v=5">
 {% endblock %}
 {% block content %}
 <div class="account-page">
@@ -37,21 +37,25 @@
     </div>
     <div class="account-login-form">
         <span class="account-leaf-mark" aria-hidden="true">❧</span>
-        <span class="account-eyebrow">SELAMAT DATANG</span>
-        <h2>Mulai cerita hijaumu.</h2>
-        <p class="account-muted">Masuk atau daftar dengan akun Google untuk punya ruang tumbuhmu sendiri.</p>
-        {% if google_configured %}
-        <form action="{% url 'akun:google_login' %}" method="post">
+        <span class="account-eyebrow">{% if is_register %}SELAMAT BERGABUNG{% else %}SELAMAT DATANG{% endif %}</span>
+        <h2>{% if is_register %}Mulai kebun ceritamu.{% else %}Kembali ke ruang tumbuhmu.{% endif %}</h2>
+        <p class="account-muted">{% if is_register %}Buat akun untuk merawat tanaman dan berbagi cerita.{% else %}Masuk menggunakan username dan password akun Floranity kamu.{% endif %}</p>
+        <form action="{% if is_register %}{% url 'akun:register' %}{% else %}{% url 'akun:login' %}{% endif %}" method="post">
             {% csrf_token %}
             {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
-            <button class="account-button account-google" type="submit"><span class="account-google-mark" aria-hidden="true">G</span>Lanjutkan dengan Google<span aria-hidden="true">↗</span></button>
+            {% for error in form.non_field_errors %}<p class="account-field-errors" role="alert">{{ error }}</p>{% endfor %}
+            {% for field in form %}
+            <div class="account-field{% if field.errors %} account-field-invalid{% endif %}">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text %}<div class="account-help" id="{{ field.auto_id }}_helptext">{{ field.help_text }}</div>{% endif %}
+                {% for error in field.errors %}<p class="account-field-errors" id="{{ field.auto_id }}_error" role="alert">{{ error }}</p>{% endfor %}
+            </div>
+            {% endfor %}
+            <button class="account-button account-auth-submit" type="submit">{% if is_register %}Daftar{% else %}Masuk{% endif %}<span aria-hidden="true">↗</span></button>
         </form>
-        {% else %}
-        <button class="account-button account-google" type="button" disabled><span class="account-google-mark" aria-hidden="true">G</span>Lanjutkan dengan Google</button>
-        <p class="account-notice" role="status">Login Google belum tersedia. Hubungi pengelola untuk mengaktifkannya.</p>
-        {% endif %}
-        <div class="account-login-note"><span aria-hidden="true">◎</span><p>Satu akun, satu kebun cerita.<br><span class="account-muted">Profil otomatis dibuat saat pertama kali masuk.</span></p></div>
-        <p class="account-fine-print">Nama dan foto Google menjadi profil awalmu. Kamu bisa mengubahnya kapan saja.</p>
+        <p class="account-login-note">{% if is_register %}Sudah punya akun? <a class="account-text-link" href="{% url 'akun:login' %}">Masuk di sini</a>{% else %}Belum punya akun? <a class="account-text-link" href="{% url 'akun:register' %}">Daftar di sini</a>{% endif %}</p>
+        <p class="account-fine-print">{% if is_register %}Profil otomatis dibuat setelah mendaftar. Nama, foto, dan bio bisa kamu ubah di halaman profil.{% else %}Sedikit perhatian, setiap hari. Tanamanmu menunggu ceritamu berikutnya.{% endif %}</p>
         <a class="account-text-link" href="{% url 'show_home' %}">← Kembali ke beranda</a>
     </div>
 </section>
