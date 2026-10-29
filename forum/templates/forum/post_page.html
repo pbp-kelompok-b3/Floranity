@@ -10,6 +10,7 @@
                     <span class="username">{{ post.author.username }}</span>
                     <span class="post-meta-separator"> &bull; </span>
                     <span class="post-date">{{ post.created_at }}</span>
+                    <span class="post-tag" id="tag-{{ post.tag }}">{{ post.get_tag_display }}</span>
                 </p>
             </header>
             <div class="post-body">

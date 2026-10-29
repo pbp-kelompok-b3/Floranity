@@ -132,6 +132,50 @@ a {
     gap: 10px;
     margin-top: 40px; 
 }
+
+.search-post__fields {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    gap: 10px;
+}
+
+.search-post__input,
+.search-post__filters select,
+.search-post__choice {
+    min-width: 0;           /* penting: supaya input boleh lebih kecil dari isi bawaannya */
+    box-sizing: border-box;
+    margin: 0;              /* jarak diatur oleh gap */
+    height: 40px;
+    padding-left: 10px;
+    border-color: var(--color-grey);
+    border-style: solid;
+    border-width: 2px;
+    border-radius: 10px;
+    transition: border-color 0.2s ease;
+}
+
+.search-post__input:focus,
+.search-post__filters select:focus,
+.search-post__choice:focus {
+    outline: none;
+    border-color: var(--color-text-muted);
+}
+
+.search-post__filters select,
+.search-post__choice {
+    color: #757575;
+}
+
+#post-container {
+    transition: opacity 0.4s ease;
+}
+
+#post-container.htmx-request {
+    opacity: 0.5;
+}
+
+
 /*
 --------------------------------------------
 Pengaturan Styling untuk Halaman Depan Forum
@@ -165,24 +209,25 @@ Pengaturan Styling untuk Halaman Depan Forum
     cursor: pointer;
 }
 
-.search-post__input {
-    flex: 1 1 0;            /* melebar/menyusut mengikuti ruang */
-    min-width: 0;           /* penting: supaya input boleh lebih kecil dari isi bawaannya */
-    max-width: 400px;
-    height: 40px;
-    box-sizing: border-box;
-    margin: 0;              /* jarak diatur oleh gap */
-    padding-left: 10px;
-    border-color: var(--color-grey);
-    border-style: solid;
-    border-width: 2px;
-    border-radius: 10px;
-    transition: border-color 0.2s ease;
+#home-page-search {
+    align-items: center;
 }
 
-.search-post__input:focus{
-    outline: none;
-    border-color: var(--color-text-muted);
+#home-page-search .search-post__fields {
+    flex-direction: column;
+}
+
+#home-page-search .search-post__filters {
+    display: flex;
+    gap: 10px;
+}
+
+#home-page-search .search-post__input {
+    max-width: 100%;
+}
+
+#home-page-search .search-post__filters select {
+    flex: 1 1 0;
 }
 
 
@@ -199,49 +244,42 @@ Pengaturan Styling untuk Halaman Post User
     margin-top: 40px;      /* pindahan dari margin-top di input */
 }
 
-#search-user-post .search-post__input {
-    flex: 1 1 200px;       /* searchbar melebar mengisi sisa ruang */
-    max-width: 300px;
-    min-width: 0;
-    height: 40px;
-    box-sizing: border-box;
-    padding-left: 10px;
-    border-color: var(--color-grey);
-    border-style: solid;
-    border-width: 2px;
-    border-radius: 10px;
-    margin-top: 0px;
-    margin-right: 0px;
-    transition: border-color 0.2s ease;
-}
-
-#search-user-post .search-post__input:focus {
-    outline: none;
-    border-color: var(--color-text-muted);
-}
-
-#search-user-post select {
-    height: 40px;
-    box-sizing: border-box;
-    border-color: var(--color-grey);
-    border-style: solid;
-    border-width: 2px;
-    border-radius: 10px;
-    color: #757575;
-    transition: border-color 0.2s ease;
-}
-
-#search-user-post select:focus {
-    outline: none;
-    border-color: var(--color-text-muted);
-}
-
 #search-user-post #forum-search-btn {
     padding: 5px 25px;
     height: 40px;
     font-weight: 500;
     justify-self: flex-end;
     margin-left: 0;        /* jarak sudah diatur oleh gap */
+}
+
+#search-user-post .search-post__input {
+    flex: 1 1 0;
+}
+
+#search-user-post .search-post__choice {
+    flex: 0.5 0.5 0;
+}
+
+
+/*
+-----------------------------------------
+Pengaturan Styling untuk Halaman Bookmark
+-----------------------------------------
+*/
+#search-bookmark-post {
+    display: flex;
+    align-items: center;   /* semua elemen sejajar secara vertikal */
+    flex-wrap: wrap;       /* tetap turun ke bawah kalau layar sempit */
+    gap: 10px;
+    margin-top: 40px;      /* pindahan dari margin-top di input */
+}
+
+#search-bookmark-post .search-post__input {
+    flex: 1 1 0;
+}
+
+#search-bookmark-post .search-post__choice {
+    flex: 0.5 0.5 0;
 }
 
 
@@ -307,7 +345,8 @@ Pengaturan Styling untuk Halaman Edit/Bikin Post
 }
 
 .form-group input,
-.form-group textarea {
+.form-group textarea,
+.form-group select {
     width: 100%;
     box-sizing: border-box;  /* supaya padding dan border tidak bikin lebar melebihi 100% */
     padding: 5px;
@@ -325,8 +364,13 @@ Pengaturan Styling untuk Halaman Edit/Bikin Post
     min-height: 200px;
 }
 
+.form-group select {
+    max-width: 40%
+}
+
 .form-group input:focus,
-.form-group textarea:focus {
+.form-group textarea:focus,
+.form-group select:focus {
     outline: none;
     border-color: var(--color-text-muted);
 }
@@ -499,6 +543,30 @@ Pengaturan Styling untuk Post
     border-top: 2px solid #dfdfdf;
 }
 
+.post-tag {
+    margin-left: 10px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    border-radius: 10px;
+    padding: 2px 10px;
+    text-align: center;
+}
+
+#tag-question {
+    background-color: var(--color-primary);
+    color: var(--color-border);
+}
+
+#tag-showcase {
+    background-color: var(--color-cream-hover);
+    color: var(--color-text-dark);
+}
+
+#tag-tips {
+    background-color: var(--color-text-muted);
+    color: var(--color-cream);
+}
+
 
 /*
 ----------------------------------
@@ -640,19 +708,10 @@ Untuk tampilan mobile
     }
 
     .search-post__input,
+    .search-post__choice,
+    .search-post__filters select
     #forum-search-btn {
         height: 35px;
-    }
-
-    #search-user-post .search-post__input,
-    #search-user-post select,
-    #search-user-post #forum-search-btn {
-        height: 35px;
-    }
-
-    #forum-search-btn,
-    #search-user-post #forum-search-btn {
-        padding: 5px 10px;
     }
 
     #create-post-button {

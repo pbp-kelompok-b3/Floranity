@@ -10,15 +10,35 @@
             popovertarget="post-form-popover">Buat Post</button>
 </div>
 {% include 'forum/post_form.html' %}
-<form class="search-post" 
+<form class="search-post"
+      id="home-page-search"
       hx-get="{% url 'forum:show_forum' %}"
       hx-target="#post-container"
-      hx-trigger="input changed delay:300ms, submit">
-    <input class="search-post__input" 
-           type="search" 
-           name="content"
-           placeholder="🔍︎ Cari Post Berdasarkan Kata Kunci">
-    <button class="button button-type-2" id="forum-search-btn" type="submit">Cari Post</button>
+      hx-trigger="input changed delay:300ms, submit"
+      hx-indicator="#post-container">
+    
+    <div class="search-post__fields">
+        <input class="search-post__input" 
+               type="search" 
+               name="content"
+               placeholder="🔍︎ Cari Post Berdasarkan Kata Kunci">
+        <div class="search-post__filters">
+            <select name="recent_post" class="search-post__recent">
+                <option value="most_recent">Paling Terbaru</option>
+                <option value="oldest">Paling Terdahulu</option>
+            </select>
+            <select name="most_likes" class="search-post__likes">
+                <option value="most_likes">Paling Banyak Disukai</option>
+                <option value="least_likes">Paling Sedikit Disukai</option>
+            </select>
+            <select class="search-post__choice" name="tag_filter">
+                <option value="" selected>Semua Post</option>
+                {% for value,label in tag_choices.items %}
+                <option value="{{ value }}">{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
 </form>
 <div class="container" id="post-container">
     {% for post in post_list %}

@@ -7,24 +7,20 @@
       id="search-user-post" 
       hx-get="{% url 'forum:show_user_post' %}"
       hx-target="#post-container"
-      hx-trigger="keyup changed delay:300ms, submit">
-    <input class="search-post__input" 
-           type="search" 
-           name="content"
-           placeholder="🔍︎ Cari Post Berdasarkan Kata Kunci">
-    <select name="recent_post" class="search-post__recent">
-        <option value="most_recent">Paling Terbaru</option>
-        <option value="oldest">Paling Terdahulu</option>
-    </select>
-    <select name="most_likes" class="search-post__likes">
-        <option value="most_likes">Paling Banyak Disukai</option>
-        <option value="least_likes">Paling Sedikit Disukai</option>
-    </select>
-    <button class="button button-type-2" 
-            id="forum-search-btn" 
-            type="submit">
-            Cari Post
-    </button>
+      hx-trigger="input changed delay:300ms, submit"
+      hx-indicator="#post-container">
+    <div class="search-post__fields">
+        <input class="search-post__input" 
+               type="search" 
+               name="content"
+               placeholder="🔍︎ Cari Post Berdasarkan Kata Kunci">
+        <select class="search-post__choice" name="tag_filter">
+            <option value="" selected>Semua Post</option>
+            {% for value,label in tag_choices.items %}
+            <option value="{{ value }}">{{ label }}</option>
+            {% endfor %}
+        </select>
+    </div>
 </form>
 <div class="container" id="post-container">
     {% for post in post_list %}

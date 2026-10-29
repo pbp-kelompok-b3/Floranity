@@ -15,6 +15,7 @@ def show_forum(request: HttpRequest):
     context["form"] = PostForm()
     context["page_title"] = "Buat Post"
     context["is_editing_post"] = False
+    context['tag_choices'] = Post.TAG_CHOICES
     return render(request, 'forum/forum_page_home.html', context)
 
 # Request handler untuk menampilkan page semua post milik user
@@ -29,6 +30,7 @@ def show_user_post(request: HttpRequest):
 
     context['page_title'] = "Edit Post"
     context['is_editing_post'] = True
+    context["tag_choices"] = Post.TAG_CHOICES
     return render(request, 'forum/forum_page_user_post.html', context)
 
 # Request handler untuk menampilkan page semua post yang disimpan oleh user (bookmarked post)
@@ -37,6 +39,7 @@ def show_bookmarked_post(request: HttpRequest):
     if request.headers.get("HX-Request"):
         return render(request, 'forum/post_rows.html', context)
     
+    context["tag_choices"] = Post.TAG_CHOICES
     return render(request, "forum/forum_page_bookmark.html", context)
 
 # Request handler untuk menampilkan page dari post
@@ -107,6 +110,11 @@ def get_post_queryset(request: HttpRequest, show_user_only: bool = False):
                 Q(post_title__icontains=word) |
                 Q(post_body__icontains=word)
             )
+
+    # Untuk sorting berdasarkan value select "tag_filter"
+    q = request.GET.get("tag_filter", "").strip()
+    if q:
+        all_post = all_post.filter(tag=q)
 
     # Untuk sorting berdasarkan value select "recent_post"
     q = request.GET.get("recent_post", "").strip()

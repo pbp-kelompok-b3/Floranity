@@ -6,6 +6,7 @@
                 <span class="username">{{ post.author.username }}</span>
                 <span class="post-meta-separator"> &bull; </span>
                 <span class="post-date">{{ post.created_at | date:"j M Y" }}</span>
+                <span class="post-tag" id="tag-{{ post.tag }}">{{ post.get_tag_display }}</span>
             </p>
             {% url 'forum:show_user_post' as show_user_post_url %}
             {% if request.path == show_user_post_url %}

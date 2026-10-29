@@ -8,11 +8,13 @@ class PostForm(ModelForm):
         fields = [
             "post_title",
             "post_body",
+            "tag"
         ]
 
         labels = {
             "post_title" : "Judul Post",
-            "post_body" : "Isi Post"
+            "post_body" : "Isi Post",
+            "tag" : "Tag Post"
         }
 
         widgets = {
