@@ -175,6 +175,29 @@ a {
     opacity: 0.5;
 }
 
+.no-post {
+    text-align: center;
+}
+
+.loading-post.htmx-request {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.loading-post .loading-logo {
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {transform: rotate(360deg);}
+}
+
+.all-post.htmx-request {
+    display: none;
+}
+
 
 /*
 --------------------------------------------

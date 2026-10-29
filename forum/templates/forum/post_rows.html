@@ -1,5 +1,15 @@
-{% for post in post_list %}
-    {% include 'forum/post.html' %}
-{% empty %}
-    <p>Tidak ada post yang cocok dengan pencarian</p>
-{% endfor %}
+<div class="loading-post" hidden>
+    <span class="loading-message">Mencari Post</span>
+    <span class="loading-logo">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1e3026" stroke-width="4" stroke-linecap="round" aria-label="Loading">
+            <path d="M12 3a9 9 0 1 0 9 9"/>
+        </svg>
+    </span>
+</div>
+<div class="all-post">
+    {% for post in post_list %}
+        {% include 'forum/post.html' %}
+    {% empty %}
+        <p class="no-post">Tidak ada post yang cocok dengan pencarian</p>
+    {% endfor %}
+</div>

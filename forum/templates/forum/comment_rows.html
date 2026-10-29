@@ -1,5 +1,5 @@
 {% for comment in comment_list %}
     {% include 'forum/comment.html' %}
 {% empty %}
-    <p>Belum ada komentar</p>
+    <p class="no-comment">Belum ada komentar</p>
 {% endfor %}
