@@ -195,7 +195,16 @@ def detail(request, tanaman_id):
 
     context = {
         "tanaman": tanaman,
-        "jurnal_list": tanaman.jurnals.all(),
+        "jurnal_list": JournalLog.objects.filter(
+            owner=request.user,
+            plant_name__iexact=tanaman.nama_panggilan,
+            plant_species__iexact=tanaman.nama_ilmiah,
+        ),
+        "journal_create_url": reverse("koleksi:jurnal_tambah") + "?" + urlencode({
+            "plant_id": tanaman.pk,
+            "plant_name": tanaman.nama_panggilan,
+            "plant_species": tanaman.nama_ilmiah,
+        }),
         "hari_ini": date.today().isoformat(),
         "journal_form": JurnalPertumbuhanForm(initial={"tanggal": date.today()}),
         "foto_url": "",

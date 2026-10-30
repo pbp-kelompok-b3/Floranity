@@ -56,7 +56,7 @@
   <section class="fl-seksi">
     <h2>Jurnal pertumbuhan</h2>
     {% if user.is_authenticated and user == tanaman.pemilik %}
-      <a class="fl-btn" href="{% url 'koleksi:jurnal_tambah' %}?plant_id={{ tanaman.id }}&amp;plant_name={{ tanaman.nama_panggilan|urlencode }}&amp;plant_species={{ tanaman.nama_ilmiah|urlencode }}">Tambah catatan jurnal</a>
+      <a class="fl-btn" href="{{ journal_create_url }}">Tambah catatan jurnal</a>
     {% endif %}
   </section>
 
