@@ -14,8 +14,9 @@
     font-family: 'DM Sans', system-ui, sans-serif;
     font-size: 1rem;
     line-height: 1.6;
+    width: calc(100% - 2rem);
     max-width: 1080px;
-    margin: 1.5rem auto 3rem;
+    margin: 2.5rem auto 3rem;
 }
 .account-page h1, .account-page h2, .account-page h3 { font-family: 'Manrope', system-ui, sans-serif; font-weight: 600; line-height: 1.25; }
 .account-page h1 { font-size: clamp(1.8rem, 3.4vw, 2.5rem); letter-spacing: -.04em; }
@@ -134,7 +135,7 @@
     .account-side-note, .account-form-card { padding: 1.5rem; }
 }
 @media (max-width: 650px) {
-    .account-page { margin: .5rem auto 1.5rem; padding-inline: 1rem; }
+    .account-page { margin: 2rem auto 1.5rem; }
     .account-login { grid-template-columns: 1fr; }
     .account-story { min-height: 260px; padding: 2rem; }
     .account-story h1 { font-size: 2rem; max-width: 290px; position: relative; z-index: 1; }
