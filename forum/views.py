@@ -80,7 +80,7 @@ def create_post(request: HttpRequest):
 @require_POST
 @login_required(login_url="/login/")
 def edit_post(request: HttpRequest, post_id):
-    post_obj = get_object_or_404(Post, pk=post_id)
+    post_obj = get_object_or_404(Post, pk=post_id, author=request.user)
     form = PostForm(request.POST or None, instance=post_obj)
 
     if form.is_valid():
@@ -94,7 +94,7 @@ def edit_post(request: HttpRequest, post_id):
 @require_http_methods(["DELETE"])
 @login_required(login_url="/login/")
 def delete_post(request: HttpRequest, post_id):
-    post = get_object_or_404(Post, pk=post_id)
+    post = get_object_or_404(Post, pk=post_id, author=request.user)
     post.delete()
     return HttpResponse("")
 
@@ -160,7 +160,7 @@ def get_post_queryset(request: HttpRequest, show_user_only: bool = False, show_b
 def toggle_like_button(request: HttpRequest, post_id):
     post = get_object_or_404(Post, pk=post_id)
 
-    if request.user in post.liked.all():
+    if post.liked.filter(pk=request.user.pk).exists():
         post.liked.remove(request.user)
         return JsonResponse({"toggle_command" : "untoggle"})
     
@@ -173,7 +173,7 @@ def toggle_like_button(request: HttpRequest, post_id):
 def toggle_bookmark_button(request: HttpRequest, post_id):
     post = get_object_or_404(Post, pk=post_id)
     
-    if request.user in post.bookmarked.all():
+    if post.bookmarked.filter(pk=request.user.pk).exists():
         post.bookmarked.remove(request.user)
         return JsonResponse({"toggle_command" : "untoggle"})
     
@@ -197,8 +197,10 @@ def show_comment_section(request: HttpRequest, post_id):
 @require_POST
 def add_comment(request: HttpRequest, post_id):
     if not request.user.is_authenticated:
+        login_url = reverse("akun:login")
+        next_url = reverse("forum:show_post_page", kwargs={"post_id": post_id})
         response = HttpResponse()
-        response["HX-Redirect"] = "/login/"
+        response["HX-Redirect"] = f"{login_url}?next={next_url}"
         return response
 
     form = CommentForm(request.POST or None)

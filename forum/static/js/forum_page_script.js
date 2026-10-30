@@ -14,6 +14,12 @@ function getCookie(name) {
     return cookieValue;
 }
 
+function redirectToLogin(button) {
+    const loginUrl = new URL(button.getAttribute("data-login-url"), window.location.origin);
+    loginUrl.searchParams.set("next", window.location.pathname + window.location.search);
+    window.location.assign(loginUrl);
+}
+
 // Men-toggle tombol like dan bookmark pada post
 document.addEventListener("click", async(event) => {
     const button = event.target.closest(".likes-button, .bookmark-button");
@@ -23,7 +29,7 @@ document.addEventListener("click", async(event) => {
 
     const is_authenticated = button.getAttribute("data-authenticated");
     if (is_authenticated === "false") {
-        window.location.href = "/login/?next=" + window.location.href;
+        redirectToLogin(button);
         return;
     }
 
@@ -33,13 +39,24 @@ document.addEventListener("click", async(event) => {
         headers: {"X-CSRFToken" : getCookie("csrftoken")},
     });
 
-    if (!response) {
+    if (response.redirected) {
+        redirectToLogin(button);
         return;
     }
 
-    const data = await response.json()
+    if (!response.ok) {
+        return;
+    }
+
+    let data;
+    try {
+        data = await response.json();
+    } catch {
+        return;
+    }
     const button_active = data.toggle_command === "toggle";
     button.classList.toggle("active", button_active);
+    button.setAttribute("aria-pressed", String(button_active));
 
     if (button.classList.contains("likes-button")) {
         const counter = button.querySelector(".likes-counter");

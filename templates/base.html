@@ -63,10 +63,10 @@
         {% block footer %}
         <div class="footer-container">
             <ul class="footer-links">
-                <li><a href="/">Beranda</a></li>
-                <li><a href="/koleksi/">Koleksi</a></li>
-                <li><a href="/katalog/">Katalog</a></li>
-                <li><a href="/koleksi/jurnal/">Jurnal</a></li>
+                <li><a href="{% url 'home' %}">Beranda</a></li>
+                <li><a href="{% url 'koleksi:show_collection' %}">Koleksi</a></li>
+                <li><a href="{% url 'koleksi:catalog' %}">Katalog</a></li>
+                <li><a href="{% url 'koleksi:jurnal' %}">Jurnal</a></li>
                 {% if user.is_authenticated %}
                 <li><a href="{% url 'schedule:calendar' %}">Jadwal</a></li>
                 {% else %}

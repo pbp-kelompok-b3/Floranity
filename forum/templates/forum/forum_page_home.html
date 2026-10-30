@@ -10,7 +10,7 @@
             id="create-post-button"
             popovertarget="post-form-popover">Buat Post</button>
     {% else %}
-    <a href="{% url 'akun:login' %}"
+    <a href="{% url 'akun:login' %}?next={% url 'forum:show_forum' %}"
        class="button button-type-1"
        id="create-post-button">Buat Post</a>
     {% endif %}

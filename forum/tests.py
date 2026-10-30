@@ -1,8 +1,9 @@
-from datetime import timedelta, timezone
+from datetime import timedelta
 import uuid
 from django.test import TestCase
 from django.urls import reverse
 from django.contrib.auth.models import User
+from django.utils import timezone
 
 from forum.models import Post
 
@@ -430,7 +431,9 @@ class ForumAnonymousTest(TestCase):
         response = self.client.post(url, {"comment_body": "Komentar"})
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response["HX-Redirect"], "/login/")
+        login_url = reverse("akun:login")
+        next_url = reverse("forum:show_post_page", args=[self.post.id])
+        self.assertEqual(response["HX-Redirect"], f"{login_url}?next={next_url}")
         self.assertEqual(self.post.post_comments.count(), 0)
 
     def test_show_forum_works_for_anonymous(self):
