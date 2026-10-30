@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Koleksi Saya — Floranity{% endblock title %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'koleksi/css/koleksi.css' %}">
+{% endblock extra_css %}
+
+{% block content %}
+
+<div class="fl-page">
+  <div class="fl-header">
+    <div>
+      <h1>Koleksi Saya</h1>
+      <p>{{ total }} tanaman dirawat oleh {{ request.user.username|default:"kamu" }}.</p>
+    </div>
+    <a class="fl-btn" href="{% url 'koleksi:tambah' %}">Tambah tanaman</a>
+  </div>
+
+  {% if pesan %}
+    <p class="fl-pesan">{{ pesan }}</p>
+  {% endif %}
+
+  <form class="fl-cari" method="get" action="{% url 'koleksi:daftar' %}">
+    <label class="fl-sr-only" for="cari-koleksi">Cari tanaman di koleksi</label>
+    <input type="search" id="cari-koleksi" name="q" value="{{ q|default:'' }}"
+           placeholder="Cari nama panggilan atau spesies">
+    <label class="fl-sr-only" for="urut">Urutkan</label>
+    <select id="urut" name="urut">
+      <option value="terbaru" {% if urut == 'terbaru' %}selected{% endif %}>Terbaru ditambahkan</option>
+      <option value="nama" {% if urut == 'nama' %}selected{% endif %}>Nama A–Z</option>
+      <option value="lama" {% if urut == 'lama' %}selected{% endif %}>Paling lama dirawat</option>
+    </select>
+    <button class="fl-btn" type="submit">Terapkan</button>
+  </form>
+
+  {% if tanaman_list %}
+    <ul class="fl-grid">
+      {% for tanaman in tanaman_list %}
+        <li>
+          <a class="fl-kartu" href="{% url 'koleksi:detail' tanaman.id %}">
+            <span class="fl-kartu__gambar">
+              {% if tanaman.foto %}
+                <img src="{{ tanaman.foto }}" alt="Foto {{ tanaman.nama_panggilan }}" loading="lazy">
+              {% else %}
+                🪴
+              {% endif %}
+            </span>
+            <span class="fl-kartu__isi">
+              <span class="fl-kartu__nama">{{ tanaman.nama_panggilan }}</span>
+              <span class="fl-kartu__ilmiah">{{ tanaman.nama_ilmiah }}</span>
+              <span class="fl-kartu__meta">
+                {{ tanaman.lokasi }} · dirawat sejak {{ tanaman.tanggal_mulai }}<br>
+                {{ tanaman.jumlah_jurnal }} catatan jurnal
+              </span>
+            </span>
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <div class="fl-kosong">
+      {% if q %}
+        <p>Tidak ada tanaman di koleksimu yang cocok dengan "{{ q }}".</p>
+        <a class="fl-btn fl-btn--sekunder" href="{% url 'koleksi:daftar' %}">Tampilkan semua koleksi</a>
+      {% else %}
+        <p>Belum ada tanaman di koleksimu.</p>
+        <a class="fl-btn" href="{% url 'koleksi:katalog' %}">Cari spesies di katalog</a>
+      {% endif %}
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

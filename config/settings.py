@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'main',
     'akun',
+    'koleksi',
 ]
 
 MIDDLEWARE = [
@@ -129,3 +130,8 @@ LOGIN_URL = 'akun:login'
 LOGIN_REDIRECT_URL = 'akun:my_profile'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# Plant APIs Configuration
+PERENUAL_API_KEY = os.environ.get("PERENUAL_API_KEY", "") or os.environ.get("PERENUAL_KEY", "")
+PERMAPEOPLE_KEY_ID = os.environ.get("PERMAPEOPLE_KEY_ID", "")
+PERMAPEOPLE_KEY_SECRET = os.environ.get("PERMAPEOPLE_KEY_SECRET", "")

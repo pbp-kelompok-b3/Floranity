@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ judul }} — Koleksi Floranity{% endblock title %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'koleksi/css/koleksi.css' %}">
+{% endblock extra_css %}
+
+{% block content %}
+
+<div class="fl-page">
+  <p class="fl-breadcrumb">
+    <a href="{% url 'koleksi:daftar' %}">Koleksi saya</a> / {{ judul }}
+  </p>
+
+  <div class="fl-header">
+    <div>
+      <h1>{{ judul }}</h1>
+      <p>Isi data tanaman yang kamu rawat. Hanya kamu yang bisa melihat koleksi ini.</p>
+    </div>
+  </div>
+
+  <form class="fl-form" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <div>
+      <label for="nama_panggilan">Nama panggilan tanaman</label>
+      <input type="text" id="nama_panggilan" name="nama_panggilan"
+             value="{{ tanaman.nama_panggilan|default:'' }}" placeholder="Misalnya: Monstera meja belajar" required>
+      <p class="fl-form__bantuan">Nama bebas supaya mudah dikenali di koleksi.</p>
+    </div>
+
+    <div>
+      <label for="spesies">Spesies</label>
+      <input type="text" id="spesies" name="spesies" value="{{ tanaman.nama_ilmiah|default:'' }}"
+             placeholder="Pilih dari katalog atau tulis sendiri">
+      <input type="hidden" name="spesies_id" value="{{ tanaman.spesies_id|default:'' }}">
+      <p class="fl-form__bantuan">
+        Data cahaya dan air diambil otomatis kalau spesies dipilih lewat
+        <a href="{% url 'koleksi:katalog' %}">katalog</a>.
+      </p>
+    </div>
+
+    <div>
+      <label for="lokasi">Lokasi</label>
+      <input type="text" id="lokasi" name="lokasi" value="{{ tanaman.lokasi|default:'' }}"
+             placeholder="Misalnya: balkon, teras depan, meja kerja">
+    </div>
+
+    <div>
+      <label for="tanggal_mulai">Dirawat sejak</label>
+      <input type="date" id="tanggal_mulai" name="tanggal_mulai"
+             value="{{ tanaman.tanggal_mulai|default:'' }}">
+    </div>
+
+    <div>
+      <label for="foto">Foto tanaman</label>
+      <input type="file" id="foto" name="foto" accept="image/*">
+      {% if tanaman.foto %}
+        <p class="fl-form__bantuan">Foto sekarang akan diganti kalau kamu mengunggah yang baru.</p>
+      {% endif %}
+    </div>
+
+    <div>
+      <label for="catatan">Catatan</label>
+      <textarea id="catatan" name="catatan"
+                placeholder="Catatan singkat tentang tanaman ini.">{{ tanaman.catatan|default:'' }}</textarea>
+    </div>
+
+    <div class="fl-form__aksi">
+      <button class="fl-btn" type="submit">Simpan</button>
+      <a class="fl-btn fl-btn--sekunder" href="{{ url_batal }}">Batal</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

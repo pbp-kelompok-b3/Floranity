@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Katalog Tanaman — Floranity{% endblock title %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'koleksi/css/koleksi.css' %}">
+{% endblock extra_css %}
+
+{% block content %}
+
+<div class="fl-page">
+  <div class="fl-header">
+    <h1>Katalog Tanaman</h1>
+  </div>
+
+  <form class="fl-cari" method="get" action="{% url 'koleksi:katalog' %}">
+    <label class="fl-sr-only" for="cari-spesies">Cari spesies</label>
+    <input type="search" id="cari-spesies" name="q" value="{{ q|default:'' }}"
+           placeholder="Nama tanaman dalam bahasa Inggris, misalnya monstera">
+
+    <label class="fl-sr-only" for="filter-air">Kebutuhan air</label>
+    <select id="filter-air" name="air">
+      <option value="">Semua kebutuhan air</option>
+      {% for kode, nama in pilihan_air %}
+        <option value="{{ kode }}" {% if air == kode %}selected{% endif %}>Air: {{ nama }}</option>
+      {% endfor %}
+    </select>
+
+    <label class="fl-sr-only" for="filter-cahaya">Kebutuhan cahaya</label>
+    <select id="filter-cahaya" name="cahaya">
+      <option value="">Semua kebutuhan cahaya</option>
+      {% for kode, nama in pilihan_cahaya %}
+        <option value="{{ kode }}" {% if cahaya == kode %}selected{% endif %}>{{ nama }}</option>
+      {% endfor %}
+    </select>
+
+    <button class="fl-btn" type="submit">Terapkan</button>
+  </form>
+
+  {% if spesies_list %}
+    <ul class="fl-grid">
+      {% for spesies in spesies_list %}
+        <li>
+          <a class="fl-kartu" href="{% url 'koleksi:katalog_detail' spesies.id %}">
+            <span class="fl-kartu__gambar">
+              {% if spesies.gambar %}
+                <img src="{{ spesies.gambar }}" alt="Foto {{ spesies.nama_umum }}" loading="lazy">
+              {% else %}
+                🌿
+              {% endif %}
+            </span>
+            <span class="fl-kartu__isi">
+              <span class="fl-kartu__nama">{{ spesies.nama_umum }}</span>
+              <span class="fl-kartu__ilmiah">{{ spesies.nama_ilmiah }}</span>
+            </span>
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+
+    <nav class="fl-paginasi" aria-label="Navigasi halaman katalog">
+      <a class="fl-btn fl-btn--sekunder {% if halaman <= 1 %}fl-paginasi__mati{% endif %}"
+         href="?{{ query_filter }}&page={{ halaman|add:'-1' }}">Sebelumnya</a>
+      <span>Halaman {{ halaman }}</span>
+      <a class="fl-btn fl-btn--sekunder {% if not ada_halaman_berikut %}fl-paginasi__mati{% endif %}"
+         href="?{{ query_filter }}&page={{ halaman|add:'1' }}">Berikutnya</a>
+    </nav>
+  {% else %}
+    <div class="fl-kosong">
+      <p>Tidak ada spesies yang cocok dengan pencarian dan filter yang dipakai.</p>
+      <a class="fl-btn fl-btn--sekunder" href="{% url 'koleksi:katalog' %}">Hapus filter</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
