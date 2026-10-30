@@ -26,13 +26,6 @@
   {% endif %}
 
   <section class="schedule-tools" aria-label="Sinkronisasi cuaca">
-    <div class="schedule-tools-copy">
-      <span class="schedule-weather-icon" aria-hidden="true">☼</span>
-      <div>
-        <h2>Sesuaikan dengan cuaca</h2>
-        <p>Hujan dapat menggeser waktu siram. Prakiraan panas dan kering menjadi pengingat untuk memeriksa media lebih awal.</p>
-      </div>
-    </div>
     <form class="schedule-sync-form" method="post" action="{% url 'schedule:synchronize' %}">
       {% csrf_token %}
       <label for="schedule-city">Lokasi prakiraan cuaca</label>
@@ -114,7 +107,7 @@
       <form class="schedule-bulk-form" method="post" action="{% url 'schedule:bulk_action' %}">
         {% csrf_token %}
         <div class="schedule-bulk-toolbar">
-          <div><strong>Tindakan massal</strong><span>Pilih jadwal yang ingin diperbarui</span><span class="schedule-selection-count" id="selection-count" aria-live="polite">0 dipilih</span></div>
+          <div><strong>Pilih jadwal yang ingin diperbarui</strong><span class="schedule-selection-count" id="selection-count" aria-live="polite">0 dipilih</span></div>
           <label class="schedule-select-all"><input id="select-visible-schedules" type="checkbox"> Pilih semua yang terlihat</label>
           <div class="schedule-bulk-actions">
             <button type="submit" name="action" value="complete">Selesaikan terpilih</button>
@@ -143,7 +136,7 @@
                         <h4>{{ entry.plant.nama_panggilan }}</h4>
                         {% if entry.plant.nama_ilmiah %}<p class="schedule-scientific">{{ entry.plant.nama_ilmiah }}</p>{% endif %}
                       </div>
-                      <span class="schedule-status{% if entry.status == 'completed' %} schedule-status--complete{% elif entry.status == 'dismissed' %} schedule-status--dismissed{% endif %}">{% if entry.status == 'completed' %}Selesai{% elif entry.status == 'dismissed' %}Diarsipkan{% else %}Waktunya cek{% endif %}</span>
+                      <span class="schedule-status{% if entry.status == 'completed' %} schedule-status--complete{% elif entry.status == 'dismissed' %} schedule-status--dismissed{% endif %}">{% if entry.status == 'completed' %}Selesai{% elif entry.status == 'dismissed' %}Diarsipkan{% elif group.date > today %}Terjadwal{% else %}Waktunya cek{% endif %}</span>
                     </div>
                     <p class="schedule-recommendation">{{ entry.recommendation }}</p>
                     <div class="schedule-weather-meta">
@@ -152,8 +145,10 @@
                       {% if entry.plant.lokasi %}<span>{{ entry.plant.lokasi }}</span>{% endif %}
                     </div>
                   </div>
-                  {% if entry.status == 'planned' %}
+                  {% if entry.status == 'planned' and group.date <= today %}
                     <button type="submit" name="single_complete" value="{{ entry.pk }}" class="schedule-complete-button" aria-label="Catat penyiraman {{ entry.plant.nama_panggilan }} selesai">Selesai</button>
+                  {% elif entry.status == 'planned' %}
+                    <span class="schedule-due-label" aria-label="Penyiraman belum jatuh tempo">Terjadwal</span>
                   {% elif entry.status == 'completed' %}
                     <span class="schedule-check" aria-label="Penyiraman selesai">✓</span>
                   {% else %}

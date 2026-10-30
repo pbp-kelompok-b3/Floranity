@@ -42,6 +42,10 @@ def _bounded_number(value, minimum, maximum):
     return number if number is not None and minimum <= number <= maximum else None
 
 
+def _has_full_horizon(forecast, today):
+    return all(today + timedelta(days=offset) in forecast for offset in range(HORIZON_DAYS))
+
+
 def _cache_get(key):
     try:
         return cache.get(key)
@@ -155,6 +159,9 @@ def _openweather_forecast(city, api_key, today, latitude=None, longitude=None):
         }
         for day, values in grouped.items()
     }
+    # OpenWeather's standard 5-day endpoint cannot cover this calendar's full
+    # seven-day horizon. Keep the usable days and fill the remaining dates from
+    # Open-Meteo below instead of treating a normal response as a failure.
     if not forecast or not has_measurements:
         raise ValueError("OpenWeather tidak mengembalikan prakiraan yang bisa digunakan.")
     return forecast
@@ -220,7 +227,11 @@ def _open_meteo_forecast(city, today, latitude=None, longitude=None):
         temp = _bounded_number(value_at(temp_values, index), -90, 70)
         humidity = _bounded_number(value_at(humidity_values, index), 0, 100)
         forecast[day] = {"rain": rain, "temp_max": temp, "humidity": humidity}
-    if not forecast or not any(any(value is not None for value in weather.values()) for weather in forecast.values()):
+    if (
+        not forecast
+        or not any(any(value is not None for value in weather.values()) for weather in forecast.values())
+        or not _has_full_horizon(forecast, today)
+    ):
         raise ValueError("Open-Meteo tidak mengembalikan tanggal prakiraan yang valid.")
     return forecast
 
@@ -253,16 +264,33 @@ def get_weather_forecast(city, today=None, latitude=None, longitude=None):
     cached = _cache_get(cache_key)
     if cached:
         forecast, provider = cached
-        return forecast, provider, ""
+        if _has_full_horizon(forecast, today):
+            return forecast, provider, ""
+        return (
+            forecast,
+            provider,
+            "Prakiraan cuaca hanya mencakup sebagian rentang; tanggal lain mengikuti panduan kebutuhan air tanaman.",
+        )
 
     api_key = getattr(settings, "OPENWEATHER_API_KEY", "")
     if api_key:
         try:
             forecast = _openweather_forecast(city, api_key, today, latitude, longitude)
             provider = "OpenWeather"
+            weather_message = ""
+            if not _has_full_horizon(forecast, today):
+                try:
+                    supplemental = _open_meteo_forecast(city, today, latitude, longitude)
+                    forecast.update({day: values for day, values in supplemental.items() if day not in forecast})
+                    if _has_full_horizon(forecast, today):
+                        provider = "OpenWeather + Open-Meteo"
+                    else:
+                        weather_message = "Prakiraan cuaca hanya mencakup sebagian rentang; tanggal lain mengikuti panduan kebutuhan air tanaman."
+                except Exception:
+                    weather_message = "Prakiraan cuaca hanya mencakup sebagian rentang; tanggal lain mengikuti panduan kebutuhan air tanaman."
             _cache_set(cache_key, (forecast, provider), WEATHER_CACHE_SECONDS)
             _cache_set(stale_key, (forecast, provider), WEATHER_STALE_SECONDS)
-            return forecast, provider, ""
+            return forecast, provider, weather_message
         except Exception:
             # Keep the calendar useful if OpenWeather is temporarily unavailable.
             try:
@@ -292,7 +320,10 @@ def get_weather_forecast(city, today=None, latitude=None, longitude=None):
             if today <= day <= today + timedelta(days=HORIZON_DAYS - 1)
         }
         if forecast:
-            return forecast, f"{provider} (tersimpan)", "Prakiraan terbaru gagal dimuat; memakai data cuaca tersimpan selama maksimal 24 jam."
+            stale_message = "Prakiraan terbaru gagal dimuat; memakai data cuaca tersimpan selama maksimal 24 jam."
+            if not _has_full_horizon(forecast, today):
+                stale_message += " Data hanya mencakup sebagian rentang; tanggal lain mengikuti panduan kebutuhan air tanaman."
+            return forecast, f"{provider} (tersimpan)", stale_message
     return {}, "Tidak tersedia", "Prakiraan cuaca belum dapat dimuat. Jadwal memakai panduan kebutuhan air tanaman."
 
 
@@ -310,7 +341,7 @@ def _recommendation(target_day, forecast):
             dry_day = target_day + timedelta(days=offset)
             dry_weather = forecast.get(dry_day)
             dry_rain = _decimal(dry_weather.get("rain")) if dry_weather else None
-            if dry_weather and (dry_rain is None or dry_rain < RAIN_SKIP_MM):
+            if dry_weather and dry_rain is not None and dry_rain < RAIN_SKIP_MM:
                 return (
                     dry_day,
                     f"Penyiraman digeser karena prakiraan hujan {rain:.1f} mm pada jadwal awal.",
@@ -373,6 +404,13 @@ def synchronize(owner, city, latitude=None, longitude=None):
 
     scheduled_ids = set()
     with transaction.atomic():
+        # Expired generated reminders are no longer actionable; watering history remains in JournalLog.
+        WateringSchedule.objects.filter(
+            owner=owner,
+            scheduled_for__lt=today,
+            status=WateringSchedule.Status.PLANNED,
+        ).delete()
+
         for plant, planned_day, note, rain, temp in plans:
             reminder, created = WateringSchedule.objects.get_or_create(
                 owner=owner,

@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.db.models import Count, Q
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_GET, require_POST
 
@@ -73,6 +73,7 @@ def calendar(request):
             and request.session.get("schedule_longitude") is not None
         ),
         "horizon_days": HORIZON_DAYS,
+        "today": today,
         "planned_count": summary["planned"],
         "completed_count": summary["completed"],
         "dismissed_count": summary["dismissed"],
@@ -171,6 +172,11 @@ def bulk_action(request):
         pk__in=schedule_ids,
         status=expected_status,
     )
+    today = timezone.localdate()
+    future_count = 0
+    if action == "complete":
+        future_count = eligible.filter(scheduled_for__gt=today).count()
+        eligible = eligible.filter(scheduled_for__lte=today)
 
     with transaction.atomic():
         selected = list(eligible.select_for_update().select_related("plant"))
@@ -205,10 +211,14 @@ def bulk_action(request):
             )
             updated_count = eligible.update(status=target_status, updated_at=timezone.now())
 
-    if not updated_count:
+    if not updated_count and action == "complete" and future_count:
+        messages.info(request, "Penyiraman hanya dapat dicatat pada atau setelah tanggal jadwal.")
+    elif not updated_count:
         messages.info(request, "Tidak ada jadwal terpilih yang memenuhi tindakan tersebut.")
     elif action == "complete":
         messages.success(request, f"{updated_count} penyiraman dicatat di jurnal.")
+        if future_count:
+            messages.info(request, f"{future_count} jadwal mendatang tetap terjadwal hingga tanggalnya tiba.")
     elif action == "dismiss":
         messages.success(request, f"{updated_count} jadwal diarsipkan. Jadwal dapat dipulihkan melalui filter arsip.")
     else:

@@ -7,8 +7,6 @@
 
 .schedule-intro,
 .schedule-section-heading,
-.schedule-tools,
-.schedule-tools-copy,
 .schedule-location-controls,
 .schedule-sync-controls,
 .schedule-task,
@@ -239,6 +237,7 @@
 .schedule-weather-meta { flex-wrap: wrap; gap: 0.65rem; margin-top: 0.55rem; }
 .schedule-weather-meta span { padding: 0; border-radius: 0; background: transparent; color: var(--muted); font-size: 0.73rem; }
 .schedule-complete-button { min-height: 2.3rem; padding: 0.55rem 0.85rem; font-size: 0.77rem; }
+.schedule-due-label { display: inline-flex; flex: 0 0 auto; align-items: center; padding: 0.45rem 0.65rem; border-radius: 999px; background: #f0f2eb; color: var(--muted); font-size: 0.72rem; font-weight: 700; }
 .schedule-check { display: grid; flex: 0 0 auto; width: 2rem; height: 2rem; place-items: center; border-radius: 50%; background: #dcead2; color: var(--leaf); font-weight: 800; }
 .schedule-check--dismissed { background: #ece8dc; color: #665f4e; }
 
@@ -275,7 +274,7 @@
   .schedule-plant-image { width: 3.25rem; height: 3.25rem; }
   .schedule-task-main { grid-column: 3; grid-row: 1; width: auto; }
   .schedule-task-heading { flex-direction: column; gap: 0.4rem; }
-  .schedule-complete-button, .schedule-check { grid-column: 3; justify-self: start; margin: 0.25rem 0 0; }
+  .schedule-complete-button, .schedule-check, .schedule-due-label { grid-column: 3; justify-self: start; margin: 0.25rem 0 0; }
   .schedule-location-controls { flex-direction: column; }
   .schedule-location-button { min-height: 2.65rem; }
 }
