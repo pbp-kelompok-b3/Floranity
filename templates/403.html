@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}403 Akses Ditolak - Floranity{% endblock title %}
+
+{% block content %}
+<div class="fl-page" style="max-width: 680px; margin: 4rem auto; text-align: center; padding: 2rem;">
+  <div style="font-size: 4rem; margin-bottom: 1rem;">🚫</div>
+  <h1 style="color: #b42318; margin-bottom: 0.75rem; font-size: 2rem;">403 : Akses Ditolak</h1>
+  <p style="font-size: 1.1rem; color: #475467; margin-bottom: 1.5rem; line-height: 1.6;">
+    {{ pesan|default:"Maaf, Anda tidak memiliki izin untuk mengakses atau memodifikasi data tanaman ini." }}
+  </p>
+  <div style="display: inline-flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+    <a href="{% url 'koleksi:show_collection' %}" class="fl-btn fl-btn--primer" style="text-decoration: none; padding: 0.75rem 1.5rem; border-radius: 8px; background-color: #2e7d32; color: #ffffff; font-weight: 600;">
+      Kembali ke Koleksi Saya
+    </a>
+    <a href="{% url 'koleksi:catalog' %}" class="fl-btn fl-btn--sekunder" style="text-decoration: none; padding: 0.75rem 1.5rem; border-radius: 8px; background-color: #f2f4f7; color: #344054; font-weight: 600;">
+      Jelajahi Katalog
+    </a>
+  </div>
+</div>
+{% endblock content %}

@@ -11,7 +11,7 @@
 
 <div class="fl-page">
   <p class="fl-breadcrumb">
-    <a href="{% url 'koleksi:daftar' %}">Koleksi saya</a> / {{ tanaman.nama_panggilan }}
+    <a href="{% url 'koleksi:show_collection' %}">Koleksi saya</a> / {{ tanaman.nama_panggilan }}
   </p>
 
   <div class="fl-detail">
@@ -55,10 +55,12 @@
       {% endif %}
 
       <div class="fl-detail__aksi">
-        <a class="fl-btn fl-btn--sekunder" href="{% url 'koleksi:ubah' tanaman.id %}">Ubah info</a>
-        <a class="fl-btn fl-btn--bahaya" href="{% url 'koleksi:hapus' tanaman.id %}">Hapus tanaman</a>
+        {% if not tanaman.pemilik or user == tanaman.pemilik %}
+          <a class="fl-btn fl-btn--sekunder" href="{% url 'koleksi:update' tanaman.id %}">Ubah info</a>
+          <a class="fl-btn fl-btn--bahaya" href="{% url 'koleksi:delete' tanaman.id %}">Hapus tanaman</a>
+        {% endif %}
         {% if tanaman.spesies_id %}
-          <a class="fl-btn fl-btn--sekunder" href="{% url 'koleksi:katalog_detail' tanaman.spesies_id %}">
+          <a class="fl-btn fl-btn--sekunder" href="{% url 'koleksi:catalog_detail' tanaman.spesies_id %}">
             Lihat spesies di katalog
           </a>
         {% endif %}
@@ -66,9 +68,10 @@
     </div>
   </div>
 
+  {% if not tanaman.pemilik or user == tanaman.pemilik %}
   <section class="fl-seksi">
     <h2>Tambah catatan jurnal</h2>
-    <form class="fl-form" method="post" action="{% url 'koleksi:jurnal_tambah' tanaman.id %}"
+    <form class="fl-form" method="post" action="{% url 'koleksi:add_journal' tanaman.id %}"
           enctype="multipart/form-data">
       {% csrf_token %}
       <div>
@@ -78,7 +81,9 @@
       <div>
         <label for="foto">Foto pertumbuhan</label>
         <input type="file" id="foto" name="foto" accept="image/*">
-        <p class="fl-form__bantuan">Opsional. Format gambar, maksimal satu foto per catatan.</p>
+        <p class="fl-form__bantuan">Opsional. Unggah foto langsung, atau tempel tautan URL gambar di bawah.</p>
+        <input type="url" id="foto_url" name="foto_url"
+               placeholder="Atau tempel URL gambar: https://..." style="margin-top: 0.5rem;">
       </div>
       <div>
         <label for="catatan">Catatan</label>
@@ -90,6 +95,7 @@
       </div>
     </form>
   </section>
+  {% endif %}
 
   <section class="fl-seksi">
     <h2>Jurnal pertumbuhan</h2>

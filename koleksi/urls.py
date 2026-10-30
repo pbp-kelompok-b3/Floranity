@@ -1,19 +1,27 @@
 from django.urls import path
-
-from . import views
+from koleksi.views import (
+    catalog,
+    catalog_detail,
+    show_collection,
+    create_tanaman,
+    detail,
+    update,
+    delete,
+    add_journal,
+)
 
 app_name = "koleksi"
 
 urlpatterns = [
     # Katalog spesies
-    path("katalog/", views.katalog, name="katalog"),
-    path("katalog/<int:spesies_id>/", views.katalog_detail, name="katalog_detail"),
+    path("katalog/", catalog, name="catalog"),
+    path("katalog/<int:spesies_id>/", catalog_detail, name="catalog_detail"),
 
     # Koleksi pribadi
-    path("koleksi/", views.daftar, name="daftar"),
-    path("koleksi/tambah/", views.tambah, name="tambah"),
-    path("koleksi/<int:tanaman_id>/", views.detail, name="detail"),
-    path("koleksi/<int:tanaman_id>/ubah/", views.ubah, name="ubah"),
-    path("koleksi/<int:tanaman_id>/hapus/", views.hapus, name="hapus"),
-    path("koleksi/<int:tanaman_id>/jurnal/tambah/", views.jurnal_tambah, name="jurnal_tambah"),
+    path("koleksi/", show_collection, name="show_collection"),
+    path("koleksi/tambah/", create_tanaman, name="create_tanaman"),
+    path("koleksi/<int:tanaman_id>/", detail, name="detail"),
+    path("koleksi/<int:tanaman_id>/ubah/", update, name="update"),
+    path("koleksi/<int:tanaman_id>/hapus/", delete, name="delete"),
+    path("koleksi/<int:tanaman_id>/jurnal/tambah/", add_journal, name="add_journal"),
 ]
