@@ -14,7 +14,7 @@
     <h1>Katalog Tanaman</h1>
   </div>
 
-  <form class="fl-cari" method="get" action="{% url 'koleksi:katalog' %}">
+  <form class="fl-cari" method="get" action="{% url 'koleksi:catalog' %}">
     <label class="fl-sr-only" for="cari-spesies">Cari spesies</label>
     <input type="search" id="cari-spesies" name="q" value="{{ q|default:'' }}"
            placeholder="Nama tanaman dalam bahasa Inggris, misalnya monstera">
@@ -42,7 +42,7 @@
     <ul class="fl-grid">
       {% for spesies in spesies_list %}
         <li>
-          <a class="fl-kartu" href="{% url 'koleksi:katalog_detail' spesies.id %}">
+          <a class="fl-kartu" href="{% url 'koleksi:catalog_detail' spesies.id %}">
             <span class="fl-kartu__gambar">
               {% if spesies.gambar %}
                 <img src="{{ spesies.gambar }}" alt="Foto {{ spesies.nama_umum }}" loading="lazy">
@@ -60,16 +60,27 @@
     </ul>
 
     <nav class="fl-paginasi" aria-label="Navigasi halaman katalog">
-      <a class="fl-btn fl-btn--sekunder {% if halaman <= 1 %}fl-paginasi__mati{% endif %}"
-         href="?{{ query_filter }}&page={{ halaman|add:'-1' }}">Sebelumnya</a>
+      {% if halaman > 1 %}
+        <a class="fl-btn fl-btn--sekunder" href="?{{ query_filter }}&page={{ halaman|add:'-1' }}">Sebelumnya</a>
+      {% else %}
+        <span class="fl-btn fl-btn--sekunder fl-paginasi__mati" aria-disabled="true">Sebelumnya</span>
+      {% endif %}
       <span>Halaman {{ halaman }}</span>
-      <a class="fl-btn fl-btn--sekunder {% if not ada_halaman_berikut %}fl-paginasi__mati{% endif %}"
-         href="?{{ query_filter }}&page={{ halaman|add:'1' }}">Berikutnya</a>
+      {% if ada_halaman_berikut %}
+        <a class="fl-btn fl-btn--sekunder" href="?{{ query_filter }}&page={{ halaman|add:'1' }}">Berikutnya</a>
+      {% else %}
+        <span class="fl-btn fl-btn--sekunder fl-paginasi__mati" aria-disabled="true">Berikutnya</span>
+      {% endif %}
     </nav>
   {% else %}
-    <div class="fl-kosong">
-      <p>Tidak ada spesies yang cocok dengan pencarian dan filter yang dipakai.</p>
-      <a class="fl-btn fl-btn--sekunder" href="{% url 'koleksi:katalog' %}">Hapus filter</a>
+    <div class="fl-kosong" role="status" aria-live="polite">
+      {% if api_error %}
+        <p>Katalog sedang tidak dapat dijangkau. Coba lagi sebentar, atau telusuri data yang tersedia.</p>
+        <a class="fl-btn" href="{% url 'koleksi:catalog' %}?q={{ q|urlencode }}&amp;air={{ air|urlencode }}&amp;cahaya={{ cahaya|urlencode }}">Coba lagi</a>
+      {% else %}
+        <p>Tidak ada spesies yang cocok dengan pencarian dan filter yang dipakai.</p>
+      {% endif %}
+      <a class="fl-btn fl-btn--sekunder" href="{% url 'koleksi:catalog' %}">Hapus filter</a>
     </div>
   {% endif %}
 </div>

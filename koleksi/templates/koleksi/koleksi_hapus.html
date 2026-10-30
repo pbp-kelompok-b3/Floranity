@@ -11,21 +11,20 @@
 
 <div class="fl-page">
   <p class="fl-breadcrumb">
-    <a href="{% url 'koleksi:daftar' %}">Koleksi saya</a> /
+    <a href="{% url 'koleksi:show_collection' %}">{% if request.user.is_authenticated %}Koleksi saya{% else %}Koleksi tanaman{% endif %}</a> /
     <a href="{% url 'koleksi:detail' tanaman.id %}">{{ tanaman.nama_panggilan }}</a> / Hapus
   </p>
 
   <div class="fl-header">
     <div>
       <h1>Hapus tanaman</h1>
-      <p>Tindakan ini juga menghapus seluruh catatan jurnalnya dan tidak bisa dibatalkan.</p>
+      <p>Tindakan ini tidak bisa dibatalkan.</p>
     </div>
   </div>
 
   <div class="fl-kosong">
     <p>
-      Hapus <strong>{{ tanaman.nama_panggilan }}</strong> ({{ tanaman.nama_ilmiah }})
-      beserta {{ tanaman.jumlah_jurnal }} catatan jurnalnya?
+      Hapus <strong>{{ tanaman.nama_panggilan }}</strong> ({{ tanaman.nama_ilmiah }})?
     </p>
     <form method="post">
       {% csrf_token %}

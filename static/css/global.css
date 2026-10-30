@@ -49,6 +49,11 @@ input, button, textarea, select {
   font: inherit;
 }
 
+:where(a, button, input, textarea, select, [tabindex]):focus-visible {
+  outline: 3px solid var(--leaf2);
+  outline-offset: 3px;
+}
+
 p, h1, h2, h3, h4, h5, h6 {
   overflow-wrap: break-word;
 }
@@ -127,6 +132,53 @@ h1, h2, h3, h4, h5, h6 {
 .nav-link:hover {
   color: var(--color-primary-hover);
   opacity: 0.8;
+}
+
+.nav-link[aria-current="page"] {
+  color: var(--color-primary-hover);
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.4rem;
+}
+
+.skip-link {
+  position: fixed;
+  z-index: 2000;
+  top: 0.75rem;
+  left: 0.75rem;
+  transform: translateY(-160%);
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  background: var(--leaf);
+  color: #fff;
+  text-decoration: none;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+.site-messages {
+  width: min(100% - 2rem, 68rem);
+  margin: 1rem auto 0;
+}
+
+.site-message {
+  padding: 0.875rem 1rem;
+  border: 1px solid rgba(36, 77, 59, 0.2);
+  border-left: 4px solid var(--leaf2);
+  border-radius: 0.75rem;
+  background: #edf2df;
+}
+
+.site-message + .site-message {
+  margin-top: 0.5rem;
+}
+
+:focus-visible {
+  outline: 3px solid #54745a;
+  outline-offset: 3px;
 }
 
 .nav-cta {

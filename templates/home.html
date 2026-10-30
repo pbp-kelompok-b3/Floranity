@@ -4,9 +4,6 @@
 {% block title %}Floranity{% endblock title %}
 
 {% block extra_css %}
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{% static 'css/home.css' %}">
 {% endblock extra_css %}
 
@@ -15,10 +12,10 @@
   <section class="hero" id="tentang">
     <div class="hero-text">
       <h1>Ruang hijau yang tumbuh <em>bersamamu.</em></h1>
-      <p class="hero-copy">Rawat tanaman dengan lebih tenang. Floranity menyatukan panduan personal, pengingat yang peka cuaca, dan komunitas yang selalu punya cerita untuk dibagikan.</p>
+      <p class="hero-copy">Rawat tanaman dengan lebih tenang. Floranity membantumu mengenal spesies, menyimpan koleksi pribadi, dan mencatat perjalanan tumbuh setiap tanaman.</p>
       <div class="hero-actions">
         <a class="button-primary" href="/koleksi/">Kenali ruang hijau</a>
-        <a class="button-secondary" href="#fitur">Explore Floranity <span>↓</span></a>
+        <a class="button-secondary" href="#fitur">Jelajahi Floranity <span>↓</span></a>
       </div>
     </div>
     <div class="hero-visual" aria-label="Tanaman hijau di dalam ruangan">
@@ -44,22 +41,22 @@
     <div class="section-inner">
       <div class="section-heading"><h2>Perawatan yang terasa lebih sederhana.</h2></div>
       <div class="feature-grid">
-        <article class="feature-card"><span class="feature-icon">◷</span><h3>Pengingat yang peka cuaca</h3><p>Jadwal siram dan pupuk mempertimbangkan kondisi cuaca lokal, agar tanaman mendapat perawatan di waktu yang tepat.</p></article>
-        <article class="feature-card"><span class="feature-icon">♧</span><h3>Koleksi dan jurnal tumbuh</h3><p>Simpan tanaman kesayangan, catat momen perawatan, dan lihat perjalanan tumbuhnya dari waktu ke waktu.</p></article>
-        <article class="feature-card"><span class="feature-icon">✳</span><h3>Panduan tiap spesies</h3><p>Kenali kebutuhan air, cahaya, dan karakter tanaman lewat katalog yang mudah ditelusuri.</p></article>
+        <article class="feature-card"><span class="feature-icon">♧</span><h3>Koleksi tanaman</h3><p>Simpan tanaman yang kamu rawat beserta nama dan lokasinya agar detailnya mudah ditemukan.</p></article>
+        <article class="feature-card"><span class="feature-icon">◷</span><h3>Jurnal pertumbuhan</h3><p>Catat momen perawatan dengan tanggal, foto, dan cerita singkat tentang perubahan tanamanmu.</p></article>
+        <article class="feature-card"><span class="feature-icon">✳</span><h3>Katalog spesies</h3><p>Kenali kebutuhan air, cahaya, dan karakter tanaman lewat katalog yang mudah ditelusuri.</p></article>
       </div>
     </div>
   </section>
 
-  <section class="section" id="komunitas">
+  <section class="section" id="panduan">
     <div class="section-inner community">
       <div>
-        <h2>Temukan teman di setiap daun baru.</h2>
-        <p class="community-copy">Bagikan perkembangan, bertanya saat ragu, atau temukan inspirasi dari sesama plant people. Ruang hijau terasa lebih hidup saat ceritanya dibagikan.</p>
-        <a href="#komunitas" class="community-link">Jelajahi komunitas <span>→</span></a>
+        <h2>Panduan untuk ruang hijau yang kamu rawat.</h2>
+        <p class="community-copy">Telusuri informasi spesies, kenali kebutuhan air dan cahayanya, lalu tambahkan tanaman pilihanmu ke koleksi.</p>
+        <a href="/katalog/" class="community-link">Jelajahi katalog tanaman <span>→</span></a>
       </div>
       <div class="community-image">
-        <img src="https://images.unsplash.com/photo-1485955900006-10f4d324d411?auto=format&fit=crop&w=1000&q=85" alt="Koleksi tanaman hias hijau">
+        <img src="https://images.unsplash.com/photo-1485955900006-10f4d324d411?auto=format&fit=crop&w=1000&q=85" alt="Tanaman hias dalam ruang hijau">
       </div>
     </div>
   </section>
@@ -78,7 +75,7 @@
     <li><a href="#tentang">Tentang</a></li>
     <li><a href="#fitur">Fitur</a></li>
     <li><a href="/katalog/">Katalog</a></li>
-    <li><a href="#komunitas">Komunitas</a></li>
+    <li><a href="#panduan">Panduan spesies</a></li>
   </ul>
   <p class="copyright-text">&copy; {% now "Y" %} Floranity. Tumbuh dengan perhatian.</p>
 </div>
