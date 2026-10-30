@@ -37,7 +37,7 @@
     </select>
     <button class="fl-btn" type="submit">Terapkan</button>
     {% if q or urut != 'terbaru' %}
-      <a class="fl-btn fl-btn--sekunder" href="{% url 'koleksi:daftar' %}">Hapus filter</a>
+      <a class="fl-btn fl-btn--sekunder" href="{% url 'koleksi:show_collection' %}">Hapus filter</a>
     {% endif %}
   </form>
 

@@ -1,0 +1,198 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Jadwal Perawatan | Floranity{% endblock title %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'schedule/css/schedule.css' %}">
+{% endblock extra_css %}
+
+{% block content %}
+<div class="schedule-page">
+  <section class="schedule-intro" aria-labelledby="schedule-title">
+    <div>
+      <h1 id="schedule-title">Jadwal penyiraman</h1>
+      <p class="schedule-lead">Rencana perawatan untuk koleksimu, diselaraskan dengan kebutuhan air spesies dan prakiraan cuaca lokal.</p>
+    </div>
+    <span class="schedule-range">7 hari ke depan</span>
+  </section>
+
+  {% if messages %}
+    <div class="schedule-messages" role="status" aria-live="polite">
+      {% for message in messages %}
+        <p class="schedule-message schedule-message--{{ message.tags }}">{{ message }}</p>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <section class="schedule-tools" aria-label="Sinkronisasi cuaca">
+    <div class="schedule-tools-copy">
+      <span class="schedule-weather-icon" aria-hidden="true">⌖</span>
+      <div>
+        <h2>Sesuaikan dengan cuaca</h2>
+        <p>Hujan dapat menggeser waktu siram. Saat prakiraan tidak tersedia, jadwal tetap mengikuti panduan kebutuhan air tanaman.</p>
+      </div>
+    </div>
+    <form class="schedule-sync-form" method="post" action="{% url 'schedule:synchronize' %}">
+      {% csrf_token %}
+      <label for="schedule-city">Lokasi prakiraan cuaca</label>
+      <div class="schedule-location-controls">
+        <input id="schedule-city" name="city" type="text" value="{{ city }}" maxlength="100" placeholder="Contoh: Jakarta" {% if not has_coordinates %}required{% endif %}>
+        <input id="schedule-latitude" name="latitude" type="hidden" value="{{ latitude|default:'' }}">
+        <input id="schedule-longitude" name="longitude" type="hidden" value="{{ longitude|default:'' }}">
+        <button type="button" class="schedule-location-button" id="use-current-location">Gunakan lokasi saya</button>
+      </div>
+      <p class="schedule-location-hint" id="location-status" role="status" aria-live="polite">Browser akan meminta izin. Lokasi dipakai untuk prakiraan cuaca dan disimpan selama sesi, atau masukkan kota secara manual.</p>
+      <div class="schedule-sync-controls">
+        <button type="submit" class="schedule-button">Sinkronkan jadwal <span aria-hidden="true">→</span></button>
+      </div>
+    </form>
+  </section>
+
+  <section class="schedule-summary" aria-label="Ringkasan jadwal">
+    <article class="schedule-summary-card">
+      <span class="schedule-summary-icon" aria-hidden="true">♧</span>
+      <div><strong>{{ planned_count }}</strong><span>penyiraman terjadwal</span></div>
+    </article>
+    <article class="schedule-summary-card">
+      <span class="schedule-summary-icon schedule-summary-icon--soft" aria-hidden="true"><svg class="schedule-checkmark-icon" viewBox="0 0 16 16" focusable="false"><path d="m3.25 8.25 3.1 3.1 6.4-6.7" /></svg></span>
+      <div><strong>{{ completed_count }}</strong><span>selesai minggu ini</span></div>
+    </article>
+    <article class="schedule-summary-card">
+      <span class="schedule-summary-icon schedule-summary-icon--soft" aria-hidden="true">↘</span>
+      <div><strong>{{ dismissed_count }}</strong><span>diarsipkan</span></div>
+    </article>
+    <article class="schedule-summary-note">
+      <span aria-hidden="true">⌖</span>
+      <p>Cuaca <strong>{{ city }}</strong> · {{ weather_provider }}{% if last_synced %}<br><small>Sinkron terakhir {{ last_synced }}</small>{% endif %}</p>
+    </article>
+  </section>
+
+  <section class="schedule-calendar" aria-labelledby="upcoming-title">
+    <div class="schedule-section-heading">
+      <h2 id="upcoming-title">Agenda mendatang</h2>
+      {% if schedule_groups %}<span>{{ schedule_groups|length }} hari ditampilkan</span>{% endif %}
+    </div>
+
+    <form class="schedule-filter-form" method="get" action="{% url 'schedule:calendar' %}">
+      <div class="schedule-filter-field schedule-filter-search">
+        <label for="schedule-search">Cari tanaman</label>
+        <input id="schedule-search" type="search" name="q" value="{{ filter_query }}" maxlength="80" placeholder="Nama atau spesies">
+      </div>
+      <div class="schedule-filter-field">
+        <label for="schedule-plant">Tanaman</label>
+        <select id="schedule-plant" name="plant">
+          <option value="">Semua tanaman</option>
+          {% for plant in plant_options %}
+            <option value="{{ plant.pk }}" {% if filter_plant == plant.pk %}selected{% endif %}>{{ plant.nama_panggilan }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="schedule-filter-field">
+        <label for="schedule-days">Rentang</label>
+        <select id="schedule-days" name="days">
+          <option value="1" {% if filter_days == '1' %}selected{% endif %}>Hari ini</option>
+          <option value="3" {% if filter_days == '3' %}selected{% endif %}>3 hari</option>
+          <option value="7" {% if filter_days == '7' %}selected{% endif %}>7 hari</option>
+        </select>
+      </div>
+      <div class="schedule-filter-field">
+        <label for="schedule-status">Status</label>
+        <select id="schedule-status" name="status">
+          <option value="active" {% if filter_status == 'active' %}selected{% endif %}>Aktif dan selesai</option>
+          <option value="planned" {% if filter_status == 'planned' %}selected{% endif %}>Terjadwal</option>
+          <option value="completed" {% if filter_status == 'completed' %}selected{% endif %}>Selesai</option>
+          <option value="dismissed" {% if filter_status == 'dismissed' %}selected{% endif %}>Diarsipkan</option>
+          <option value="all" {% if filter_status == 'all' %}selected{% endif %}>Semua status</option>
+        </select>
+      </div>
+      <button type="submit" class="schedule-filter-button">Terapkan filter</button>
+      {% if has_filters %}<a class="schedule-filter-reset" href="{% url 'schedule:calendar' %}">Atur ulang</a>{% endif %}
+    </form>
+
+    {% if schedule_groups %}
+      <form class="schedule-bulk-form" method="post" action="{% url 'schedule:bulk_action' %}">
+        {% csrf_token %}
+        <div class="schedule-bulk-toolbar">
+          <div><strong>Pilih jadwal yang ingin diperbarui</strong><span class="schedule-selection-count" id="selection-count" aria-live="polite">0 dipilih</span></div>
+          <label class="schedule-select-all"><input id="select-visible-schedules" type="checkbox"> Pilih semua yang terlihat</label>
+          <div class="schedule-bulk-actions">
+            <button type="submit" name="action" value="complete">Selesaikan terpilih</button>
+            <button type="submit" name="action" value="dismiss">Arsipkan terpilih</button>
+            <button type="submit" name="action" value="restore">Pulihkan terpilih</button>
+          </div>
+        </div>
+        <div class="schedule-days">
+        {% for group in schedule_groups %}
+          <section class="schedule-day" aria-label="{{ group.date|date:'l, j F' }}">
+            <div class="schedule-day-date">
+              <span class="schedule-day-dot" aria-hidden="true"></span>
+              <h3>{{ group.date|date:'l' }}</h3>
+              <time datetime="{{ group.date|date:'Y-m-d' }}">{{ group.date|date:'j F' }}</time>
+            </div>
+            <div class="schedule-day-items">
+              {% for entry in group.entries %}
+                <article class="schedule-task{% if entry.status == 'completed' %} schedule-task--complete{% elif entry.status == 'dismissed' %} schedule-task--dismissed{% endif %}">
+                  <label class="schedule-task-select">
+                    <input type="checkbox" name="schedule_ids" value="{{ entry.pk }}">
+                    <span class="schedule-sr-only">Pilih jadwal {{ entry.plant.nama_panggilan }} tanggal {{ group.date|date:'j F' }}</span>
+                  </label>
+                  <div class="schedule-task-main">
+                    <div class="schedule-task-heading">
+                      <div>
+                        <h4>{{ entry.plant.nama_panggilan }}</h4>
+                        {% if entry.plant.nama_ilmiah %}<p class="schedule-scientific">{{ entry.plant.nama_ilmiah }}</p>{% endif %}
+                      </div>
+                      <span class="schedule-status{% if entry.status == 'completed' %} schedule-status--complete{% elif entry.status == 'dismissed' %} schedule-status--dismissed{% endif %}">{% if entry.status == 'completed' %}Selesai{% elif entry.status == 'dismissed' %}Diarsipkan{% elif group.date > today %}Terjadwal{% else %}Waktunya cek{% endif %}</span>
+                    </div>
+                    <p class="schedule-recommendation">{{ entry.recommendation }}</p>
+                    <div class="schedule-weather-meta">
+                      {% if entry.rainfall_mm != None %}<span>Hujan {{ entry.rainfall_mm|floatformat:1 }} mm</span>{% endif %}
+                      {% if entry.temperature_max_c != None %}<span>Maks. {{ entry.temperature_max_c|floatformat:0 }}°C</span>{% endif %}
+                      {% if entry.plant.lokasi %}<span>{{ entry.plant.lokasi }}</span>{% endif %}
+                    </div>
+                  </div>
+                  {% if entry.status == 'planned' %}
+                    {% if group.date <= today %}<button type="submit" name="single_complete" value="{{ entry.pk }}" class="schedule-complete-button" aria-label="Catat penyiraman {{ entry.plant.nama_panggilan }} selesai">Selesai</button>{% endif %}
+                  {% elif entry.status == 'completed' %}
+                    <span class="schedule-check" role="img" aria-label="Penyiraman selesai"><svg class="schedule-checkmark-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="m3.25 8.25 3.1 3.1 6.4-6.7" /></svg></span>
+                  {% else %}
+                    <span class="schedule-check schedule-check--dismissed" aria-label="Jadwal diarsipkan">↘</span>
+                  {% endif %}
+                </article>
+              {% endfor %}
+            </div>
+          </section>
+        {% endfor %}
+      </div>
+      </form>
+    {% elif has_filters %}
+      <div class="schedule-empty">
+        <span aria-hidden="true">⌕</span>
+        <h3>Tidak ada jadwal yang cocok</h3>
+        <p>Coba ubah tanaman, rentang waktu, atau status yang dipilih.</p>
+        <a class="schedule-button" href="{% url 'schedule:calendar' %}">Hapus filter</a>
+      </div>
+    {% elif has_plants %}
+      <div class="schedule-empty">
+        <span aria-hidden="true">{% if has_synced %}<svg class="schedule-checkmark-icon" fill="#000000" viewBox="0 0 1920 1920" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M1743.858 267.012 710.747 1300.124 176.005 765.382 0 941.387l710.747 710.871 1209.24-1209.116z" fill-rule="evenodd"></path> </g></svg>{% else %}<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M12 7V12L9.5 10.5M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>{% endif %}</span>
+        <h3>{% if has_synced %}Tidak ada penyiraman dalam waktu dekat{% else %}Jadwalmu siap disusun{% endif %}</h3>
+        <p>{% if has_synced %}Belum ada penyiraman yang jatuh tempo dalam tujuh hari. Sinkronkan kembali setelah memperbarui catatan perawatan atau lokasi.{% else %}Sinkronkan kota di atas untuk membuat rekomendasi penyiraman tujuh hari berdasarkan tanaman di koleksimu.{% endif %}</p>
+      </div>
+    {% else %}
+      <div class="schedule-empty">
+        <span aria-hidden="true">♧</span>
+        <h3>Mulai dari koleksi tanamanmu</h3>
+        <p>Tambahkan tanaman terlebih dahulu agar kami dapat menyusun jadwal perawatan yang sesuai.</p>
+        <a class="schedule-button" href="{% url 'koleksi:create_tanaman' %}">Tambah tanaman <span aria-hidden="true">→</span></a>
+      </div>
+    {% endif %}
+  </section>
+
+  <p class="schedule-footnote">Rekomendasi membantu merencanakan perawatan. Periksa kelembapan media tanam sebelum menyiram, terutama setelah hujan.</p>
+</div>
+{% endblock content %}
+
+{% block extra_js %}
+<script src="{% static 'schedule/js/schedule.js' %}" defer></script>
+{% endblock extra_js %}

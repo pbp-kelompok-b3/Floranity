@@ -4,10 +4,16 @@
 {% block forum-page-content %}
 <div class="forum-header">
     <h1 class="page-title">Forum Komunitas</h1>
+    {% if user.is_authenticated %}
     <button type="button"
             class="button button-type-1"
             id="create-post-button"
             popovertarget="post-form-popover">Buat Post</button>
+    {% else %}
+    <a href="{% url 'akun:login' %}?next={% url 'forum:show_forum' %}"
+       class="button button-type-1"
+       id="create-post-button">Buat Post</a>
+    {% endif %}
 </div>
 {% include 'forum/post_form.html' %}
 <form class="search-post"
@@ -53,7 +59,7 @@
         {% for post in post_list %}
             {% include 'forum/post.html' %}
         {% empty %}
-            <p class="no-post">Post tidak ditemmukan...</p>
+            <p class="no-post">Post tidak ditemukan...</p>
         {% endfor %}
     </div>
 </div>

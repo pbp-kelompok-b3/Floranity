@@ -15,6 +15,7 @@ class KoleksiDanKatalogTests(TestCase):
         self.client = Client()
         self.user = User.objects.create_user(username="testuser", password="password123")
         self.user2 = User.objects.create_user(username="testuser2", password="password123")
+        self.client.force_login(self.user)
         seed_sample_data_if_empty()
 
     def test_katalog_list_view(self):
@@ -59,7 +60,8 @@ class KoleksiDanKatalogTests(TestCase):
         self.assertContains(response, "Tambah tanaman")
 
     def test_koleksi_ubah_view(self):
-        url = reverse("koleksi:update", args=[1])
+        t_user = Tanaman.objects.create(pemilik=self.user, nama_panggilan="Tanaman Ubah")
+        url = reverse("koleksi:update", args=[t_user.id])
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "koleksi/koleksi_form.html")
@@ -67,7 +69,8 @@ class KoleksiDanKatalogTests(TestCase):
         self.assertContains(response, "Ubah info tanaman")
 
     def test_koleksi_hapus_view(self):
-        url = reverse("koleksi:delete", args=[1])
+        t_user = Tanaman.objects.create(pemilik=self.user, nama_panggilan="Tanaman Hapus")
+        url = reverse("koleksi:delete", args=[t_user.id])
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "koleksi/koleksi_hapus.html")
@@ -178,24 +181,25 @@ class KoleksiDanKatalogTests(TestCase):
         })
         self.assertEqual(res_jurnal.status_code, 403)
 
-        # 2. Pengguna anonim (belum login) juga harus diblokir (403 Forbidden)
+        # 2. Pengguna anonim (belum login) harus diblokir (302 Redirect ke login atau 403 Forbidden)
         self.client.logout()
 
         res_anon_detail = self.client.get(reverse("koleksi:detail", args=[tanaman_user1.id]))
-        self.assertEqual(res_anon_detail.status_code, 403)
+        self.assertIn(res_anon_detail.status_code, [302, 403])
 
         res_anon_update = self.client.post(reverse("koleksi:update", args=[tanaman_user1.id]), {
             "nama_panggilan": "Dibajak Anon",
         })
-        self.assertEqual(res_anon_update.status_code, 403)
+        self.assertIn(res_anon_update.status_code, [302, 403])
 
         res_anon_delete = self.client.post(reverse("koleksi:delete", args=[tanaman_user1.id]))
-        self.assertEqual(res_anon_delete.status_code, 403)
+        self.assertIn(res_anon_delete.status_code, [302, 403])
 
     def test_security_rate_limiting(self):
         from django.core.cache import cache
         cache.clear()
 
+        self.client.force_login(self.user)
         # Uji rate limiting pada endpoint create_tanaman
         for _ in range(20):
             res = self.client.get(reverse("koleksi:create_tanaman"))

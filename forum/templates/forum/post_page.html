@@ -19,6 +19,7 @@
         </section>
         <section class="comment-section">
             <h2 class="comment-section-title">Komentar</h2>
+            {% if user.is_authenticated %}
             <div class="comment-form-container">
                 <form class="comment-form"
                       hx-post="{% url 'forum:add_comment' post.id %}"
@@ -39,6 +40,9 @@
                     </button>
                 </form>
             </div>
+            {% else %}
+            <p><a href="{% url 'akun:login' %}?next={% url 'forum:show_post_page' post.id %}">Masuk untuk menambahkan komentar.</a></p>
+            {% endif %}
             <div class="comment-rows">
                 {% for comment in comment_list %}
                     {% include 'forum/comment.html' %}

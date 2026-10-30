@@ -26,8 +26,7 @@ Floranity hadir sebagai platform perawatan tanaman hias pintar dan wadah komunit
 * **Perenual API** - [https://perenual.com/docs/api](https://perenual.com/docs/api)  
   Digunakan sebagai basis data utama katalog tanaman hias. API ini menyediakan informasi spesifik spesies, seperti nama ilmiah, karakteristik pertumbuhan, tingkat kebutuhan air (*frequent, moderate, minimum*), serta kebutuhan sinar matahari yang digunakan oleh Floranity untuk memberikan panduan perawatan dasar setiap tanaman.
 
-* **Google OAuth 2.0 & Google People API** - [https://developers.google.com/identity](https://developers.google.com/identity)  
-  Digunakan untuk mekanisme autentikasi akun pengguna serta mengambil data profil awal (nama tampilan dan foto profil) secara otomatis saat pertama kali melakukan pendaftaran.
+Untuk mengaktifkan sinkronisasi penuh pada jadwal penyiraman, atur `PERENUAL_API_KEY` dan `OPENWEATHER_API_KEY` di environment atau file `.env`. Jika OpenWeather belum dikonfigurasi, jadwal memakai Open-Meteo sebagai sumber prakiraan cuaca tanpa kunci API. Data kebutuhan air yang sudah tersimpan di koleksi tetap digunakan saat Perenual tidak tersedia.
 
 ## Target Pengguna
 Floranity menyasar penggemar tanaman hias mulai dari pemula yang membutuhkan panduan perawatan dasar, *hobbyist* berpengalaman yang ingin mendokumentasikan koleksinya dan berdiskusi teknik lanjutan, hingga pengguna yang peduli terhadap isu biodiversitas urban di lingkungan tempat tinggalnya.
@@ -38,13 +37,13 @@ Floranity menyasar penggemar tanaman hias mulai dari pemula yang membutuhkan pan
 Menyediakan fungsi **CRUD** (*Create, Read, Update, Delete*) untuk tanaman yang dimiliki atau dirawat pengguna. Fitur ini mencakup penambahan tanaman ke koleksi pribadi lengkap dengan jurnal pertumbuhan berupa foto dan catatan berkala, pengeditan info, serta penghapusan tanaman dari koleksi. Koleksi ini terfilter berdasarkan sesi login sehingga hanya dapat diakses oleh pemiliknya. API yang digunakan adalah **Perenual API** (*endpoint species list & species details*) untuk mengambil data referensi spesies seperti nama, kebutuhan cahaya, tingkat kesulitan, dan kebutuhan air.
 
 ### 2. Jadwal dan Log Perawatan (PiC: Syabil)
-Menyediakan fungsi **CRUD** untuk catatan aktivitas perawatan (seperti menyiram, memupuk, dan memangkas) per tanaman, dengan jadwal rekomendasi yang disesuaikan secara otomatis berdasarkan kondisi cuaca terkini. API yang digunakan adalah **OpenWeather API** untuk mengambil data suhu, kelembapan, dan curah hujan berdasarkan lokasi pengguna.
+Menyediakan jadwal penyiraman tujuh hari untuk tanaman dalam koleksi pengguna. Rekomendasi memakai kebutuhan air spesies dari **Perenual API** (atau data panduan yang tersimpan), riwayat penyiraman, dan prakiraan hujan serta suhu dari **OpenWeather API**. Pengguna dapat memasukkan kota atau mengizinkan geolokasi browser untuk mengambil prakiraan yang lebih akurat. Filter tanaman, status, pencarian, dan rentang tanggal membantu menemukan pengingat tertentu. Beberapa pengingat dapat diselesaikan, diarsipkan, atau dipulihkan sekaligus; penyiraman yang ditandai selesai otomatis dicatat ke jurnal perawatan.
 
 ### 3. Forum dan Observasi Komunitas (PiC: Aksa)
 Menyediakan fungsi **CRUD** untuk *post* diskusi atau *showcase* beserta komentarnya, mencakup tips perawatan, teknik *wiring* dan *pruning* bonsai, serta hasil rawatan. API yang digunakan adalah **iNaturalist API** untuk mengambil data observasi biodiversitas dari lokasi sekitar pengguna, sehingga forum dapat menampilkan spesies teramati di area yang sama untuk memperkuat tema biodiversitas urban.
 
-### 4. Autentikasi dan Profil Pengguna via Google OAuth (PiC: Fatih)
-Menyediakan fungsi **CRUD** untuk entitas Profil Pengguna yang terhubung *one-to-one* dengan akun Django. Pengguna dapat login dan mendaftar menggunakan Google OAuth. Saat pertama kali login, sistem akan membuat profil baru (*Create*) secara otomatis dengan nama tampilan dan foto profil yang diambil dari akun Google pengguna lewat **Google People API**. Pengguna dapat melihat profil miliknya serta profil publik anggota lain (*Read*), mengedit bio, foto profil, atau preferensi tampilan (*Update*), serta menghapus atau menonaktifkan akunnya (*Delete*).
+### 4. Autentikasi dan Profil Pengguna (PiC: Fatih)
+Menyediakan fungsi CRUD untuk entitas Profil Pengguna yang terhubung one-to-one dengan akun Django. Pengguna dapat mendaftar (sign up) dan masuk (login) menggunakan sistem Django Authentication bawaan (username/email dan password). Saat pendaftaran akun berhasil, sistem secara otomatis membuat profil pengguna baru (_Create_) yang terhubung dengan akun Django tersebut. Pengguna dapat melihat profil miliknya serta profil publik anggota lain (_Read_), mengedit informasi pribadi seperti bio, foto profil, atau preferensi tampilan (Update), serta menghapus atau menonaktifkan akunnya (_Delete_).
 
 ## Komponen-Komponen Website
 

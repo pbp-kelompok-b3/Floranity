@@ -34,10 +34,12 @@
         </div>
         <footer class="post-action-button">
             <button type="button"
-                    class="likes-button"
+                    class="likes-button {% if post.is_liked %}active{% endif %}"
                     data-url="{% url 'forum:toggle_like_button' post.id %}"
+                    data-authenticated="{{ user.is_authenticated | yesno:'true,false' }}"
+                    data-login-url="{% url 'akun:login' %}"
                     aria-label="Sukai Post"
-                    aria-pressed="false">
+                    aria-pressed="{{ post.is_liked|yesno:'true,false' }}">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#858383" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="Like">
                     <path d="M7 10v11"/>
                     <path d="M7 10l4-7a2 2 0 0 1 2 2v4h5.6a2 2 0 0 1 2 2.3l-1.2 7.4a2 2 0 0 1-2 1.7H7"/>
@@ -59,10 +61,12 @@
                 <p class="counter comments-counter">{{ post.comments_total }}</p>
             </button>
             <button type="button" 
-                    class="bookmark-button"
+                    class="bookmark-button {% if post.is_bookmarked %}active{% endif %}"
                     data-url="{% url 'forum:toggle_bookmark_button' post.id %}"
+                    data-authenticated="{{ user.is_authenticated | yesno:'true,false' }}"
+                    data-login-url="{% url 'akun:login' %}"
                     aria-label="Simpan Post"
-                    aria-pressed="false">
+                    aria-pressed="{{ post.is_bookmarked|yesno:'true,false' }}">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#858383" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="Bookmark">
                     <path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4.5L5 21V4a1 1 0 0 1 1-1Z"/>
                 </svg>

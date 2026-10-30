@@ -35,7 +35,7 @@
         {% for post in post_list %}
             {% include 'forum/post.html' with form=post.update_form popover_id=post.id %}
         {% empty %}
-            <p class="no-post">Post tidak ditemmukan...</p>
+            <p class="no-post">Post tidak ditemukan...</p>
         {% endfor %}
     </div>
 </div>
