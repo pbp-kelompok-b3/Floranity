@@ -134,7 +134,7 @@
     .account-side-note, .account-form-card { padding: 1.5rem; }
 }
 @media (max-width: 650px) {
-    .account-page { margin: .5rem auto 1.5rem; }
+    .account-page { margin: .5rem auto 1.5rem; padding-inline: 1rem; }
     .account-login { grid-template-columns: 1fr; }
     .account-story { min-height: 260px; padding: 2rem; }
     .account-story h1 { font-size: 2rem; max-width: 290px; position: relative; z-index: 1; }
