@@ -6,7 +6,7 @@ from zoneinfo import ZoneInfo
 import requests
 from django.conf import settings
 from django.db import transaction
-from django.db.models import Max
+from django.db.models import Max, Q
 from django.utils import timezone
 
 from journal.models import JournalLog
@@ -69,7 +69,7 @@ def _openweather_forecast(city, api_key, today, latitude=None, longitude=None):
     grouped = defaultdict(lambda: {"rain": 0.0, "temps": [], "humidities": []})
     for entry in payload.get("list", []):
         forecast_day = datetime.fromtimestamp(entry["dt"], tz=local_tz).date()
-        if not today <= forecast_day <= today + timedelta(days=HORIZON_DAYS):
+        if not today <= forecast_day <= today + timedelta(days=HORIZON_DAYS - 1):
             continue
         values = grouped[forecast_day]
         values["rain"] += float(entry.get("rain", {}).get("3h", 0) or 0)
@@ -111,7 +111,7 @@ def _open_meteo_forecast(city, today, latitude=None, longitude=None):
             "latitude": latitude,
             "longitude": longitude,
             "daily": "precipitation_sum,temperature_2m_max,relative_humidity_2m_mean",
-            "forecast_days": HORIZON_DAYS + 1,
+            "forecast_days": HORIZON_DAYS,
             "timezone": settings.TIME_ZONE,
         },
         timeout=8,
@@ -196,7 +196,7 @@ def _recommendation(target_day, forecast):
 def synchronize(owner, city, latitude=None, longitude=None):
     """Refresh the owner's upcoming watering recommendations for one week."""
     today = timezone.localdate()
-    last_day = today + timedelta(days=HORIZON_DAYS)
+    last_day = today + timedelta(days=HORIZON_DAYS - 1)
     plants = list(Tanaman.objects.filter(pemilik=owner).order_by("nama_panggilan"))
     forecast, provider, weather_message = get_weather_forecast(city, today, latitude, longitude)
     intervals = {plant.pk: _water_interval(plant) for plant in plants}
@@ -231,7 +231,7 @@ def synchronize(owner, city, latitude=None, longitude=None):
             plans.append((plant, planned_day, note, rain, temp))
             due_day = planned_day + timedelta(days=interval)
 
-    scheduled = set()
+    scheduled_ids = set()
     with transaction.atomic():
         for plant, planned_day, note, rain, temp in plans:
             reminder, created = WateringSchedule.objects.get_or_create(
@@ -254,7 +254,7 @@ def synchronize(owner, city, latitude=None, longitude=None):
                 reminder.save(update_fields=[
                     "recommendation", "rainfall_mm", "temperature_max_c", "weather_source", "updated_at",
                 ])
-            scheduled.add((plant.pk, planned_day))
+            scheduled_ids.add(reminder.pk)
 
         # Remove stale generated reminders, while preserving completed care.
         stale = WateringSchedule.objects.filter(
@@ -262,25 +262,47 @@ def synchronize(owner, city, latitude=None, longitude=None):
             scheduled_for__range=(today, last_day),
             status=WateringSchedule.Status.PLANNED,
         )
-        for reminder in stale:
-            if (reminder.plant_id, reminder.scheduled_for) not in scheduled:
-                reminder.delete()
+        stale.exclude(pk__in=scheduled_ids).delete()
 
     return {
         "provider": provider,
         "weather_message": weather_message,
         "plant_count": len(plants),
-        "schedule_count": len(scheduled),
+        "schedule_count": len(scheduled_ids),
         "synced_at": timezone.now(),
     }
 
 
-def schedule_groups(owner):
+def schedule_groups(owner, *, days=HORIZON_DAYS, status="active", plant_id="", search=""):
     today = timezone.localdate()
     entries = WateringSchedule.objects.filter(
         owner=owner,
-        scheduled_for__range=(today, today + timedelta(days=HORIZON_DAYS)),
-    ).select_related("plant")
+        scheduled_for__range=(today, today + timedelta(days=days - 1)),
+    ).select_related("plant").only(
+        "id",
+        "scheduled_for",
+        "status",
+        "recommendation",
+        "rainfall_mm",
+        "temperature_max_c",
+        "weather_source",
+        "plant__id",
+        "plant__nama_panggilan",
+        "plant__nama_ilmiah",
+        "plant__foto",
+        "plant__lokasi",
+    )
+    if status == "active":
+        entries = entries.exclude(status=WateringSchedule.Status.DISMISSED)
+    elif status != "all":
+        entries = entries.filter(status=status)
+    if plant_id:
+        entries = entries.filter(plant_id=plant_id)
+    if search:
+        entries = entries.filter(
+            Q(plant__nama_panggilan__icontains=search)
+            | Q(plant__nama_ilmiah__icontains=search)
+        )
     groups = []
     for entry in entries:
         if not groups or groups[-1]["date"] != entry.scheduled_for:

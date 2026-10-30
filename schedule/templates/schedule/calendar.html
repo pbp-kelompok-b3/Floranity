@@ -58,6 +58,10 @@
       <span class="schedule-summary-icon schedule-summary-icon--soft" aria-hidden="true">✓</span>
       <div><strong>{{ completed_count }}</strong><span>selesai minggu ini</span></div>
     </article>
+    <article class="schedule-summary-card">
+      <span class="schedule-summary-icon schedule-summary-icon--soft" aria-hidden="true">↘</span>
+      <div><strong>{{ dismissed_count }}</strong><span>diarsipkan</span></div>
+    </article>
     <article class="schedule-summary-note">
       <span aria-hidden="true">⌖</span>
       <p>Cuaca <strong>{{ city }}</strong> · {{ weather_provider }}{% if last_synced %}<br><small>Sinkron terakhir {{ last_synced }}</small>{% endif %}</p>
@@ -67,11 +71,58 @@
   <section class="schedule-calendar" aria-labelledby="upcoming-title">
     <div class="schedule-section-heading">
       <h2 id="upcoming-title">Agenda mendatang</h2>
-      {% if schedule_groups %}<span>{{ planned_count }} perlu perhatian</span>{% endif %}
+      {% if schedule_groups %}<span>{{ schedule_groups|length }} hari ditampilkan</span>{% endif %}
     </div>
 
+    <form class="schedule-filter-form" method="get" action="{% url 'schedule:calendar' %}">
+      <div class="schedule-filter-field schedule-filter-search">
+        <label for="schedule-search">Cari tanaman</label>
+        <input id="schedule-search" type="search" name="q" value="{{ filter_query }}" maxlength="80" placeholder="Nama atau spesies">
+      </div>
+      <div class="schedule-filter-field">
+        <label for="schedule-plant">Tanaman</label>
+        <select id="schedule-plant" name="plant">
+          <option value="">Semua tanaman</option>
+          {% for plant in plant_options %}
+            <option value="{{ plant.pk }}" {% if filter_plant == plant.pk %}selected{% endif %}>{{ plant.nama_panggilan }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="schedule-filter-field">
+        <label for="schedule-days">Rentang</label>
+        <select id="schedule-days" name="days">
+          <option value="1" {% if filter_days == '1' %}selected{% endif %}>Hari ini</option>
+          <option value="3" {% if filter_days == '3' %}selected{% endif %}>3 hari</option>
+          <option value="7" {% if filter_days == '7' %}selected{% endif %}>7 hari</option>
+        </select>
+      </div>
+      <div class="schedule-filter-field">
+        <label for="schedule-status">Status</label>
+        <select id="schedule-status" name="status">
+          <option value="active" {% if filter_status == 'active' %}selected{% endif %}>Aktif dan selesai</option>
+          <option value="planned" {% if filter_status == 'planned' %}selected{% endif %}>Terjadwal</option>
+          <option value="completed" {% if filter_status == 'completed' %}selected{% endif %}>Selesai</option>
+          <option value="dismissed" {% if filter_status == 'dismissed' %}selected{% endif %}>Diarsipkan</option>
+          <option value="all" {% if filter_status == 'all' %}selected{% endif %}>Semua status</option>
+        </select>
+      </div>
+      <button type="submit" class="schedule-filter-button">Terapkan filter</button>
+      {% if has_filters %}<a class="schedule-filter-reset" href="{% url 'schedule:calendar' %}">Atur ulang</a>{% endif %}
+    </form>
+
     {% if schedule_groups %}
-      <div class="schedule-days">
+      <form class="schedule-bulk-form" method="post" action="{% url 'schedule:bulk_action' %}">
+        {% csrf_token %}
+        <div class="schedule-bulk-toolbar">
+          <div><strong>Tindakan massal</strong><span>Pilih jadwal yang ingin diperbarui</span></div>
+          <label class="schedule-select-all"><input id="select-visible-schedules" type="checkbox"> Pilih semua yang terlihat</label>
+          <div class="schedule-bulk-actions">
+            <button type="submit" name="action" value="complete">Selesaikan terpilih</button>
+            <button type="submit" name="action" value="dismiss">Arsipkan terpilih</button>
+            <button type="submit" name="action" value="restore">Pulihkan terpilih</button>
+          </div>
+        </div>
+        <div class="schedule-days">
         {% for group in schedule_groups %}
           <section class="schedule-day" aria-label="{{ group.date|date:'l, j F' }}">
             <div class="schedule-day-date">
@@ -81,7 +132,11 @@
             </div>
             <div class="schedule-day-items">
               {% for entry in group.entries %}
-                <article class="schedule-task{% if entry.status == 'completed' %} schedule-task--complete{% endif %}">
+                <article class="schedule-task{% if entry.status == 'completed' %} schedule-task--complete{% elif entry.status == 'dismissed' %} schedule-task--dismissed{% endif %}">
+                  <label class="schedule-task-select">
+                    <input type="checkbox" name="schedule_ids" value="{{ entry.pk }}">
+                    <span class="schedule-sr-only">Pilih jadwal {{ entry.plant.nama_panggilan }} tanggal {{ group.date|date:'j F' }}</span>
+                  </label>
                   <div class="schedule-plant-image">
                     {% if entry.plant.foto %}<img src="{{ entry.plant.foto }}" alt="" loading="lazy">{% else %}<span aria-hidden="true">♧</span>{% endif %}
                   </div>
@@ -91,7 +146,7 @@
                         <h4>{{ entry.plant.nama_panggilan }}</h4>
                         {% if entry.plant.nama_ilmiah %}<p class="schedule-scientific">{{ entry.plant.nama_ilmiah }}</p>{% endif %}
                       </div>
-                      <span class="schedule-status{% if entry.status == 'completed' %} schedule-status--complete{% endif %}">{% if entry.status == 'completed' %}Selesai{% else %}Waktunya cek{% endif %}</span>
+                      <span class="schedule-status{% if entry.status == 'completed' %} schedule-status--complete{% elif entry.status == 'dismissed' %} schedule-status--dismissed{% endif %}">{% if entry.status == 'completed' %}Selesai{% elif entry.status == 'dismissed' %}Diarsipkan{% else %}Waktunya cek{% endif %}</span>
                     </div>
                     <p class="schedule-recommendation">{{ entry.recommendation }}</p>
                     <div class="schedule-weather-meta">
@@ -101,18 +156,25 @@
                     </div>
                   </div>
                   {% if entry.status == 'planned' %}
-                    <form method="post" action="{% url 'schedule:complete' entry.pk %}" class="schedule-complete-form">
-                      {% csrf_token %}
-                      <button type="submit" class="schedule-complete-button" aria-label="Catat penyiraman {{ entry.plant.nama_panggilan }} selesai">Selesai</button>
-                    </form>
-                  {% else %}
+                    <button type="submit" name="single_complete" value="{{ entry.pk }}" class="schedule-complete-button" aria-label="Catat penyiraman {{ entry.plant.nama_panggilan }} selesai">Selesai</button>
+                  {% elif entry.status == 'completed' %}
                     <span class="schedule-check" aria-label="Penyiraman selesai">✓</span>
+                  {% else %}
+                    <span class="schedule-check schedule-check--dismissed" aria-label="Jadwal diarsipkan">↘</span>
                   {% endif %}
                 </article>
               {% endfor %}
             </div>
           </section>
         {% endfor %}
+      </div>
+      </form>
+    {% elif has_filters %}
+      <div class="schedule-empty">
+        <span aria-hidden="true">⌕</span>
+        <h3>Tidak ada jadwal yang cocok</h3>
+        <p>Coba ubah tanaman, rentang waktu, atau status yang dipilih.</p>
+        <a class="schedule-button" href="{% url 'schedule:calendar' %}">Hapus filter</a>
       </div>
     {% elif has_plants %}
       <div class="schedule-empty">

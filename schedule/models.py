@@ -6,6 +6,7 @@ class WateringSchedule(models.Model):
     class Status(models.TextChoices):
         PLANNED = "planned", "Terjadwal"
         COMPLETED = "completed", "Selesai"
+        DISMISSED = "dismissed", "Diarsipkan"
 
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -35,6 +36,12 @@ class WateringSchedule(models.Model):
             models.UniqueConstraint(
                 fields=["plant", "scheduled_for"],
                 name="unique_plant_watering_day",
+            ),
+        ]
+        indexes = [
+            models.Index(
+                fields=["owner", "scheduled_for", "status"],
+                name="sched_owner_day_status_idx",
             ),
         ]
         verbose_name = "Jadwal penyiraman"

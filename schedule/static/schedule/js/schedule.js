@@ -17,6 +17,23 @@
     locationStatus.textContent = "Memakai lokasi perangkat yang tersimpan di sesi ini.";
   }
 
+  const bulkForm = document.querySelector(".schedule-bulk-form");
+  const selectAll = document.getElementById("select-visible-schedules");
+  const scheduleCheckboxes = bulkForm?.querySelectorAll('input[name="schedule_ids"]') || [];
+  if (selectAll && bulkForm) {
+    selectAll.addEventListener("change", () => {
+      scheduleCheckboxes.forEach((checkbox) => {
+        checkbox.checked = selectAll.checked;
+      });
+    });
+    scheduleCheckboxes.forEach((checkbox) => {
+      checkbox.addEventListener("change", () => {
+        selectAll.checked = scheduleCheckboxes.length > 0
+          && Array.from(scheduleCheckboxes).every((item) => item.checked);
+      });
+    });
+  }
+
   locationButton.addEventListener("click", () => {
     if (!navigator.geolocation) {
       locationStatus.textContent = "Browser ini belum mendukung lokasi perangkat. Masukkan kota secara manual.";
