@@ -32,10 +32,11 @@
             </button>
 
             <ul class="nav-menu" id="nav-menu">
-                <li><a href="/" class="nav-link">Beranda</a></li>
-                <li><a href="/koleksi/" class="nav-link">Koleksi</a></li>
-                <li><a href="/katalog/" class="nav-link">Katalog</a></li>
-                <li><a href="/koleksi/jurnal/" class="nav-link">Jurnal</a></li>
+                <li><a href="{% url 'home' %}" class="nav-link">Beranda</a></li>
+                <li><a href="{% url 'koleksi:show_collection' %}" class="nav-link">Koleksi</a></li>
+                <li><a href="{% url 'koleksi:catalog' %}" class="nav-link">Katalog</a></li>
+                <li><a href="{% url 'koleksi:jurnal' %}" class="nav-link">Jurnal</a></li>
+                <li><a href="{% url 'forum:show_forum' %}" class="nav-link">Forum</a></li>
             </ul>
         {% if user.is_authenticated %}
         <a href="{% url 'akun:my_profile' %}" class="nav-link user-profile-badge">Profil Saya</a>

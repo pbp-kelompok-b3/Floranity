@@ -6,7 +6,7 @@
     --color-text-dark: #1b4d3e;
     --color-text-muted: #5a7369;
     --color-border: #edf2f7;
-    --color-grey: #ececec; 
+    --color-grey: #eef3e6;
 }
 
 
@@ -56,16 +56,19 @@ a {
 .forum-layout {
     display: flex;
     align-items: flex-start;   /* supaya nav tidak ikut setinggi konten */
-    gap: 32px;
-    padding: 32px 100px;
+    gap: 24px;
+    width: min(100% - 2rem, 1200px);
+    margin: 0 auto;
+    padding: 32px 0;
 }
 
 .forum-page-nav {
     position: sticky;          /* ganti dari fixed */
-    top: 130px;                 /* jarak dari atas saat di-scroll */
-    flex: 0 0 180px;           /* lebar tetap, tidak menyusut */
+    top: 112px;                 /* jarak dari atas saat di-scroll */
+    flex: 0 0 200px;           /* lebar tetap, tidak menyusut */
     background-color: var(--color-grey);
-    border-radius: 10px;
+    border: 1px solid rgba(36, 77, 59, 0.1);
+    border-radius: 16px;
     padding-top: 20px;
     padding-bottom: 20px;
     display: flex;
@@ -658,7 +661,8 @@ Untuk tampilan tablet
 @media (max-width: 768px) {
     .forum-layout {
         display: block;
-        padding: 32px 20px;
+        width: min(100% - 2rem, 1200px);
+        padding: 32px 0;
     }
 
     .forum-page-nav {
@@ -722,10 +726,6 @@ Untuk tampilan tablet
 Untuk tampilan mobile
 */
 @media (max-width: 426px) {
-    html {
-        font-size: 75%;
-    }
-
     .forum-page-nav p {
         display: none;
     }
