@@ -1,0 +1,42 @@
+{% extends 'forum/forum_page_base.html' %}
+{% block forum-page-content %}
+<div class="forum-header">
+    <h1 class="page-title">Post Saya</h1>
+</div>
+<form class="search-post" 
+      id="search-user-post" 
+      hx-get="{% url 'forum:show_user_post' %}"
+      hx-target="#post-container"
+      hx-trigger="input changed delay:300ms, submit"
+      hx-indicator=".all-post, .loading-post">
+    <div class="search-post__fields">
+        <input class="search-post__input" 
+               type="search" 
+               name="content"
+               placeholder="🔍︎ Cari Post Berdasarkan Kata Kunci">
+        <select class="search-post__choice" name="tag_filter">
+            <option value="" selected>Semua Post</option>
+            {% for value,label in tag_choices.items %}
+            <option value="{{ value }}">{{ label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+</form>
+<div class="container" id="post-container">
+    <div class="loading-post" hidden>
+        <span class="loading-message">Mencari Post</span>
+        <span class="loading-logo">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1e3026" stroke-width="4" stroke-linecap="round" aria-label="Loading">
+                <path d="M12 3a9 9 0 1 0 9 9"/>
+            </svg>
+        </span>
+    </div>
+    <div class="all-post">
+        {% for post in post_list %}
+            {% include 'forum/post.html' with form=post.update_form popover_id=post.id %}
+        {% empty %}
+            <p class="no-post">Post tidak ditemmukan...</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock forum-page-content %}

@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ spesies.nama_umum }} — Katalog Floranity{% endblock title %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'koleksi/css/koleksi.css' %}">
+{% endblock extra_css %}
+
+{% block content %}
+
+<div class="fl-page">
+  <p class="fl-breadcrumb">
+    <a href="{% url 'koleksi:catalog' %}">Katalog</a> / {{ spesies.nama_umum }}
+  </p>
+
+  <div class="fl-detail">
+    <div class="fl-detail__gambar">
+      {% if spesies.gambar %}
+        <img src="{{ spesies.gambar }}" alt="Foto {{ spesies.nama_umum }}">
+      {% else %}
+        🌿
+      {% endif %}
+    </div>
+
+    <div>
+      <h1>{{ spesies.nama_umum }}</h1>
+      <p class="fl-detail__ilmiah">{{ spesies.nama_ilmiah }}</p>
+
+      {% if detail_terkunci %}
+        <p class="fl-pesan">
+          Perenual hanya membuka detail lengkap spesies ini untuk paket berbayar,
+          jadi yang tampil di bawah adalah data ringkas dari hasil pencarian.
+        </p>
+      {% endif %}
+
+      <dl class="fl-fakta">
+        <div>
+          <dt>Kebutuhan cahaya</dt>
+          <dd>{{ spesies.cahaya|default:"Tidak ada data" }}</dd>
+        </div>
+        <div>
+          <dt>Kebutuhan air</dt>
+          <dd>{{ spesies.penyiraman|default:"Tidak ada data" }}</dd>
+        </div>
+        <div>
+          <dt>Tingkat kesulitan</dt>
+          <dd>{{ spesies.tingkat_kesulitan|default:"Tidak ada data" }}</dd>
+        </div>
+        <div>
+          <dt>Siklus hidup</dt>
+          <dd>{{ spesies.siklus|default:"Tidak ada data" }}</dd>
+        </div>
+        <div>
+          <dt>Famili</dt>
+          <dd>{{ spesies.famili|default:"Tidak ada data" }}</dd>
+        </div>
+        <div>
+          <dt>Cocok dalam ruangan</dt>
+          <dd>{{ spesies.dalam_ruangan|default:"Tidak ada data" }}</dd>
+        </div>
+      </dl>
+
+      <div class="fl-detail__aksi">
+        <a class="fl-btn" href="{% url 'koleksi:create_tanaman' %}?spesies_id={{ spesies.id }}">
+          Tambah ke koleksi saya
+        </a>
+        <a class="fl-btn fl-btn--sekunder" href="{% url 'koleksi:catalog' %}">Kembali ke katalog</a>
+      </div>
+    </div>
+  </div>
+
+  {% if spesies.deskripsi %}
+    <section class="fl-seksi">
+      <h2>Deskripsi</h2>
+      <p>{{ spesies.deskripsi }}</p>
+    </section>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,28 @@
+<h3 class="comment-section-title">Komentar</h3>
+<div class="comment-form-container">
+    <form class="comment-form"
+          hx-post="{% url 'forum:add_comment' post_id %}"
+          hx-target="next .comment-rows"
+          hx-on::after-request="if (event.detail.successful) this.reset()">
+        {% csrf_token %}
+        {% for field in form %}
+        <div class="form-group">
+            {{ field }}
+            {% for error in field.errors %}
+            <p class="form-error">{{ error }}</p>
+            {% endfor %}
+        </div>    
+        {% endfor %}
+        <button class="submit-comment-button button-type-1"
+                type="submit">
+            Kirim
+        </button>
+    </form>
+</div>
+<div class="comment-rows">
+    {% for comment in comment_list %}
+        {% include 'forum/comment.html' %}
+    {% empty %}
+        <p class="no-comment">Belum ada komentar...</p>
+    {% endfor %}
+</div>

@@ -1,0 +1,851 @@
+/* Floranity - Koleksi & Katalog Tanaman
+   Semua kelas diberi awalan "fl-" supaya tidak bentrok dengan CSS anggota tim lain. */
+
+:root {
+  --fl-hijau: var(--leaf);
+  --fl-hijau-tua: #173b2c;
+  --fl-hijau-muda: #eef3e6;
+  --fl-teks: var(--ink);
+  --fl-abu: var(--muted);
+  --fl-garis: var(--color-border);
+  --fl-latar: #ffffff;
+  --fl-latar-lembut: var(--paper);
+  --fl-merah: #9b2c2c;
+  --fl-radius: 0.75rem;
+}
+
+/* ---------- Kerangka halaman ---------- */
+
+.fl-page {
+  max-width: 68rem;
+  margin: 0 auto;
+  padding: 2.5rem 1.25rem 4rem;
+  color: var(--fl-teks);
+  font-family: 'DM Sans', system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  box-sizing: border-box;
+}
+
+.fl-page *,
+.fl-page *::before,
+.fl-page *::after {
+  box-sizing: border-box;
+}
+
+/* Label yang hanya dibaca pembaca layar, misalnya pada kolom pencarian */
+.fl-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.fl-breadcrumb {
+  font-size: 0.875rem;
+  color: var(--fl-abu);
+  margin-bottom: 1rem;
+}
+
+.fl-breadcrumb a {
+  color: var(--fl-abu);
+}
+
+.fl-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.fl-header h1 {
+  margin: 0;
+  font-size: 1.875rem;
+  color: var(--fl-hijau);
+}
+
+.fl-header p {
+  margin: 0.25rem 0 0;
+  color: var(--fl-abu);
+}
+
+/* ---------- Tombol ---------- */
+
+.fl-btn {
+  display: inline-block;
+  padding: 0.625rem 1.125rem;
+  border: 1px solid var(--fl-hijau);
+  border-radius: 999px;
+  background: var(--fl-hijau);
+  color: #ffffff;
+  font-size: 1rem;
+  font-family: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.fl-btn:hover {
+  background: var(--fl-hijau-tua);
+}
+
+.fl-btn--sekunder {
+  background: transparent;
+  color: var(--fl-hijau);
+}
+
+.fl-btn--sekunder:hover {
+  background: var(--fl-hijau-muda);
+}
+
+.fl-btn--bahaya {
+  background: transparent;
+  border-color: var(--fl-merah);
+  color: var(--fl-merah);
+}
+
+.fl-btn--bahaya:hover {
+  background: #fdf2f2;
+}
+
+.fl-btn:focus-visible,
+.fl-kartu:focus-visible,
+.fl-form input:focus-visible,
+.fl-form select:focus-visible,
+.fl-form textarea:focus-visible {
+  outline: 2px solid var(--fl-hijau);
+  outline-offset: 2px;
+}
+
+/* ---------- Pencarian ---------- */
+
+.fl-cari {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.75rem;
+}
+
+.fl-cari input[type="search"],
+.fl-cari select {
+  flex: 1 1 14rem;
+  min-width: 0;
+  padding: 0.625rem 0.875rem;
+  font: inherit;
+  color: inherit;
+  background: var(--fl-latar);
+  border: 1px solid var(--fl-garis);
+  border-radius: var(--fl-radius);
+}
+
+.fl-cari select {
+  /* Cukup lebar supaya teks pilihan tidak terpotong */
+  flex: 0 1 13.5rem;
+}
+
+/* ---------- Grid kartu ---------- */
+
+.fl-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+  gap: 1.25rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.fl-kartu {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--fl-latar);
+  border: 1px solid var(--fl-garis);
+  border-radius: var(--fl-radius);
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+}
+
+.fl-kartu:hover {
+  border-color: var(--fl-hijau);
+}
+
+.fl-kartu__gambar {
+  aspect-ratio: 4 / 3;
+  background: var(--fl-hijau-muda);
+  display: grid;
+  place-items: center;
+  font-size: 2rem;
+  color: var(--fl-hijau);
+}
+
+.fl-kartu__gambar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.fl-kartu__isi {
+  padding: 0.875rem 1rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+}
+
+.fl-kartu__nama {
+  font-weight: 600;
+  color: var(--fl-hijau);
+  line-height: 1.3;
+}
+
+.fl-kartu__ilmiah {
+  font-style: italic;
+  font-size: 0.875rem;
+  color: var(--fl-abu);
+}
+
+.fl-kartu__meta {
+  margin-top: auto;
+  padding-top: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--fl-abu);
+}
+
+/* ---------- Halaman detail ---------- */
+
+.fl-detail {
+  display: grid;
+  grid-template-columns: minmax(0, 20rem) minmax(0, 1fr);
+  gap: 2rem;
+  align-items: start;
+}
+
+.fl-detail__gambar {
+  aspect-ratio: 1 / 1;
+  background: var(--fl-hijau-muda);
+  border: 1px solid var(--fl-garis);
+  border-radius: var(--fl-radius);
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  font-size: 3rem;
+  color: var(--fl-hijau);
+}
+
+.fl-detail__gambar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.fl-detail h1 {
+  margin: 0;
+  font-size: 1.875rem;
+  color: var(--fl-hijau);
+}
+
+.fl-detail__ilmiah {
+  margin: 0.25rem 0 1.25rem;
+  font-style: italic;
+  color: var(--fl-abu);
+}
+
+.fl-detail__aksi {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+}
+
+.fl-fakta {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+  gap: 0.75rem;
+  margin: 0;
+}
+
+.fl-fakta > div {
+  padding: 0.75rem 0.875rem;
+  background: var(--fl-latar-lembut);
+  border: 1px solid var(--fl-garis);
+  border-radius: var(--fl-radius);
+}
+
+.fl-fakta dt {
+  font-size: 0.875rem;
+  color: var(--fl-abu);
+}
+
+.fl-fakta dd {
+  margin: 0.125rem 0 0;
+}
+
+.fl-seksi {
+  margin-top: 2.5rem;
+}
+
+.fl-seksi h2 {
+  font-size: 1.25rem;
+  color: var(--fl-hijau);
+  margin: 0 0 0.875rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--fl-garis);
+}
+
+/* ---------- Formulir ---------- */
+
+.fl-form-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: 2rem;
+  align-items: start;
+}
+
+@media (max-width: 880px) {
+  .fl-form-layout {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+}
+
+.fl-form-card {
+  background: var(--fl-latar);
+  border: 1px solid var(--fl-garis);
+  border-radius: var(--fl-radius);
+  padding: 1.75rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+}
+
+.fl-form-card .fl-form {
+  max-width: 100%;
+}
+
+.fl-form {
+  max-width: 36rem;
+  display: grid;
+  gap: 1.25rem;
+}
+
+.fl-form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.fl-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 560px) {
+  .fl-form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.fl-wajib {
+  color: var(--fl-merah);
+  font-weight: bold;
+}
+
+.fl-field-error {
+  margin: 0.375rem 0 0;
+  color: var(--fl-merah);
+  font-size: 0.875rem;
+}
+
+.fl-form label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--fl-teks);
+  margin-bottom: 0.375rem;
+}
+
+.fl-form input[type="text"],
+.fl-form input[type="date"],
+.fl-form input[type="url"],
+.fl-form input[type="file"],
+.fl-form select,
+.fl-form textarea {
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  font: inherit;
+  color: inherit;
+  background: var(--fl-latar);
+  border: 1px solid var(--fl-garis);
+  border-radius: var(--fl-radius);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.fl-form input[type="text"]:focus,
+.fl-form input[type="date"]:focus,
+.fl-form input[type="url"]:focus,
+.fl-form select:focus,
+.fl-form textarea:focus {
+  border-color: var(--fl-hijau);
+}
+
+.fl-form textarea {
+  min-height: 7rem;
+  resize: vertical;
+}
+
+.fl-form__bantuan {
+  font-size: 0.8125rem;
+  color: var(--fl-abu);
+  margin: 0.375rem 0 0;
+  line-height: 1.4;
+}
+
+.fl-form__bantuan a {
+  color: var(--fl-hijau);
+  text-decoration: underline;
+}
+
+.fl-form__aksi {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--fl-garis);
+}
+
+/* Upload zone & URL input */
+.fl-upload-zone {
+  margin-top: 0.25rem;
+}
+
+.fl-upload-zone__label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem 1rem;
+  border: 2px dashed var(--fl-garis);
+  border-radius: var(--fl-radius);
+  background: var(--fl-latar-lembut);
+  cursor: pointer;
+  text-align: center;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.fl-upload-zone__label:hover {
+  border-color: var(--fl-hijau);
+  background: var(--fl-hijau-muda);
+}
+
+.fl-upload-zone__icon {
+  stroke: var(--fl-hijau);
+  margin-bottom: 0.5rem;
+}
+
+.fl-upload-zone__text {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--fl-teks);
+}
+
+.fl-upload-zone__subtext {
+  font-size: 0.75rem;
+  color: var(--fl-abu);
+  margin-top: 0.25rem;
+}
+
+.fl-upload-chosen {
+  font-size: 0.8125rem;
+  color: var(--fl-hijau);
+  margin-top: 0.375rem;
+  font-weight: 500;
+}
+
+.fl-url-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 0.75rem 0;
+  color: var(--fl-abu);
+  font-size: 0.75rem;
+}
+
+.fl-url-divider::before,
+.fl-url-divider::after {
+  content: "";
+  flex: 1;
+  border-bottom: 1px solid var(--fl-garis);
+}
+
+.fl-url-divider span {
+  padding: 0 0.625rem;
+}
+
+.fl-input-icon-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.fl-input-icon {
+  position: absolute;
+  left: 0.75rem;
+  stroke: var(--fl-abu);
+  pointer-events: none;
+}
+
+.fl-input-icon-wrap input {
+  padding-left: 2.25rem !important;
+}
+
+/* Sidebar pratinjau & tips */
+.fl-form-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  position: sticky;
+  top: 6rem;
+}
+
+.fl-preview-box,
+.fl-tips-box {
+  background: var(--fl-latar);
+  border: 1px solid var(--fl-garis);
+  border-radius: var(--fl-radius);
+  padding: 1.25rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+}
+
+.fl-sidebar-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--fl-hijau);
+  margin-bottom: 0.25rem;
+}
+
+.fl-sidebar-heading h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--fl-hijau);
+}
+
+.fl-sidebar-heading svg {
+  stroke: var(--fl-hijau);
+  flex-shrink: 0;
+}
+
+.fl-sidebar-sub {
+  font-size: 0.8125rem;
+  color: var(--fl-abu);
+  margin: 0 0 1rem;
+}
+
+.fl-preview-card {
+  max-width: 100%;
+  pointer-events: none;
+  background: var(--fl-latar-lembut);
+  border: 1px solid var(--fl-garis);
+  border-radius: var(--fl-radius);
+  overflow: hidden;
+}
+
+.fl-preview-card__gambar {
+  aspect-ratio: 16 / 10;
+  background: var(--fl-hijau-muda);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.fl-preview-card__gambar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.fl-preview-placeholder {
+  stroke: var(--fl-hijau);
+  opacity: 0.7;
+}
+
+.fl-meta-dot {
+  margin: 0 0.25rem;
+  color: var(--fl-abu);
+}
+
+.fl-meta-sub {
+  font-size: 0.75rem;
+  color: var(--fl-abu);
+  margin-top: 0.25rem;
+  display: inline-block;
+}
+
+.fl-tips-box {
+  background: var(--fl-latar-lembut);
+  border-color: #d1e3d6;
+}
+
+.fl-tips-list {
+  margin: 0.75rem 0 0;
+  padding-left: 1.25rem;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  color: var(--fl-teks);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.fl-tips-list strong {
+  color: var(--fl-hijau);
+}
+
+.fl-hidden {
+  display: none !important;
+}
+
+/* ---------- Jurnal pertumbuhan ---------- */
+
+.fl-jurnal {
+  list-style: none;
+  margin: 1.25rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 1rem;
+}
+
+.fl-jurnal__item {
+  display: grid;
+  grid-template-columns: 7rem minmax(0, 1fr);
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--fl-garis);
+  border-radius: var(--fl-radius);
+  background: var(--fl-latar);
+}
+
+.fl-jurnal__preview {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+
+.fl-jurnal__preview .fl-btn {
+  margin-top: 0.75rem;
+}
+
+.fl-jurnal__preview {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+
+.fl-jurnal__preview .fl-btn {
+  margin-top: 0.75rem;
+}
+
+.fl-jurnal__foto {
+  aspect-ratio: 1 / 1;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  background: var(--fl-hijau-muda);
+  display: grid;
+  place-items: center;
+  font-size: 1.5rem;
+  color: var(--fl-hijau);
+}
+
+.fl-jurnal__foto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.fl-jurnal__tanggal {
+  font-size: 0.875rem;
+  color: var(--fl-abu);
+  margin: 0 0 0.25rem;
+}
+
+.fl-jurnal__badge {
+  display: inline-block;
+  margin-bottom: 0.4rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: var(--fl-hijau-muda);
+  color: var(--fl-hijau-tua);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.fl-jurnal__catatan {
+  margin-top: 0.4rem;
+}
+
+.fl-jurnal-dialog {
+  width: min(calc(100% - 2rem), 48rem);
+  max-height: min(85vh, 54rem);
+  margin: auto;
+  padding: clamp(1rem, 3vw, 1.75rem);
+  overflow: auto;
+  border: 1px solid var(--fl-garis);
+  border-radius: 1rem;
+  background: var(--fl-latar);
+  color: var(--fl-teks);
+  box-shadow: 0 1.5rem 5rem rgb(15 61 33 / 24%);
+}
+
+.fl-jurnal-dialog::backdrop {
+  background: rgb(15 30 20 / 62%);
+  backdrop-filter: blur(3px);
+}
+
+.fl-jurnal-dialog__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.fl-jurnal-dialog__header h3 {
+  color: var(--fl-hijau);
+  font-size: 1.25rem;
+}
+
+.fl-jurnal-dialog__close {
+  display: grid;
+  width: 2.5rem;
+  height: 2.5rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid var(--fl-garis);
+  border-radius: 50%;
+  background: var(--fl-latar);
+  color: var(--fl-teks);
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.fl-jurnal-dialog__fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.fl-jurnal-dialog__fields > div {
+  min-width: 0;
+  padding: 0.75rem;
+  border: 1px solid var(--fl-garis);
+  border-radius: 0.6rem;
+  background: var(--fl-latar-lembut);
+  overflow-wrap: anywhere;
+}
+
+.fl-jurnal-dialog__fields dt {
+  margin-bottom: 0.25rem;
+  color: var(--fl-abu);
+  font-size: 0.8rem;
+}
+
+.fl-jurnal-dialog__fields dd {
+  margin: 0;
+}
+
+.fl-jurnal-dialog__photo {
+  width: min(100%, 24rem);
+  max-height: 20rem;
+  border-radius: 0.6rem;
+  object-fit: contain;
+  object-position: left center;
+}
+
+.fl-jurnal-dialog__fields .fl-jurnal-dialog__wide {
+  grid-column: 1 / -1;
+}
+
+/* ---------- Keadaan kosong & pesan ---------- */
+
+.fl-kosong {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  border: 1px dashed var(--fl-garis);
+  border-radius: var(--fl-radius);
+  background: var(--fl-latar-lembut);
+}
+
+.fl-kosong p {
+  color: var(--fl-abu);
+  margin: 0 0 1.25rem;
+}
+
+.fl-pesan {
+  padding: 0.875rem 1rem;
+  border: 1px solid var(--fl-garis);
+  border-left: 4px solid var(--fl-hijau);
+  border-radius: var(--fl-radius);
+  background: var(--fl-hijau-muda);
+  margin-bottom: 1.5rem;
+}
+
+/* ---------- Navigasi halaman ---------- */
+
+.fl-paginasi {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 2rem;
+  color: var(--fl-abu);
+}
+
+.fl-hasil {
+  margin: 0 0 1rem;
+  color: var(--fl-abu);
+  font-size: 0.9375rem;
+}
+
+.fl-paginasi__mati {
+  display: inline-flex;
+  align-items: center;
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* ---------- Layar kecil ---------- */
+
+@media (max-width: 48rem) {
+  .fl-page {
+    padding-top: 1.5rem;
+  }
+
+  .fl-detail {
+    grid-template-columns: 1fr;
+  }
+
+  .fl-jurnal__item {
+    grid-template-columns: 5rem minmax(0, 1fr);
+  }
+
+  .fl-jurnal-dialog__fields {
+    grid-template-columns: 1fr;
+  }
+
+  .fl-jurnal-dialog__fields .fl-jurnal-dialog__wide {
+    grid-column: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fl-btn,
+  .fl-kartu {
+    scroll-behavior: auto;
+    transition: none;
+  }
+}

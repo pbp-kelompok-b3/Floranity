@@ -1,0 +1,288 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ judul }} — Koleksi Floranity{% endblock title %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'koleksi/css/koleksi.css' %}">
+{% endblock extra_css %}
+
+{% block content %}
+
+<div class="fl-page">
+  <p class="fl-breadcrumb">
+    <a href="{% url 'koleksi:show_collection' %}">{% if request.user.is_authenticated %}Koleksi saya{% else %}Koleksi tanaman{% endif %}</a> / {{ judul }}
+  </p>
+
+  <div class="fl-header">
+    <div>
+      <h1>{{ judul }}</h1>
+      <p>{% if request.user.is_authenticated %}Isi data tanaman yang kamu rawat. Hanya kamu yang bisa melihat koleksi ini.{% else %}Kamu sedang menambahkan tanaman ke koleksi contoh yang dapat dilihat pengunjung lain. <a href="{% url 'akun:login' %}">Masuk</a> untuk menyimpan koleksi pribadi.{% endif %}</p>
+    </div>
+  </div>
+
+  <div class="fl-form-layout">
+    <!-- Kolom Kiri: Formulir Input -->
+    <div class="fl-form-card">
+      <form class="fl-form" method="post" enctype="multipart/form-data" id="plant-form">
+        {% csrf_token %}
+
+        <div class="fl-form-group">
+          <label for="nama_panggilan">Nama panggilan tanaman <span class="fl-wajib">*</span></label>
+          <input type="text" id="nama_panggilan" name="nama_panggilan"
+                 value="{% if form.is_bound %}{{ form.nama_panggilan.value|default:'' }}{% else %}{{ tanaman.nama_panggilan|default:'' }}{% endif %}"
+                 placeholder="Misalnya: Monstera meja belajar" required
+                 {% if form.nama_panggilan.errors %}aria-invalid="true" aria-describedby="error-nama_panggilan"{% endif %}>
+          {% for error in form.nama_panggilan.errors %}<p class="fl-field-error" id="error-nama_panggilan" role="alert">{{ error }}</p>{% endfor %}
+          <p class="fl-form__bantuan">Nama bebas supaya mudah dikenali di koleksi.</p>
+        </div>
+
+        <div class="fl-form-group">
+          <label for="spesies">Spesies</label>
+          <input type="text" id="spesies" name="spesies" value="{% if form.is_bound %}{{ form.nama_ilmiah.value|default:'' }}{% else %}{{ tanaman.nama_ilmiah|default:'' }}{% endif %}"
+                 placeholder="Pilih dari katalog atau tulis sendiri">
+          <input type="hidden" name="spesies_id" id="spesies_id" value="{% if form.is_bound %}{{ form.spesies_id.value|default:'' }}{% else %}{{ tanaman.spesies_id|default:'' }}{% endif %}">
+          <p class="fl-form__bantuan">
+            Data cahaya dan air diambil otomatis kalau spesies dipilih lewat
+            <a href="{% url 'koleksi:catalog' %}">katalog</a>.
+          </p>
+        </div>
+
+        <div class="fl-form-row">
+          <div class="fl-form-group">
+            <label for="lokasi">Lokasi</label>
+            <input type="text" id="lokasi" name="lokasi" value="{% if form.is_bound %}{{ form.lokasi.value|default:'' }}{% else %}{{ tanaman.lokasi|default:'' }}{% endif %}"
+                   placeholder="Misalnya: Balkon, teras depan, meja kerja">
+          </div>
+
+          <div class="fl-form-group">
+            <label for="tanggal_mulai">Dirawat sejak</label>
+            <input type="date" id="tanggal_mulai" name="tanggal_mulai"
+                   value="{% if form.is_bound %}{{ form.tanggal_mulai.value|default:'' }}{% else %}{{ tanaman.tanggal_mulai|default:'' }}{% endif %}"
+                   {% if form.tanggal_mulai.errors %}aria-invalid="true" aria-describedby="error-tanggal_mulai"{% endif %}>
+            {% for error in form.tanggal_mulai.errors %}<p class="fl-field-error" id="error-tanggal_mulai" role="alert">{{ error }}</p>{% endfor %}
+          </div>
+        </div>
+
+        <div class="fl-form-group">
+          <label>Foto tanaman</label>
+          <div class="fl-upload-zone">
+            <label for="foto" class="fl-upload-zone__label">
+              <svg class="fl-upload-zone__icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                <polyline points="21 15 16 10 5 21"></polyline>
+              </svg>
+              <span class="fl-upload-zone__text">Pilih file foto dari perangkat</span>
+              <span class="fl-upload-zone__subtext">Format: JPG, PNG, WEBP</span>
+              <input type="file" id="foto" name="foto" accept="image/*" class="fl-sr-only">
+            </label>
+            <div id="file-chosen-name" class="fl-upload-chosen"></div>
+          </div>
+
+          <div class="fl-url-divider">
+            <span>atau tempel tautan URL gambar</span>
+          </div>
+
+          <div class="fl-input-icon-wrap">
+            <svg class="fl-input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+            </svg>
+          <input type="url" id="foto_url" name="foto_url" value="{% if form.is_bound %}{{ form.foto.value|default:'' }}{% else %}{{ tanaman.foto|default:'' }}{% endif %}"
+                   placeholder="https://example.com/foto-tanaman.jpg">
+          </div>
+
+          {% if form.is_bound and form.foto.value %}
+            <p class="fl-form__bantuan">Foto saat ini terpasang: <a href="{{ form.foto.value }}" target="_blank" rel="noopener">Buka tautan foto</a></p>
+          {% elif tanaman.foto %}
+            <p class="fl-form__bantuan">Foto saat ini terpasang: <a href="{{ tanaman.foto }}" target="_blank" rel="noopener">Buka tautan foto</a></p>
+          {% endif %}
+        </div>
+
+        <div class="fl-form-group">
+          <label for="catatan">Catatan</label>
+          <textarea id="catatan" name="catatan"
+                    placeholder="Catatan singkat tentang tanaman ini (jadwal pemupukan, kondisi bibit, dll).">{% if form.is_bound %}{{ form.catatan.value|default:'' }}{% else %}{{ tanaman.catatan|default:'' }}{% endif %}</textarea>
+          {% for error in form.catatan.errors %}<p class="fl-field-error" id="error-catatan" role="alert">{{ error }}</p>{% endfor %}
+        </div>
+
+        <div class="fl-form__aksi">
+          <button class="fl-btn" type="submit">Simpan</button>
+          <a class="fl-btn fl-btn--sekunder" href="{{ url_batal }}">Batal</a>
+        </div>
+      </form>
+    </div>
+
+    <!-- Kolom Kanan: Pratinjau & Tips -->
+    <aside class="fl-form-sidebar">
+      <div class="fl-preview-box">
+        <div class="fl-sidebar-heading">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+          <h3>Pratinjau Kartu</h3>
+        </div>
+        <p class="fl-sidebar-sub">Tampilan kartu tanaman di koleksi kamu</p>
+
+        <div class="fl-preview-card" aria-hidden="true">
+          <div class="fl-preview-card__gambar" id="preview-image-container">
+            {% if form.is_bound and form.foto.value %}
+              <img id="preview-img" src="{{ form.foto.value }}" alt="Foto tanaman">
+              <svg id="preview-placeholder" class="fl-preview-placeholder fl-hidden" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 10V3"></path>
+                <path d="M12 6a4 4 0 0 1 4-4c0 3-2 5-4 5"></path>
+                <path d="M12 8a4 4 0 0 0-4-4c0 3 2 5 4 5"></path>
+                <path d="M6 13h12l-1.5 8h-9L6 13z"></path>
+                <path d="M5 10h14a1 1 0 0 1 1 1v2H4v-2a1 1 0 0 1 1-1z"></path>
+              </svg>
+            {% elif tanaman.foto %}
+              <img id="preview-img" src="{{ tanaman.foto }}" alt="Foto tanaman">
+              <svg id="preview-placeholder" class="fl-preview-placeholder fl-hidden" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 10V3"></path>
+                <path d="M12 6a4 4 0 0 1 4-4c0 3-2 5-4 5"></path>
+                <path d="M12 8a4 4 0 0 0-4-4c0 3 2 5 4 5"></path>
+                <path d="M6 13h12l-1.5 8h-9L6 13z"></path>
+                <path d="M5 10h14a1 1 0 0 1 1 1v2H4v-2a1 1 0 0 1 1-1z"></path>
+              </svg>
+            {% else %}
+              <img id="preview-img" src="" alt="Foto tanaman" class="fl-hidden">
+              <svg id="preview-placeholder" class="fl-preview-placeholder" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 10V3"></path>
+                <path d="M12 6a4 4 0 0 1 4-4c0 3-2 5-4 5"></path>
+                <path d="M12 8a4 4 0 0 0-4-4c0 3 2 5 4 5"></path>
+                <path d="M6 13h12l-1.5 8h-9L6 13z"></path>
+                <path d="M5 10h14a1 1 0 0 1 1 1v2H4v-2a1 1 0 0 1 1-1z"></path>
+              </svg>
+            {% endif %}
+          </div>
+          <div class="fl-kartu__isi">
+            <span class="fl-kartu__nama" id="preview-nama">{% if form.is_bound %}{{ form.nama_panggilan.value|default:"Nama Tanaman" }}{% else %}{{ tanaman.nama_panggilan|default:"Nama Tanaman" }}{% endif %}</span>
+            <span class="fl-kartu__ilmiah" id="preview-spesies">{% if form.is_bound %}{{ form.nama_ilmiah.value|default:"Nama Spesies" }}{% else %}{{ tanaman.nama_ilmiah|default:"Nama Spesies" }}{% endif %}</span>
+            <span class="fl-kartu__meta" id="preview-meta">
+              <span id="preview-lokasi">{% if form.is_bound %}{{ form.lokasi.value|default:"Lokasi belum diisi" }}{% else %}{{ tanaman.lokasi|default:"Lokasi belum diisi" }}{% endif %}</span>
+              <span class="fl-meta-dot">·</span>
+              <span id="preview-tanggal">{% if form.is_bound %}{% if form.tanggal_mulai.value %}dirawat sejak {{ form.tanggal_mulai.value }}{% else %}dirawat sejak hari ini{% endif %}{% elif tanaman.tanggal_mulai %}dirawat sejak {{ tanaman.tanggal_mulai }}{% else %}dirawat sejak hari ini{% endif %}</span>
+              <br>
+              <span class="fl-meta-sub">0 catatan jurnal</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="fl-tips-box">
+        <div class="fl-sidebar-heading">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+          </svg>
+          <h3>Panduan Pengisian</h3>
+        </div>
+        <ul class="fl-tips-list">
+          <li>
+            <strong>Integrasi Katalog</strong>: Jika nama spesies dicocokkan dengan katalog, profil kebutuhan cahaya dan air akan terisi otomatis.
+          </li>
+          <li>
+            <strong>Detail Lokasi</strong>: Cantumkan lokasi spesifik (misal: "Balkon depan") untuk mempermudah evaluasi kebutuhan cahaya.
+          </li>
+          <li>
+            <strong>Jurnal Pertumbuhan</strong>: Setelah tanaman disimpan, kamu dapat menambahkan catatan berkala dan foto progres di halaman detail.
+          </li>
+        </ul>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<script>
+  (function() {
+    var inputNama = document.getElementById('nama_panggilan');
+    var inputSpesies = document.getElementById('spesies');
+    var inputLokasi = document.getElementById('lokasi');
+    var inputTanggal = document.getElementById('tanggal_mulai');
+    var inputFotoUrl = document.getElementById('foto_url');
+    var inputFile = document.getElementById('foto');
+
+    var previewNama = document.getElementById('preview-nama');
+    var previewSpesies = document.getElementById('preview-spesies');
+    var previewLokasi = document.getElementById('preview-lokasi');
+    var previewTanggal = document.getElementById('preview-tanggal');
+    var previewImg = document.getElementById('preview-img');
+    var previewPlaceholder = document.getElementById('preview-placeholder');
+    var fileChosenName = document.getElementById('file-chosen-name');
+
+    function updateNama() {
+      if (previewNama && inputNama) {
+        previewNama.textContent = inputNama.value.trim() || 'Nama Tanaman';
+      }
+    }
+
+    function updateSpesies() {
+      if (previewSpesies && inputSpesies) {
+        previewSpesies.textContent = inputSpesies.value.trim() || 'Nama Spesies';
+      }
+    }
+
+    function updateLokasi() {
+      if (previewLokasi && inputLokasi) {
+        previewLokasi.textContent = inputLokasi.value.trim() || 'Lokasi belum diisi';
+      }
+    }
+
+    function updateTanggal() {
+      if (previewTanggal && inputTanggal) {
+        if (inputTanggal.value) {
+          previewTanggal.textContent = 'dirawat sejak ' + inputTanggal.value;
+        } else {
+          previewTanggal.textContent = 'dirawat sejak hari ini';
+        }
+      }
+    }
+
+    function setImagePreview(src) {
+      if (!previewImg || !previewPlaceholder) return;
+      if (src) {
+        previewImg.src = src;
+        previewImg.classList.remove('fl-hidden');
+        previewPlaceholder.classList.add('fl-hidden');
+      } else {
+        previewImg.src = '';
+        previewImg.classList.add('fl-hidden');
+        previewPlaceholder.classList.remove('fl-hidden');
+      }
+    }
+
+    if (inputNama) inputNama.addEventListener('input', updateNama);
+    if (inputSpesies) inputSpesies.addEventListener('input', updateSpesies);
+    if (inputLokasi) inputLokasi.addEventListener('input', updateLokasi);
+    if (inputTanggal) inputTanggal.addEventListener('input', updateTanggal);
+
+    if (inputFotoUrl) {
+      inputFotoUrl.addEventListener('input', function() {
+        if (!inputFile || !inputFile.files || !inputFile.files[0]) {
+          setImagePreview(this.value.trim());
+        }
+      });
+    }
+
+    if (inputFile) {
+      inputFile.addEventListener('change', function() {
+        var file = this.files && this.files[0];
+        if (file) {
+          if (fileChosenName) fileChosenName.textContent = 'File terpilih: ' + file.name;
+          var reader = new FileReader();
+          reader.onload = function(e) {
+            setImagePreview(e.target.result);
+          };
+          reader.readAsDataURL(file);
+        } else {
+          if (fileChosenName) fileChosenName.textContent = '';
+          setImagePreview(inputFotoUrl ? inputFotoUrl.value.trim() : '');
+        }
+      });
+    }
+  })();
+</script>
+{% endblock %}

@@ -1,0 +1,744 @@
+:root {
+    --color-primary: #1b4d3e;
+    --color-primary-hover: #143b30;
+    --color-cream: #faf2e2;
+    --color-cream-hover: #f3e8d2;
+    --color-text-dark: #1b4d3e;
+    --color-text-muted: #5a7369;
+    --color-border: #edf2f7;
+    --color-grey: #eef3e6;
+}
+
+
+/*
+----------------------------------------------
+Pengaturan Styling yang Berlaku ke semua page
+----------------------------------------------
+*/
+h1 {
+    color: var(--color-primary);
+}
+
+a {
+    text-decoration: none;
+}
+
+.button-type-1 {
+    background-color: var(--color-primary);
+    border: none;
+    border-radius: 10px;
+    
+    color: var(--color-border);
+    
+    transition: background-color 0.2s ease;
+}
+
+.button-type-1:hover {
+    background-color: var(--color-primary-hover);
+}
+
+.button-type-2 {
+    background-color: var(--color-cream);
+    border-radius: 10px;
+    border-color: var(--color-text-dark);
+    border-style: solid;
+    border-width: 3px;
+    
+    color: var(--color-text-dark);
+
+    transition: background-color 0.2s ease;
+}
+
+.button-type-2:hover {
+    background-color: var(--color-cream-hover);
+}
+
+.forum-layout {
+    display: flex;
+    align-items: flex-start;   /* supaya nav tidak ikut setinggi konten */
+    gap: 24px;
+    width: min(100% - 2rem, 1200px);
+    margin: 0 auto;
+    padding: 32px 0;
+}
+
+.forum-page-nav {
+    position: sticky;          /* ganti dari fixed */
+    top: 112px;                 /* jarak dari atas saat di-scroll */
+    flex: 0 0 200px;           /* lebar tetap, tidak menyusut */
+    background-color: var(--color-grey);
+    border: 1px solid rgba(36, 77, 59, 0.1);
+    border-radius: 16px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.forum-page-content {
+    flex: 1;
+    min-width: 0;              /* mencegah konten meluber keluar */
+}
+
+.home-page,
+.user-post-page,
+.bookmark-page {
+    display: flex;
+    column-gap: 5px;
+    padding: 7px 10px 7px 7px;
+    color: var(--color-text-dark);
+    background-color: var(--color-grey);
+    transition: background-color 0.2s ease;
+}
+
+.home-page:hover,
+.user-post-page:hover,
+.bookmark-page:hover {
+    background-color: #dedede;
+}
+
+.nav-active {
+    border-left: 5px solid var(--color-text-dark);
+}
+
+.nav-inactive {
+    border-left: 5px solid transparent;
+}
+
+#post-container {
+    margin-top: 30px;
+}
+
+.collapsed {
+    display: -webkit-box;
+    line-clamp: 3;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.collapse-toggle-btn {
+    color: var(--color-text-muted);
+    border: none;
+    background: transparent;
+    padding: 0;
+    cursor: pointer;
+}
+
+.collapse-toggle-btn:hover {
+    text-decoration: underline;
+}
+
+.search-post {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 40px; 
+}
+
+.search-post__fields {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    gap: 10px;
+}
+
+.search-post__input,
+.search-post__filters select,
+.search-post__choice {
+    min-width: 0;           /* penting: supaya input boleh lebih kecil dari isi bawaannya */
+    box-sizing: border-box;
+    margin: 0;              /* jarak diatur oleh gap */
+    height: 40px;
+    padding-left: 10px;
+    border-color: var(--color-grey);
+    border-style: solid;
+    border-width: 2px;
+    border-radius: 10px;
+    transition: border-color 0.2s ease;
+}
+
+.search-post__input:focus,
+.search-post__filters select:focus,
+.search-post__choice:focus {
+    outline: none;
+    border-color: var(--color-text-muted);
+}
+
+.search-post__filters select,
+.search-post__choice {
+    color: #757575;
+}
+
+#post-container {
+    transition: opacity 0.4s ease;
+}
+
+#post-container.htmx-request {
+    opacity: 0.5;
+}
+
+.no-post {
+    text-align: center;
+}
+
+.loading-post.htmx-request {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.loading-post .loading-logo {
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {transform: rotate(360deg);}
+}
+
+.all-post.htmx-request {
+    display: none;
+}
+
+
+/*
+--------------------------------------------
+Pengaturan Styling untuk Halaman Depan Forum
+--------------------------------------------
+*/
+.forum-header {
+    display: flex;
+    justify-content: space-between; 
+    align-items: center;          
+    flex-wrap: wrap;      
+    gap: 16px;
+}
+
+#create-post-button {
+    padding: 0px 35px;
+    height: 45px;
+    width: fit-content;
+    text-align: center;
+    align-content: center;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+#forum-search-btn {
+    flex-shrink: 0;         /*tombol tidak ikut mengecil */
+    padding: 5px 25px;
+    margin-left: 0;
+    font-weight: 500;
+    height: 40px;
+    cursor: pointer;
+}
+
+#home-page-search {
+    align-items: center;
+}
+
+#home-page-search .search-post__fields {
+    flex-direction: column;
+}
+
+#home-page-search .search-post__filters {
+    display: flex;
+    gap: 10px;
+}
+
+#home-page-search .search-post__input {
+    max-width: 100%;
+}
+
+#home-page-search .search-post__filters select {
+    flex: 1 1 0;
+}
+
+
+/*
+------------------------------------------
+Pengaturan Styling untuk Halaman Post User
+------------------------------------------
+*/
+#search-user-post {
+    display: flex;
+    align-items: center;   /* semua elemen sejajar secara vertikal */
+    flex-wrap: wrap;       /* tetap turun ke bawah kalau layar sempit */
+    gap: 10px;
+    margin-top: 40px;      /* pindahan dari margin-top di input */
+}
+
+#search-user-post #forum-search-btn {
+    padding: 5px 25px;
+    height: 40px;
+    font-weight: 500;
+    justify-self: flex-end;
+    margin-left: 0;        /* jarak sudah diatur oleh gap */
+}
+
+#search-user-post .search-post__input {
+    flex: 1 1 0;
+}
+
+#search-user-post .search-post__choice {
+    flex: 0.5 0.5 0;
+}
+
+
+/*
+-----------------------------------------
+Pengaturan Styling untuk Halaman Bookmark
+-----------------------------------------
+*/
+#search-bookmark-post {
+    display: flex;
+    align-items: center;   /* semua elemen sejajar secara vertikal */
+    flex-wrap: wrap;       /* tetap turun ke bawah kalau layar sempit */
+    gap: 10px;
+    margin-top: 40px;      /* pindahan dari margin-top di input */
+}
+
+#search-bookmark-post .search-post__input {
+    flex: 1 1 0;
+}
+
+#search-bookmark-post .search-post__choice {
+    flex: 0.5 0.5 0;
+}
+
+
+/*
+------------------------------------------------
+Pengaturan Styling untuk Halaman Edit/Bikin Post
+------------------------------------------------
+*/
+.post-form-popover {
+    margin: auto;
+    inset: 0;
+    width: min(75vw, 960px);
+    max-height: 90vh;
+    box-sizing: border-box;
+    padding: 36px 36px;
+    border: none;
+    border-radius: 10px;
+    background-color: var(--color-cream);
+    overflow-y: auto;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+}
+
+.post-form-popover::backdrop {
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.post-form-header {
+    display: flex;
+    justify-content: space-between;
+}
+
+.popover-close {
+    background-color: transparent;
+    padding: 0px;
+    border: none;
+    color: black;
+    font-size: 2rem;
+    cursor: pointer;
+}
+
+.post-form {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;               /* jarak antar form-group */
+}
+
+.post-form-container {
+    width: 100%;
+    margin-top: 40px;
+}
+
+.form-group {
+    width: 100%;
+    display: flex;
+    flex-direction: column;  /* label di atas, field di bawah */
+    gap: 8px;                /* jarak label ke field */
+}
+
+.form-group label {
+    font-weight: 600;
+    font-size: 20px;
+    color: var(--color-text-dark);
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    box-sizing: border-box;  /* supaya padding dan border tidak bikin lebar melebihi 100% */
+    padding: 5px;
+    font-family: inherit;
+    font-size: 1rem;
+    border: 2px solid var(--color-grey);
+    border-radius: 10px;
+    background-color: #fff;
+    resize: none;
+    field-sizing: content;
+    transition: border-color 0.2s ease;
+}
+
+.form-group textarea {
+    min-height: 200px;
+}
+
+.form-group select {
+    max-width: 40%
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--color-text-muted);
+}
+
+.form-error {
+    color: #b3261e;
+    font-size: 0.875rem;
+    margin: 0;
+}
+
+.post-form #submit-post-button {
+    align-self: flex-start;
+    padding: 10px 32px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+
+/*
+-----------------------------
+Pengaturan Styling untuk Post
+-----------------------------
+*/
+.post {
+    background-color: var(--color-grey);
+    border: 10px;
+    border-radius: 10px;
+    padding: 10px 10px;
+    margin-top: 10px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.post-comment-shown {
+    border-bottom-left-radius: 0px;
+    border-bottom-right-radius: 0px;
+}
+
+.post-header {
+    display: flex;
+    justify-content: space-between;
+}
+
+.post-header .edit-tooltip-button {
+    color: #858383;
+    padding: 0px;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.post-header .edit-action-tooltip {
+    gap: 0px;
+    display: flex;
+    flex-direction: column;
+    visibility: hidden;
+    width: fit-content;
+    border-radius: 10px;
+    z-index: 1;
+    position: absolute;
+}
+
+.post-header .edit-post-button,
+.post-header .delete-post-button {
+    border-radius: 0px;
+    padding: 5px 30px;
+    background-color: #dedede;
+    border: 2px solid #858383;
+    color: var(--color-text-dark);
+    font-weight: 400;
+    cursor: pointer;
+}
+
+.post-header .edit-post-button:hover,
+.post-header .delete-post-button:hover {
+    background-color: #858383;
+}
+
+.post-header .post-edit-action:focus-within .edit-action-tooltip {
+    visibility: visible;
+}
+
+.post-meta .username,
+.comment-meta .username {
+    font-weight: 500;
+}
+
+.post-body .post-title a {
+    color: var(--color-text-dark);
+    text-decoration: none;
+}
+
+.post-body .post-title a:hover {
+    text-decoration: underline var(--color-text-dark);
+}
+
+.post-action-button {
+    display: flex;
+    gap: 10px;
+}
+
+.likes-button,
+.comment-button,
+.bookmark-button {
+    display: flex;
+    gap: 5px;
+    border: none;
+    padding: 5px 5px;
+    background-color: transparent;
+    cursor: pointer;
+}
+
+.likes-button:hover,
+.comment-button:hover,
+.bookmark-button:hover {
+    border-radius: 10px;
+    background-color: #dfdfdf;
+}
+
+.post-action-button .active svg {
+    fill: #858383;
+    stroke: none;
+}
+
+.comment-section {
+    background-color: var(--color-grey);
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+
+.comment-form,
+.comment-section-title,
+.comment-section .no-comment,
+.comment {
+    padding: 10px;
+}
+
+.comment-form {
+    background-color: #dfdfdf;
+}
+
+.comment-form .form-group textarea {
+    min-height: fit-content;
+    padding: 5px;
+    border: none;
+    field-sizing: content;
+    resize: none;
+}
+
+.comment-form .submit-comment-button {
+    display: block;
+    margin-left: auto;
+}
+
+.comment-form .submit-comment-button {
+    cursor: pointer;
+    padding: 5px 10px;
+    margin-top: 5px;
+    font-weight: 500;
+    font-size: small;
+}
+
+.comment-section-title {
+    color: var(--color-text-dark);
+}
+
+.comment {
+    border-top: 2px solid #dfdfdf;
+}
+
+.post-tag {
+    margin-left: 10px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    border-radius: 10px;
+    padding: 2px 10px;
+    text-align: center;
+}
+
+#tag-question {
+    background-color: var(--color-primary);
+    color: var(--color-border);
+}
+
+#tag-showcase {
+    background-color: var(--color-cream-hover);
+    color: var(--color-text-dark);
+}
+
+#tag-tips {
+    background-color: var(--color-text-muted);
+    color: var(--color-cream);
+}
+
+
+/*
+----------------------------------
+Pengaturan Styling untuk Page Post
+----------------------------------
+*/
+.post-page .post,
+.post-page .comment-form,
+.post-page .comment-section-title,
+.post-page .comment-section .no-comment,
+.post-page .comment {
+    padding: 0px;
+}
+
+.post-page .post,
+.post-page .comment-section,
+.post-page .comment-form {
+    background-color: transparent;
+}
+
+.post-page .post-header {
+    display: flex;
+    flex-direction: column;
+}
+
+.post-page .post-title {
+    color: var(--color-text-dark);
+}
+
+.post-page .comment-form .submit-comment-button {
+    display: block;
+    margin-left: auto;
+}
+
+.post-page .comment-section {
+    border-top: 2px solid #dfdfdf;
+    margin-top: 40px;
+}
+
+.post-page .comment-rows {
+    margin-top: 20px;
+}
+
+.post-page .comment-form textarea {
+    border-bottom: 2px solid var(--color-grey);
+    border-radius: 0px;
+    transition: border-bottom 0.2s ease;
+}
+
+.post-page .comment-form textarea:focus {
+    border-bottom: 2px solid var(--color-text-muted);
+}
+
+.post-page .comment {
+    background-color: var(--color-grey);
+    border-color: transparent;
+    border-radius: 10px;
+    padding: 10px;
+    margin-top: 10px;
+}
+
+
+/*
+Untuk tampilan tablet
+*/
+@media (max-width: 768px) {
+    .forum-layout {
+        display: block;
+        width: min(100% - 2rem, 1200px);
+        padding: 32px 0;
+    }
+
+    .forum-page-nav {
+        position: sticky;          /* ganti dari fixed */
+        top: 120px;                 /* jarak dari atas saat di-scroll */
+        background-color: var(--color-primary);
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: row;
+        justify-content:space-evenly;
+        justify-self: center;
+        width: 100%;
+    }
+
+    .forum-page-nav p {
+        font-size: 0.9rem;
+    }
+
+    .home-page,
+    .user-post-page,
+    .bookmark-page {
+        display: flex;
+        column-gap: 5px;
+        flex: 1 1 0;
+        padding: 10px 8px;
+        color: var(--color-cream-hover);
+        background-color: transparent;
+        justify-content: center;
+        transition: background-color 0.2s ease;
+    }
+
+    .home-page svg,
+    .user-post-page svg,
+    .bookmark-page svg {
+        stroke: var(--color-cream-hover);
+    }
+
+    .nav-active {
+        border: none;
+        border-bottom: 5px solid var(--color-cream-hover);
+    }
+    
+    .nav-inactive {
+        border: none;
+        border-bottom: 5px solid transparent;
+    }
+
+    .forum-page-content {
+        margin-top: 50px;
+    }
+
+    .edit-action-tooltip {
+        right: 1rem;
+    }
+}
+
+
+/*
+Untuk tampilan mobile
+*/
+@media (max-width: 426px) {
+    .forum-page-nav p {
+        display: none;
+    }
+
+    .search-post__input,
+    .search-post__choice,
+    .search-post__filters select
+    #forum-search-btn {
+        height: 35px;
+    }
+
+    #create-post-button {
+        padding: 0px 15px;
+        height: 35px;
+    }
+}

@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Jurnal tanaman - Floranity{% endblock title %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'koleksi/css/koleksi.css' %}">
+<link rel="stylesheet" href="{% static 'journal/css/journal.css' %}">
+{% endblock extra_css %}
+
+{% block content %}
+<div class="fl-page">
+  <div class="fl-header">
+    <div>
+      <h1>Jurnal tanaman</h1>
+      <p>Catatan terbaru tampil lebih dulu.</p>
+    </div>
+    <a class="fl-btn" href="{% url 'koleksi:jurnal_tambah' %}">Tambah catatan</a>
+  </div>
+
+  {% if jurnal_list %}
+    <ul class="fl-jurnal">
+      {% for catatan in jurnal_list %}
+        <li class="fl-jurnal__item">
+          <span class="fl-jurnal__foto">
+            {% if catatan.photo %}
+              <img src="{{ catatan.photo.url }}" alt="Foto jurnal {{ catatan.plant_name }}" loading="lazy">
+            {% else %}
+              <span aria-hidden="true">Plant</span>
+            {% endif %}
+          </span>
+          <div>
+            <p><strong>{{ catatan.plant_name }}</strong>{% if catatan.plant_species %} · {{ catatan.plant_species }}{% endif %}</p>
+            <p class="fl-jurnal__tanggal">{{ catatan.occurred_at|date:"d M Y, H:i" }} · {{ catatan.get_activity_display }}</p>
+            {% if catatan.notes %}<p class="fl-jurnal__catatan">{{ catatan.notes }}</p>{% endif %}
+            {% if catatan.health_status != "unknown" %}<p>Status: {{ catatan.get_health_status_display }}</p>{% endif %}
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <div class="fl-kosong">
+      <p>Belum ada catatan jurnal.</p>
+      <a class="fl-btn" href="{% url 'koleksi:jurnal_tambah' %}">Buat catatan pertama</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock content %}
