@@ -9,6 +9,7 @@ from urllib.parse import urlencode
 
 from django.conf import settings
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.http import Http404, HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -101,6 +102,7 @@ def catalog_detail(request, spesies_id):
 # Koleksi pribadi (CRUD Database via Django ORM & ModelForm)
 # --------------------------------------------------------------------------
 
+@login_required
 def show_collection(request):
     """Menampilkan daftar tanaman dalam koleksi pengguna dari database."""
     seed_sample_data_if_empty()
@@ -136,6 +138,7 @@ def show_collection(request):
     return render(request, "koleksi/koleksi_list.html", context)
 
 
+@login_required
 def detail(request, tanaman_id):
     """Detail satu tanaman dari database beserta seluruh catatan jurnal pertumbuhannya."""
     seed_sample_data_if_empty()
@@ -165,6 +168,7 @@ def detail(request, tanaman_id):
     return render(request, "koleksi/koleksi_detail.html", context)
 
 
+@login_required
 @rate_limit_sensitive(max_requests=20, window_seconds=60)
 def create_tanaman(request):
     """Formulir penambahan tanaman baru ke dalam database."""
@@ -242,6 +246,7 @@ def create_tanaman(request):
     return render(request, "koleksi/koleksi_form.html", context)
 
 
+@login_required
 @plant_owner_required
 @rate_limit_sensitive(max_requests=25, window_seconds=60)
 def update(request, tanaman_id):
@@ -280,6 +285,7 @@ def update(request, tanaman_id):
     return render(request, "koleksi/koleksi_form.html", context)
 
 
+@login_required
 @plant_owner_required
 @rate_limit_sensitive(max_requests=15, window_seconds=60)
 def delete(request, tanaman_id):
@@ -297,6 +303,7 @@ def delete(request, tanaman_id):
     return render(request, "koleksi/koleksi_hapus.html", context)
 
 
+@login_required
 @plant_owner_required
 @rate_limit_sensitive(max_requests=25, window_seconds=60)
 def add_journal(request, tanaman_id):
