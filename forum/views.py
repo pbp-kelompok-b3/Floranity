@@ -56,10 +56,11 @@ def show_post_page(request: HttpRequest, post_id):
     return render(request, "forum/post_page.html", context)
 
 # Request handler untuk menampilkan form membuat post baru
+@require_POST
 def create_post(request: HttpRequest):
     form = PostForm(request.POST or None)
 
-    if request.method == "POST" and form.is_valid():
+    if form.is_valid():
         post = form.save(commit=False)
         
         # NOTE: Ketika sistem autentikasi udah ada, uncomment kode di bawah 
@@ -67,6 +68,8 @@ def create_post(request: HttpRequest):
 
         post.save()
         return redirect("forum:show_post_page", post_id=post.id)
+
+    return redirect("forum:show_forum")
 
 # Request handler untuk menampilkan form mengedit post milik user
 # Form yang ditampilkan bukan form kosongan, tapi udah ada isi sesuai sama data post yang di-edit
@@ -82,7 +85,9 @@ def edit_post(request: HttpRequest, post_id):
         # post.author = request.user
         
         post.save()
-        return redirect("forum:show_user_post")
+    
+    return redirect("forum:show_user_post")
+    
 
 @require_http_methods(["DELETE"])
 def delete_post(request: HttpRequest, post_id):
