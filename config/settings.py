@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'main',
+    'akun',
     'koleksi',
 ]
 
@@ -123,6 +124,12 @@ MAILERS = {
         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
     },
 }
+
+# Authentication and user profiles.
+LOGIN_URL = 'akun:login'
+LOGIN_REDIRECT_URL = 'akun:my_profile'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # Plant APIs Configuration
 PERENUAL_API_KEY = os.environ.get("PERENUAL_API_KEY", "") or os.environ.get("PERENUAL_KEY", "")
