@@ -1,0 +1,41 @@
+<div class="post-form-popover"
+     id="{{popover_id | default:'post-form-popover' }}" 
+     popover="auto">
+    <header class="post-form-header">
+        <h1>{{ page_title }}</h1>
+        <button type="button"
+                class="popover-close"
+                popovertarget="{{popover_id | default:'post-form-popover' }}"
+                popovertargetaction="hide"
+                aria-label="Tutup">&times;</button>
+    </header>
+    <div class="post-form-container">
+        <form method="post"
+              action="{% if is_editing_post %}
+                        {% url 'forum:edit_post' form.instance.pk %}
+                      {% else %}
+                        {% url 'forum:create_post' %}
+                      {% endif %}"
+              class="post-form">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% for error in field.errors %}
+                        <p class="form-error">{{ error }}</p>
+                    {% endfor %}
+                </div>    
+            {% endfor %}
+            <button type="submit"
+                    class="button button-type-1"
+                    id="submit-post-button">
+                {% if is_editing_post %}
+                    Simpan Perubahan
+                {% else %}
+                    Buat Post
+                {% endif %}    
+            </button>
+        </form>
+    </div>
+</div>

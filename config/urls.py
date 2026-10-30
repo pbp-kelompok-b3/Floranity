@@ -10,6 +10,7 @@ urlpatterns = [
     path('', include('akun.urls')),
     path('', views.show_landing_page, name='home'),
     path('', include('koleksi.urls')),
+    path('', include('forum.urls')),
 ]
 
 if settings.DEBUG:

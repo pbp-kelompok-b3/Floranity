@@ -1,0 +1,73 @@
+{% load static %}
+<div class="post-wrapper">
+    <div class="post">
+        <header class="post-header">
+            <p class="post-meta">
+                <span class="username">{{ post.author.username }}</span>
+                <span class="post-meta-separator"> &bull; </span>
+                <span class="post-date">{{ post.created_at | date:"j M Y" }}</span>
+                <span class="post-tag" id="tag-{{ post.tag }}">{{ post.get_tag_display }}</span>
+            </p>
+            {% url 'forum:show_user_post' as show_user_post_url %}
+            {% if request.path == show_user_post_url %}
+            <div class="post-edit-action">
+                <button class="edit-tooltip-button">&bull; &bull; &bull;</button>
+                <div class="edit-action-tooltip">
+                    <button class="edit-post-button" 
+                            type="button"
+                            popovertarget="{{ popover_id }}">Edit</button>
+                    <button class="delete-post-button" 
+                            type="button"
+                            hx-delete="{% url 'forum:delete_post' post.id %}"
+                            hx-target="closest .post-wrapper"
+                            hx-swap="outerHTML"
+                            hx-confirm="Apakah Anda yakin untuk menghapus post?">Hapus</button>
+                </div>
+            </div>
+            {% include 'forum/post_form.html' %}
+            {% endif %}
+        </header>
+        <div class="post-body">
+            <h3 class="post-title"><a href="{% url 'forum:show_post_page' post.id %}">{{ post.post_title }}</a></h3>
+            <p class="post-content collapsed">{{ post.post_body | linebreaksbr }}</p>
+            <button type="button" class="collapse-toggle-btn">Lihat Lebih Banyak</button>
+        </div>
+        <footer class="post-action-button">
+            <button type="button"
+                    class="likes-button"
+                    data-url="{% url 'forum:toggle_like_button' post.id %}"
+                    aria-label="Sukai Post"
+                    aria-pressed="false">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#858383" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="Like">
+                    <path d="M7 10v11"/>
+                    <path d="M7 10l4-7a2 2 0 0 1 2 2v4h5.6a2 2 0 0 1 2 2.3l-1.2 7.4a2 2 0 0 1-2 1.7H7"/>
+                    <path d="M3 10h4v11H3z"/>
+                </svg>
+                <p class="counter likes-counter">{{ post.likes_total }}</p>
+            </button>
+            <button type="button"
+                    class="comment-button"
+                    data-last-comment-visibility="hidden"
+                    hx-get="{% url 'forum:show_comment_section' post.id %}"
+                    hx-target="next .comment-section"
+                    hx-trigger="click once"
+                    aria-label="Kolom Komentar Post"
+                    aria-pressed="false">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#858383" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="Comment">
+                    <path d="M21 11.5a8.5 8.5 0 0 1-12.4 7.55L3 20.5l1.45-4.9A8.5 8.5 0 1 1 21 11.5Z"/>
+                </svg>
+                <p class="counter comments-counter">{{ post.comments_total }}</p>
+            </button>
+            <button type="button" 
+                    class="bookmark-button"
+                    data-url="{% url 'forum:toggle_bookmark_button' post.id %}"
+                    aria-label="Simpan Post"
+                    aria-pressed="false">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#858383" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="Bookmark">
+                    <path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4.5L5 21V4a1 1 0 0 1 1-1Z"/>
+                </svg>
+            </button>
+        </footer>
+    </div>
+    <div class="comment-section" hidden></div>
+</div>
