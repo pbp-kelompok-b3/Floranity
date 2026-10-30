@@ -1,4 +1,5 @@
 from datetime import date
+from django.db import connection
 from .models import Tanaman, JurnalPertumbuhan
 
 
@@ -8,10 +9,17 @@ def seed_sample_data_if_empty():
     sehingga aplikasi langsung memiliki data realistis.
     """
     if Tanaman.objects.exists():
+        if connection.vendor == "postgresql":
+            try:
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        "SELECT setval(pg_get_serial_sequence('koleksi_tanaman', 'id'), coalesce(max(id), 1)) FROM koleksi_tanaman;"
+                    )
+            except Exception:
+                pass
         return
 
     t1 = Tanaman.objects.create(
-        id=1,
         spesies_id=1,
         nama_panggilan="Monstera meja belajar",
         nama_ilmiah="Monstera deliciosa",
@@ -39,7 +47,6 @@ def seed_sample_data_if_empty():
     )
 
     t2 = Tanaman.objects.create(
-        id=2,
         spesies_id=4,
         nama_panggilan="Basil dapur",
         nama_ilmiah="Ocimum basilicum",
@@ -57,7 +64,6 @@ def seed_sample_data_if_empty():
     )
 
     Tanaman.objects.create(
-        id=3,
         spesies_id=2,
         nama_panggilan="Lidah mertua ruang tamu",
         nama_ilmiah="Sansevieria trifasciata",
@@ -67,3 +73,12 @@ def seed_sample_data_if_empty():
         penyiraman="Jarang",
         tingkat_kesulitan="Sangat mudah",
     )
+
+    if connection.vendor == "postgresql":
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    "SELECT setval(pg_get_serial_sequence('koleksi_tanaman', 'id'), coalesce(max(id), 1)) FROM koleksi_tanaman;"
+                )
+        except Exception:
+            pass
