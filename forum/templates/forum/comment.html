@@ -1,0 +1,12 @@
+<div class="comment">
+    <header class="comment-header">
+        <p class="comment-meta">
+            <span class="username">{{ comment.user.username }}</span>
+            <span class="post-meta-separator"> &bull; </span>
+            <span class="post-date">{{ comment.created_at | date:"j M Y" }}</span>
+        </p>
+    </header>
+    <div class="comment-body">
+        <p class="comment-content">{{ comment.comment_body | linebreaksbr }}</p>
+    </div>
+</div>

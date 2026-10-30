@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/forum.css' %}">
+{% endblock extra_css %}
+
+{% block content %}
+<div class="forum-layout">
+    <nav class="forum-page-nav">
+        {% url 'forum:show_forum' as show_forum_url %}
+        <a href="{{ show_forum_url }}" 
+           class="home-page {% if request.path == show_forum_url %}nav-active{% else %}nav-inactive{% endif %}">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1b4d3e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="Home">
+                <path d="M3 10.5 12 3l9 7.5"/>
+                <path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/>
+            </svg>
+            <p>Beranda</p>
+        </a>
+        {% url 'forum:show_user_post' as show_user_post_url %}
+        <a href="{{ show_user_post_url }}"
+           class="user-post-page {% if request.path == show_user_post_url %}nav-active{% else %}nav-inactive{% endif %}">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1b4d3e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="My Posts">
+                <path d="M12 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6"/>
+                <path d="M18.4 2.6a2 2 0 0 1 2.8 2.8L12 14.6 8 16l1.4-4 9-9.4Z"/>
+            </svg>
+            <p>Post Saya</p>
+        </a>
+        {% url 'forum:show_bookmarked_post' as show_bookmarked_post_url %}
+        <a href="{{ show_bookmarked_post_url }}" 
+           class="bookmark-page {% if request.path == show_bookmarked_post_url %}nav-active{% else %}nav-inactive{% endif %}">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1b4d3e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="Bookmark">
+                <path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4.5L5 21V4a1 1 0 0 1 1-1Z"/>
+            </svg>
+            <p>Bookmark</p>
+        </a>
+    </nav>
+    <div class="forum-page-content">
+        {% block forum-page-content %}
+        {% endblock forum-page-content %}
+    </div>
+</div>
+{% endblock content %}
+
+{% block extra_js %}
+    <script src="{% static 'js/forum_page_script.js' %}"></script>
+{% endblock extra_js %}

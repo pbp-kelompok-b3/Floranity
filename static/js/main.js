@@ -4,14 +4,14 @@ const navMenu = document.querySelector('.nav-menu');
 if (navToggle && navMenu) {
     const closeMenu = () => {
         navToggle.setAttribute('aria-expanded', 'false');
-        navToggle.setAttribute('aria-label', 'Open Navigation Bar');
+        navToggle.setAttribute('aria-label', 'Buka navigasi');
         navMenu.classList.remove('is-open');
     };
 
     navToggle.addEventListener('click', () => {
         const isExpanded = navToggle.getAttribute('aria-expanded') === 'true';
         navToggle.setAttribute('aria-expanded', String(!isExpanded));
-        navToggle.setAttribute('aria-label', isExpanded ? 'Open Navigation Bar' : 'Close Navigation Bar');
+        navToggle.setAttribute('aria-label', isExpanded ? 'Buka navigasi' : 'Tutup navigasi');
         navMenu.classList.toggle('is-open', !isExpanded);
     });
 

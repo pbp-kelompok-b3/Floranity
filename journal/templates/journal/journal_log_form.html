@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Tambah catatan jurnal | Floranity{% endblock title %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'journal/css/journal.css' %}">
+{% endblock extra_css %}
+
+{% block content %}
+<div class="journal-page">
+  <div class="journal-shell">
+    <header class="journal-heading">
+      <h1>Catat perkembangan <em>tanamanmu.</em></h1>
+      <p>Simpan aktivitas perawatan dan tanda pertumbuhan agar perkembangannya mudah diikuti.</p>
+    </header>
+
+    <div class="journal-form-card">
+      <div class="journal-step-guide" aria-label="Form sections">
+        {% for title, fields in form.sections %}
+          <div class="journal-step"><span>{{ forloop.counter|stringformat:'02d' }}</span><b>{{ title }}</b></div>
+        {% endfor %}
+      </div>
+
+      <form method="post" enctype="multipart/form-data" class="journal-form">
+        {% csrf_token %}
+        {% if plant_id %}<input type="hidden" name="plant_id" value="{{ plant_id }}">{% endif %}
+        {% if form.non_field_errors %}<div class="journal-errors" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+
+        {% for title, fields in form.sections %}
+          <fieldset class="journal-form-section">
+            <legend><span class="section-leaf" aria-hidden="true">♧</span>{{ title }}</legend>
+            <div class="journal-fields-grid">
+              {% for field in fields %}
+                <div class="journal-form-field{% if field.errors %} has-error{% endif %}{% if field.name == 'notes' or field.name == 'health_tags' %} field-wide{% endif %}">
+                  {{ field.label_tag }}
+                  {{ field }}
+                  {% if field.help_text %}<small class="field-help">{{ field.help_text }}</small>{% endif %}
+                  {% if field.errors %}<div class="field-errors">{{ field.errors }}</div>{% endif %}
+                </div>
+              {% endfor %}
+            </div>
+          </fieldset>
+        {% endfor %}
+
+        <div class="journal-form-actions">
+          <button type="submit" class="journal-submit">Simpan catatan <span aria-hidden="true">&rarr;</span></button>
+          <a class="journal-cancel" href="{{ url_batal }}">Batal</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock content %}

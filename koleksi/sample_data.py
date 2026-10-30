@@ -101,7 +101,6 @@ TANAMAN = [
         "penyiraman": "Sedang",
         "tingkat_kesulitan": "Mudah",
         "foto": "",
-        "jumlah_jurnal": 3,
     },
     {
         "id": 2,
@@ -115,7 +114,6 @@ TANAMAN = [
         "penyiraman": "Sedang",
         "tingkat_kesulitan": "Mudah",
         "foto": "",
-        "jumlah_jurnal": 1,
     },
     {
         "id": 3,
@@ -129,22 +127,33 @@ TANAMAN = [
         "penyiraman": "Jarang",
         "tingkat_kesulitan": "Sangat mudah",
         "foto": "",
-        "jumlah_jurnal": 0,
     },
 ]
 
-JURNAL = {
-    1: [
-        {"tanggal": "28 September 2026", "catatan": "Dua daun baru terbuka. Daun paling bawah mulai menguning, dipangkas.", "foto": ""},
-        {"tanggal": "5 September 2026", "catatan": "Dipindah ke pot 25 cm, media diganti campuran baru.", "foto": ""},
-        {"tanggal": "12 Maret 2026", "catatan": "Masuk koleksi, tinggi sekitar 30 cm dengan empat daun.", "foto": ""},
-    ],
-    2: [
-        {"tanggal": "14 Oktober 2026", "catatan": "Panen pertama tiga tangkai untuk masak.", "foto": ""},
-    ],
-    3: [],
+# Contoh log untuk Monstera meja belajar (tanaman contoh dengan id 1).
+SAMPLE_JOURNAL_LOG = {
+    "id": "DEMO-LOG-001",
+    "plant_id": 1,
+    "owner_display": "Pengguna contoh",
+    "created_at_display": "27 Oktober 2026, 08.15",
+    "occurred_at_display": "27 Oktober 2026, 08.15",
+    "plant_name": "Monstera meja belajar",
+    "plant_species": "Monstera deliciosa",
+    "plant_type": "Tanaman hias dalam ruangan",
+    "activity_display": "Penyiraman",
+    "water_volume_ml": "250 ml",
+    "fertilizer_type": "",
+    "health_status_display": "Sehat",
+    "health_tags": "Daun baru terbuka",
+    "weather_temperature_c": "28 °C",
+    "weather_humidity_percent": "70%",
+    "weather_rainfall_mm": "0 mm",
+    "notes": (
+        "Media tanam mulai terasa kering. Saya menyiram perlahan sampai air keluar "
+        "dari dasar pot, lalu memindahkan tanaman kembali ke dekat jendela."
+    ),
+    "photo": "",
 }
-
 
 # Kode filter Perenual dipetakan ke teks data contoh, supaya dropdown di katalog
 # bisa dicoba sebelum API disambungkan

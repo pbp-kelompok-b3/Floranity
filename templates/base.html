@@ -8,10 +8,15 @@
     <title>{% block title %}Floranity{% endblock title %}</title>
 
     <link rel="stylesheet" href="{% static 'css/global.css' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
     {% block extra_css %}{% endblock extra_css %}
+
+    <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.11/dist/htmx.min.js"></script>
 </head>
-<body>
+<body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
 
     <header class="site-header">
         {% block navbar %}
@@ -27,16 +32,16 @@
             </button>
 
             <ul class="nav-menu" id="nav-menu">
-                <li><a href="/" class="nav-link">Beranda</a></li>
-                <li><a href="/koleksi/" class="nav-link">Koleksi</a></li>
-                <li><a href="/katalog/" class="nav-link">Katalog</a></li>
-                <li><a href="/kalender/" class="nav-link">Kalender</a></li>
-                <li><a href="/forum/" class="nav-link">Forum</a></li>
+                <li><a href="{% url 'home' %}" class="nav-link">Beranda</a></li>
+                <li><a href="{% url 'koleksi:show_collection' %}" class="nav-link">Koleksi</a></li>
+                <li><a href="{% url 'koleksi:catalog' %}" class="nav-link">Katalog</a></li>
+                <li><a href="{% url 'koleksi:jurnal' %}" class="nav-link">Jurnal</a></li>
+                <li><a href="{% url 'forum:show_forum' %}" class="nav-link">Forum</a></li>
             </ul>
         {% if user.is_authenticated %}
         <a href="{% url 'akun:my_profile' %}" class="nav-link user-profile-badge">Profil Saya</a>
         {% else %}
-        <a href="{% url 'akun:login' %}" class="nav-link">Login</a>
+        <a href="{% url 'akun:login' %}" class="nav-link">Masuk</a>
         {% endif %}
         </nav>
         {% endblock navbar %}
@@ -54,10 +59,9 @@
                 <li><a href="/">Beranda</a></li>
                 <li><a href="/koleksi/">Koleksi</a></li>
                 <li><a href="/katalog/">Katalog</a></li>
-                <li><a href="/kalender/">Kalender</a></li>
-                <li><a href="/forum/">Forum</a></li>
+                <li><a href="/koleksi/jurnal/">Jurnal</a></li>
             </ul>
-            <p class="copyright-text">&copy; {% now "Y" %} Floranity. All rights reserved.</p>
+            <p class="copyright-text">&copy; {% now "Y" %} Floranity. Hak cipta dilindungi.</p>
         </div>
         {% endblock footer %}
     </footer>

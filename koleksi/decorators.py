@@ -27,9 +27,9 @@ def plant_owner_required(view_func):
     def _wrapped_view(request, tanaman_id, *args, **kwargs):
         tanaman = get_object_or_404(Tanaman, id=tanaman_id)
 
-        # Pengguna hanya boleh memanipulasi jika tanaman tidak berpemilik (sample data)
-        # atau jika user adalah pemilik sah dari tanaman tersebut.
-        if tanaman.pemilik and (not request.user.is_authenticated or tanaman.pemilik != request.user):
+        # Tanaman contoh tanpa pemilik bersifat baca-saja. Tanaman milik pengguna
+        # hanya dapat dimanipulasi oleh pemiliknya.
+        if not tanaman.pemilik or tanaman.pemilik != request.user:
             pesan_error = "Anda tidak memiliki izin untuk mengakses atau memodifikasi data tanaman ini."
             if is_ajax_or_json(request):
                 return JsonResponse({"message": pesan_error}, status=403)

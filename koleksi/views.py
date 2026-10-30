@@ -9,10 +9,14 @@ from urllib.parse import urlencode
 
 from django.conf import settings
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.http import Http404, HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+
+from journal.forms import JournalLogForm
+from journal.models import JournalLog
 
 from .decorators import plant_owner_required, rate_limit_sensitive
 from .forms import JurnalPertumbuhanForm, TanamanForm
@@ -21,6 +25,38 @@ from .seed import seed_sample_data_if_empty
 from . import sample_data, services
 
 JUMLAH_PER_HALAMAN = 6
+
+
+@login_required
+def jurnal(request):
+    """List the signed-in user's journal entries."""
+    return render(request, "koleksi/journal_list.html", {
+        "jurnal_list": JournalLog.objects.filter(owner=request.user),
+    })
+
+
+@login_required
+def jurnal_tambah(request):
+    """Render and save the journal feature's dedicated form template."""
+    plant_id = request.POST.get("plant_id") or request.GET.get("plant_id", "")
+    linked_plant = None
+    if str(plant_id).isdigit():
+        linked_plant = Tanaman.objects.filter(pk=int(plant_id), pemilik=request.user).first()
+    initial = {
+        "plant_name": linked_plant.nama_panggilan if linked_plant else request.GET.get("plant_name", ""),
+        "plant_species": linked_plant.nama_ilmiah if linked_plant else request.GET.get("plant_species", ""),
+        "plant_type": request.GET.get("plant_type", ""),
+    }
+    form = JournalLogForm(request.POST or None, request.FILES or None, initial=initial)
+    if request.method == "POST" and form.is_valid():
+        form.save_for_owner(request.user, plant=linked_plant)
+        messages.success(request, "Catatan jurnal berhasil disimpan.")
+        return redirect("koleksi:jurnal")
+    return render(request, "journal/journal_log_form.html", {
+        "form": form,
+        "plant_id": plant_id,
+        "url_batal": reverse("koleksi:jurnal"),
+    })
 
 
 # --------------------------------------------------------------------------
@@ -39,6 +75,7 @@ def catalog(request):
 
     spesies_list = []
     ada_berikut = False
+    api_error = False
 
     if getattr(settings, "PERENUAL_API_KEY", ""):
         try:
@@ -46,6 +83,7 @@ def catalog(request):
             ada_berikut = len(spesies_list) >= JUMLAH_PER_HALAMAN
         except Exception:
             spesies_list = []
+            api_error = True
 
     if not spesies_list and not (getattr(settings, "PERENUAL_API_KEY", "") and q):
         hasil = sample_data.cari_spesies(q, air=air, cahaya=cahaya)
@@ -63,6 +101,7 @@ def catalog(request):
         "pilihan_cahaya": services.PILIHAN_CAHAYA,
         "halaman": halaman,
         "ada_halaman_berikut": ada_berikut,
+        "api_error": api_error and bool(q),
         "query_filter": urlencode({"q": q, "air": air, "cahaya": cahaya}),
     }
     return render(request, "koleksi/katalog_list.html", context)
@@ -98,6 +137,7 @@ def catalog_detail(request, spesies_id):
 # Koleksi pribadi (CRUD Database via Django ORM & ModelForm)
 # --------------------------------------------------------------------------
 
+@login_required
 def show_collection(request):
     """Menampilkan daftar tanaman dalam koleksi pengguna dari database."""
     seed_sample_data_if_empty()
@@ -105,7 +145,8 @@ def show_collection(request):
     if request.user.is_authenticated:
         qs = Tanaman.objects.filter(pemilik=request.user)
     else:
-        qs = Tanaman.objects.all()
+        # Anonymous visitors see only the public sample plants, never members' collections.
+        qs = Tanaman.objects.filter(pemilik__isnull=True)
 
     q = request.GET.get("q", "").strip()
     urut = request.GET.get("urut", "terbaru")
@@ -132,6 +173,7 @@ def show_collection(request):
     return render(request, "koleksi/koleksi_list.html", context)
 
 
+@login_required
 def detail(request, tanaman_id):
     """Detail satu tanaman dari database beserta seluruh catatan jurnal pertumbuhannya."""
     seed_sample_data_if_empty()
@@ -153,12 +195,24 @@ def detail(request, tanaman_id):
 
     context = {
         "tanaman": tanaman,
-        "jurnal_list": tanaman.jurnals.all(),
+        "jurnal_list": JournalLog.objects.filter(owner=request.user, plant=tanaman),
+        "journal_create_url": reverse("koleksi:jurnal_tambah") + "?" + urlencode({
+            "plant_id": tanaman.pk,
+            "plant_name": tanaman.nama_panggilan,
+            "plant_species": tanaman.nama_ilmiah,
+        }),
         "hari_ini": date.today().isoformat(),
+        "journal_form": JurnalPertumbuhanForm(initial={"tanggal": date.today()}),
+        "foto_url": "",
     }
+    if not context["jurnal_list"].exists() and tanaman.pemilik is None:
+        sample_log = sample_data.SAMPLE_JOURNAL_LOG
+        if sample_log.get("plant_id") == tanaman.pk:
+            context["sample_log"] = sample_log
     return render(request, "koleksi/koleksi_detail.html", context)
 
 
+@login_required
 @rate_limit_sensitive(max_requests=20, window_seconds=60)
 def create_tanaman(request):
     """Formulir penambahan tanaman baru ke dalam database."""
@@ -236,6 +290,7 @@ def create_tanaman(request):
     return render(request, "koleksi/koleksi_form.html", context)
 
 
+@login_required
 @plant_owner_required
 @rate_limit_sensitive(max_requests=25, window_seconds=60)
 def update(request, tanaman_id):
@@ -274,6 +329,7 @@ def update(request, tanaman_id):
     return render(request, "koleksi/koleksi_form.html", context)
 
 
+@login_required
 @plant_owner_required
 @rate_limit_sensitive(max_requests=15, window_seconds=60)
 def delete(request, tanaman_id):
@@ -291,6 +347,7 @@ def delete(request, tanaman_id):
     return render(request, "koleksi/koleksi_hapus.html", context)
 
 
+@login_required
 @plant_owner_required
 @rate_limit_sensitive(max_requests=25, window_seconds=60)
 def add_journal(request, tanaman_id):
@@ -313,5 +370,9 @@ def add_journal(request, tanaman_id):
             jurnal.tanaman = tanaman
             jurnal.save()
             messages.success(request, "Catatan jurnal berhasil ditambahkan!")
+        else:
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{field}: {error}")
 
     return redirect("koleksi:detail", tanaman_id=tanaman_id)
