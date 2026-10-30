@@ -114,7 +114,7 @@
       <form class="schedule-bulk-form" method="post" action="{% url 'schedule:bulk_action' %}">
         {% csrf_token %}
         <div class="schedule-bulk-toolbar">
-          <div><strong>Tindakan massal</strong><span>Pilih jadwal yang ingin diperbarui</span></div>
+          <div><strong>Tindakan massal</strong><span>Pilih jadwal yang ingin diperbarui</span><span class="schedule-selection-count" id="selection-count" aria-live="polite">0 dipilih</span></div>
           <label class="schedule-select-all"><input id="select-visible-schedules" type="checkbox"> Pilih semua yang terlihat</label>
           <div class="schedule-bulk-actions">
             <button type="submit" name="action" value="complete">Selesaikan terpilih</button>
