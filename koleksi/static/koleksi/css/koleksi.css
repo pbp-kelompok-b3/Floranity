@@ -2,14 +2,14 @@
    Semua kelas diberi awalan "fl-" supaya tidak bentrok dengan CSS anggota tim lain. */
 
 :root {
-  --fl-hijau: #14532d;
-  --fl-hijau-tua: #0f3d21;
-  --fl-hijau-muda: #e9f2ec;
-  --fl-teks: #1f2421;
-  --fl-abu: #6b7280;
-  --fl-garis: #e5e7eb;
+  --fl-hijau: var(--leaf);
+  --fl-hijau-tua: #173b2c;
+  --fl-hijau-muda: #eef3e6;
+  --fl-teks: var(--ink);
+  --fl-abu: var(--muted);
+  --fl-garis: var(--color-border);
   --fl-latar: #ffffff;
-  --fl-latar-lembut: #f8faf8;
+  --fl-latar-lembut: var(--paper);
   --fl-merah: #9b2c2c;
   --fl-radius: 0.75rem;
 }
@@ -21,7 +21,7 @@
   margin: 0 auto;
   padding: 2.5rem 1.25rem 4rem;
   color: var(--fl-teks);
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-family: 'DM Sans', system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   box-sizing: border-box;
 }
 
@@ -79,7 +79,7 @@
   display: inline-block;
   padding: 0.625rem 1.125rem;
   border: 1px solid var(--fl-hijau);
-  border-radius: var(--fl-radius);
+  border-radius: 999px;
   background: var(--fl-hijau);
   color: #ffffff;
   font-size: 1rem;
@@ -352,6 +352,12 @@
 .fl-wajib {
   color: var(--fl-merah);
   font-weight: bold;
+}
+
+.fl-field-error {
+  margin: 0.375rem 0 0;
+  color: var(--fl-merah);
+  font-size: 0.875rem;
 }
 
 .fl-form label {

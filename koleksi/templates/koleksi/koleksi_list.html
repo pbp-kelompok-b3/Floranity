@@ -12,14 +12,14 @@
 <div class="fl-page">
   <div class="fl-header">
     <div>
-      <h1>Koleksi Saya</h1>
-      <p>{{ total }} tanaman dirawat oleh {{ request.user.username|default:"Anda" }}.</p>
+      <h1>{% if request.user.is_authenticated %}Koleksi Saya{% else %}Jelajahi tanaman{% endif %}</h1>
+      <p>{% if request.user.is_authenticated %}{{ total }} tanaman dirawat oleh {{ request.user.username }}.{% else %}{{ total }} tanaman contoh untuk dijelajahi.{% endif %}</p>
     </div>
-    <a class="fl-btn" href="{% url 'koleksi:create_tanaman' %}">Tambah tanaman</a>
+    <a class="fl-btn" href="{% url 'koleksi:create_tanaman' %}">{% if request.user.is_authenticated %}Tambah tanaman{% else %}Tambah tanaman contoh{% endif %}</a>
   </div>
 
   {% if messages %}
-    <div class="fl-pesan-container">
+    <div class="fl-pesan-container" role="status" aria-live="polite">
       {% for message in messages %}
         <p class="fl-pesan">{{ message }}</p>
       {% endfor %}
@@ -64,10 +64,10 @@
       <li style="grid-column: 1 / -1; list-style: none;">
         <div class="fl-kosong">
           {% if q %}
-            <p>Tidak ada tanaman di koleksimu yang cocok dengan "{{ q }}".</p>
+            <p>{% if request.user.is_authenticated %}Tidak ada tanaman di koleksimu{% else %}Tidak ada tanaman contoh{% endif %} yang cocok dengan "{{ q }}".</p>
             <a class="fl-btn fl-btn--sekunder" href="{% url 'koleksi:show_collection' %}">Tampilkan semua koleksi</a>
           {% else %}
-            <p>Belum ada tanaman di koleksimu.</p>
+            <p>{% if request.user.is_authenticated %}Belum ada tanaman di koleksimu.{% else %}Belum ada tanaman contoh untuk ditampilkan.{% endif %}</p>
             <a class="fl-btn" href="{% url 'koleksi:catalog' %}">Cari spesies di katalog</a>
           {% endif %}
         </div>

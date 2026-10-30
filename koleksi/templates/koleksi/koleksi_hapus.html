@@ -11,7 +11,7 @@
 
 <div class="fl-page">
   <p class="fl-breadcrumb">
-    <a href="{% url 'koleksi:show_collection' %}">Koleksi saya</a> /
+    <a href="{% url 'koleksi:show_collection' %}">{% if request.user.is_authenticated %}Koleksi saya{% else %}Koleksi tanaman{% endif %}</a> /
     <a href="{% url 'koleksi:detail' tanaman.id %}">{{ tanaman.nama_panggilan }}</a> / Hapus
   </p>
 

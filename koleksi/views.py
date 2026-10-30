@@ -39,6 +39,7 @@ def catalog(request):
 
     spesies_list = []
     ada_berikut = False
+    api_error = False
 
     if getattr(settings, "PERENUAL_API_KEY", ""):
         try:
@@ -46,6 +47,7 @@ def catalog(request):
             ada_berikut = len(spesies_list) >= JUMLAH_PER_HALAMAN
         except Exception:
             spesies_list = []
+            api_error = True
 
     if not spesies_list and not (getattr(settings, "PERENUAL_API_KEY", "") and q):
         hasil = sample_data.cari_spesies(q, air=air, cahaya=cahaya)
@@ -63,6 +65,7 @@ def catalog(request):
         "pilihan_cahaya": services.PILIHAN_CAHAYA,
         "halaman": halaman,
         "ada_halaman_berikut": ada_berikut,
+        "api_error": api_error and bool(q),
         "query_filter": urlencode({"q": q, "air": air, "cahaya": cahaya}),
     }
     return render(request, "koleksi/katalog_list.html", context)
@@ -105,7 +108,8 @@ def show_collection(request):
     if request.user.is_authenticated:
         qs = Tanaman.objects.filter(pemilik=request.user)
     else:
-        qs = Tanaman.objects.all()
+        # Anonymous visitors see only the public sample plants, never members' collections.
+        qs = Tanaman.objects.filter(pemilik__isnull=True)
 
     q = request.GET.get("q", "").strip()
     urut = request.GET.get("urut", "terbaru")
@@ -155,6 +159,8 @@ def detail(request, tanaman_id):
         "tanaman": tanaman,
         "jurnal_list": tanaman.jurnals.all(),
         "hari_ini": date.today().isoformat(),
+        "journal_form": JurnalPertumbuhanForm(initial={"tanggal": date.today()}),
+        "foto_url": "",
     }
     return render(request, "koleksi/koleksi_detail.html", context)
 
@@ -313,5 +319,14 @@ def add_journal(request, tanaman_id):
             jurnal.tanaman = tanaman
             jurnal.save()
             messages.success(request, "Catatan jurnal berhasil ditambahkan!")
+        else:
+            context = {
+                "tanaman": tanaman,
+                "jurnal_list": tanaman.jurnals.all(),
+                "hari_ini": date.today().isoformat(),
+                "journal_form": form,
+                "foto_url": request.POST.get("foto_url", "") or (post_data.get("foto", "") if request.FILES.get("foto") else ""),
+            }
+            return render(request, "koleksi/koleksi_detail.html", context)
 
     return redirect("koleksi:detail", tanaman_id=tanaman_id)

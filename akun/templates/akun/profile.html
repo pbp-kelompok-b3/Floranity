@@ -3,9 +3,6 @@
 {% load i18n %}
 {% block title %}{{ profile.display_name }} · Floranity{% endblock %}
 {% block extra_css %}
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{% static 'akun/css/profile.css' %}?v=6">
 {% endblock %}
 {% block content %}
@@ -30,12 +27,13 @@
         <span class="account-pill">ANGGOTA FLORANITY</span>
         <h2>{{ profile.display_name }}</h2>
         <p class="account-muted">Tumbuh bersama sejak {% language 'id' %}{{ profile.user.date_joined|date:'F Y' }}{% endlanguage %}</p>
-        <div class="account-bio"><h3>Tentang saya</h3>{% if profile.bio %}<div>{{ profile.bio|linebreaksbr }}</div>{% else %}<p class="account-muted">{% if is_owner %}Cerita hijaumu dimulai di sini. Tambahkan bio untuk memperkenalkan dirimu.{% else %}Anggota ini belum menambahkan bio.{% endif %}</p>{% endif %}</div>
+        <div class="account-bio"><h3>Tentang saya</h3>{% if profile.bio %}<div>{{ profile.bio|linebreaksbr }}</div>{% else %}<p class="account-muted">{% if is_owner %}Cerita hijaumu dimulai di sini. <a class="account-text-link" href="{% url 'akun:edit_profile' %}">Tambahkan bio</a> untuk memperkenalkan dirimu.{% else %}Anggota ini belum menambahkan bio.{% endif %}</p>{% endif %}</div>
     </div>
 </section>
 {% if is_owner %}
 <section class="account-personal"><div><span class="account-eyebrow">AKUN PRIBADI</span><h3>Terhubung dan siap tumbuh.</h3><p class="account-muted">{{ profile.user.email|default:profile.user.username }}</p><p class="account-fine-print">Informasi akun hanya terlihat olehmu.</p></div><form action="{% url 'akun:logout' %}" method="post">{% csrf_token %}<button class="account-button account-button-outline" type="submit">Keluar akun <span aria-hidden="true">↗</span></button></form></section>
 <a class="account-text-link account-danger-link" href="{% url 'akun:remove_account' %}">Hapus akun permanen</a>
+<p class="account-fine-print">Penghapusan akun dan data terkait tidak dapat dibatalkan.</p>
 {% endif %}
 
 </div>
