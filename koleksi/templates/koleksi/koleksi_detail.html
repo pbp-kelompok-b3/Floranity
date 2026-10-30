@@ -15,7 +15,7 @@
     </div>
   {% endif %}
   <p class="fl-breadcrumb">
-    <a href="{% url 'koleksi:show_collection' %}">{% if user.is_authenticated %}Koleksi saya{% else %}Koleksi tanaman{% endif %}</a> / {{ tanaman.nama_panggilan }}
+    <a href="{% url 'koleksi:show_collection' %}">Koleksi saya</a> / {{ tanaman.nama_panggilan }}
   </p>
 
   <div class="fl-detail">
@@ -33,7 +33,7 @@
 
       <dl class="fl-fakta">
         <div><dt>Lokasi</dt><dd>{{ tanaman.lokasi|default:"Belum diisi" }}</dd></div>
-        <div><dt>Dirawat sejak</dt><dd>{{ tanaman.tanggal_mulai }}</dd></div>
+        <div><dt>Dirawat sejak</dt><dd>{{ tanaman.tanggal_mulai|default:"Belum diisi" }}</dd></div>
         <div><dt>Kebutuhan cahaya</dt><dd>{{ tanaman.cahaya|default:"Tidak ada data" }}</dd></div>
         <div><dt>Kebutuhan air</dt><dd>{{ tanaman.penyiraman|default:"Tidak ada data" }}</dd></div>
         <div><dt>Tingkat kesulitan</dt><dd>{{ tanaman.tingkat_kesulitan|default:"Tidak ada data" }}</dd></div>
@@ -42,7 +42,7 @@
       {% if tanaman.catatan %}<p class="fl-form__bantuan">Catatan: {{ tanaman.catatan }}</p>{% endif %}
 
       <div class="fl-detail__aksi">
-        {% if not tanaman.pemilik or user == tanaman.pemilik %}
+        {% if tanaman.pemilik and user == tanaman.pemilik %}
           <a class="fl-btn fl-btn--sekunder" href="{% url 'koleksi:update' tanaman.id %}">Ubah info</a>
           <a class="fl-btn fl-btn--bahaya" href="{% url 'koleksi:delete' tanaman.id %}">Hapus tanaman</a>
         {% endif %}
@@ -55,11 +55,9 @@
 
   <section class="fl-seksi">
     <h2>Jurnal pertumbuhan</h2>
-    {% if user.is_authenticated and user == tanaman.pemilik %}
+    {% if tanaman.pemilik and user == tanaman.pemilik %}
       <a class="fl-btn" href="{{ journal_create_url }}">Tambah catatan jurnal</a>
     {% endif %}
-  </section>
-
     {% if jurnal_list %}
       <ul class="fl-jurnal">
         {% for catatan in jurnal_list %}

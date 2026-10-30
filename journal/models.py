@@ -25,6 +25,13 @@ class JournalLog(models.Model):
         on_delete=models.CASCADE,
         related_name="journal_logs",
     )
+    plant = models.ForeignKey(
+        "koleksi.Tanaman",
+        on_delete=models.CASCADE,
+        related_name="journal_logs",
+        null=True,
+        blank=True,
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     occurred_at = models.DateTimeField(help_text="When the care or growth event happened.")
 

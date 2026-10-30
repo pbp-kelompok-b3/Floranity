@@ -65,9 +65,10 @@ class JournalLogForm(forms.ModelForm):
             for title, field_names in self.SECTION_FIELDS
         ]
 
-    def save_for_owner(self, owner, commit=True):
+    def save_for_owner(self, owner, plant=None, commit=True):
         instance = self.save(commit=False)
         instance.owner = owner
+        instance.plant = plant
         if commit:
             instance.save()
             self.save_m2m()

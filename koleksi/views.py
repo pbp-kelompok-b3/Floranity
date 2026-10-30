@@ -49,7 +49,7 @@ def jurnal_tambah(request):
     }
     form = JournalLogForm(request.POST or None, request.FILES or None, initial=initial)
     if request.method == "POST" and form.is_valid():
-        form.save_for_owner(request.user)
+        form.save_for_owner(request.user, plant=linked_plant)
         messages.success(request, "Catatan jurnal berhasil disimpan.")
         return redirect("koleksi:jurnal")
     return render(request, "journal/journal_log_form.html", {
@@ -195,11 +195,7 @@ def detail(request, tanaman_id):
 
     context = {
         "tanaman": tanaman,
-        "jurnal_list": JournalLog.objects.filter(
-            owner=request.user,
-            plant_name__iexact=tanaman.nama_panggilan,
-            plant_species__iexact=tanaman.nama_ilmiah,
-        ),
+        "jurnal_list": JournalLog.objects.filter(owner=request.user, plant=tanaman),
         "journal_create_url": reverse("koleksi:jurnal_tambah") + "?" + urlencode({
             "plant_id": tanaman.pk,
             "plant_name": tanaman.nama_panggilan,
@@ -209,6 +205,10 @@ def detail(request, tanaman_id):
         "journal_form": JurnalPertumbuhanForm(initial={"tanggal": date.today()}),
         "foto_url": "",
     }
+    if not context["jurnal_list"].exists() and tanaman.pemilik is None:
+        sample_log = sample_data.SAMPLE_JOURNAL_LOG
+        if sample_log.get("plant_id") == tanaman.pk:
+            context["sample_log"] = sample_log
     return render(request, "koleksi/koleksi_detail.html", context)
 
 
@@ -371,13 +371,8 @@ def add_journal(request, tanaman_id):
             jurnal.save()
             messages.success(request, "Catatan jurnal berhasil ditambahkan!")
         else:
-            context = {
-                "tanaman": tanaman,
-                "jurnal_list": tanaman.jurnals.all(),
-                "hari_ini": date.today().isoformat(),
-                "journal_form": form,
-                "foto_url": request.POST.get("foto_url", "") or (post_data.get("foto", "") if request.FILES.get("foto") else ""),
-            }
-            return render(request, "koleksi/koleksi_detail.html", context)
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{field}: {error}")
 
     return redirect("koleksi:detail", tanaman_id=tanaman_id)
