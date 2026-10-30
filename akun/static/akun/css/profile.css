@@ -88,6 +88,46 @@
 .account-message + .account-message { margin-top: .5rem; }
 .account-removal { max-width: 740px; margin: 0 auto; }
 .account-removal h2 { margin-bottom: .8rem; }
+
+/* Bring the public profile in line with Floranity's shared site palette and type. */
+.account-profile-page {
+    --account-primary: var(--leaf);
+    --account-secondary: var(--leaf2);
+    --account-soft: #eef3e6;
+    --account-background: var(--paper);
+    --account-text: var(--ink);
+    --account-muted: var(--muted);
+    --account-line: var(--color-border);
+    font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+    font-size: 1rem;
+    max-width: 68rem;
+    margin: 0 auto;
+    padding: 2.5rem 1.25rem 4rem;
+}
+.account-profile-page h1,
+.account-profile-page h2,
+.account-profile-page h3 { font-family: 'Manrope', sans-serif; color: var(--leaf); font-weight: 600; }
+.account-profile-page h1 { font-size: clamp(2rem, 4vw, 3.35rem); letter-spacing: -.065em; }
+.account-profile-page h2 { letter-spacing: -.045em; }
+.account-profile-page .account-profile-card { border-radius: 19px; }
+.account-profile-page .account-cover { background: #eef3e6; }
+.account-profile-page .account-cover-leaf { color: #8b9b69; }
+.account-profile-page .account-avatar { border-color: #fff; }
+.account-profile-page .account-pill { border-radius: 999px; }
+.account-profile-page .account-button {
+    border-radius: 999px;
+    background: var(--leaf);
+    min-height: 52px;
+    padding: .75rem 1.4rem;
+    transition: transform .2s, background .2s;
+}
+.account-profile-page .account-button:hover { transform: translateY(-2px); background: #173b2c; }
+.account-profile-page .account-button-outline { background: #fff; color: var(--leaf); border-color: rgba(36, 77, 59, .19); }
+.account-profile-page .account-button-outline:hover { background: #edf0e4; }
+.account-profile-page .account-danger-link { color: var(--muted); }
+@media (max-width: 650px) {
+    .account-profile-page { padding: 1rem 1rem 2.5rem; }
+}
 @media (max-width: 900px) {
     .account-story, .account-login-form { padding: 2rem; }
     .account-edit-grid { grid-template-columns: 230px 1fr; gap: 1rem; }

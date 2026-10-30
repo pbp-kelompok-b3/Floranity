@@ -5,11 +5,11 @@
 {% block extra_css %}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Doppio+One&family=Gidole&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{% static 'akun/css/profile.css' %}?v=5">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'akun/css/profile.css' %}?v=6">
 {% endblock %}
 {% block content %}
-<div class="account-page">
+<div class="account-page account-profile-page">
     {% if messages %}
     <div class="account-messages" role="status" aria-live="polite">
         {% for message in messages %}<p class="account-message {{ message.tags }}">{{ message }}</p>{% endfor %}
