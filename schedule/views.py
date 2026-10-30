@@ -2,17 +2,20 @@ import math
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseNotAllowed
+from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.views.decorators.http import require_GET, require_POST
 
 from journal.models import JournalLog
+from koleksi.decorators import rate_limit_sensitive
 
 from .models import WateringSchedule
 from .services import HORIZON_DAYS, schedule_groups, synchronize
 
 
 @login_required
+@require_GET
 def calendar(request):
     city = request.session.get("schedule_city", "Jakarta")
     entries = schedule_groups(request.user)
@@ -42,10 +45,9 @@ def calendar(request):
 
 
 @login_required
+@require_POST
+@rate_limit_sensitive(max_requests=8, window_seconds=60, key_prefix="schedule")
 def synchronize_schedule(request):
-    if request.method != "POST":
-        return HttpResponseNotAllowed(["POST"])
-
     raw_latitude = request.POST.get("latitude", "").strip()
     raw_longitude = request.POST.get("longitude", "").strip()
     latitude = longitude = None
@@ -93,27 +95,31 @@ def synchronize_schedule(request):
 
 
 @login_required
+@require_POST
+@rate_limit_sensitive(max_requests=25, window_seconds=60, key_prefix="schedule")
 def mark_complete(request, schedule_id):
-    if request.method != "POST":
-        return HttpResponseNotAllowed(["POST"])
-
-    schedule = get_object_or_404(
-        WateringSchedule.objects.select_related("plant"),
-        pk=schedule_id,
-        owner=request.user,
-        plant__pemilik=request.user,
-    )
-    if schedule.status == WateringSchedule.Status.PLANNED:
-        JournalLog.objects.create(
+    with transaction.atomic():
+        schedule = get_object_or_404(
+            WateringSchedule.objects.select_related("plant"),
+            pk=schedule_id,
             owner=request.user,
-            plant=schedule.plant,
-            occurred_at=timezone.now(),
-            plant_name=schedule.plant.nama_panggilan,
-            plant_species=schedule.plant.nama_ilmiah,
-            activity=JournalLog.Activity.WATERING,
-            notes="Penyiraman dicatat dari jadwal perawatan Floranity.",
+            plant__pemilik=request.user,
         )
-        schedule.status = WateringSchedule.Status.COMPLETED
-        schedule.save(update_fields=["status", "updated_at"])
+        completed = WateringSchedule.objects.filter(
+            pk=schedule.pk,
+            owner=request.user,
+            status=WateringSchedule.Status.PLANNED,
+        ).update(status=WateringSchedule.Status.COMPLETED, updated_at=timezone.now())
+        if completed:
+            JournalLog.objects.create(
+                owner=request.user,
+                plant=schedule.plant,
+                occurred_at=timezone.now(),
+                plant_name=schedule.plant.nama_panggilan,
+                plant_species=schedule.plant.nama_ilmiah,
+                activity=JournalLog.Activity.WATERING,
+                notes="Penyiraman dicatat dari jadwal perawatan Floranity.",
+            )
+    if completed:
         messages.success(request, f"Penyiraman {schedule.plant.nama_panggilan} dicatat di jurnal.")
     return redirect("schedule:calendar")
