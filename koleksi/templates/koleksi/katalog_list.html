@@ -14,10 +14,10 @@
     <h1>Katalog Tanaman</h1>
   </div>
 
-  <form class="fl-cari" method="get" action="{% url 'koleksi:catalog' %}">
+  <form class="fl-cari" method="get" action="{% url 'koleksi:catalog' %}" id="catalog-search-form">
     <label class="fl-sr-only" for="cari-spesies">Cari spesies</label>
     <input type="search" id="cari-spesies" name="q" value="{{ q|default:'' }}"
-           placeholder="Nama tanaman dalam bahasa Inggris, misalnya monstera">
+           placeholder="Nama tanaman dalam bahasa Inggris, misalnya monstera" autocomplete="off">
 
     <label class="fl-sr-only" for="filter-air">Kebutuhan air</label>
     <select id="filter-air" name="air">
@@ -38,50 +38,164 @@
     <button class="fl-btn" type="submit">Terapkan</button>
   </form>
 
-  {% if spesies_list %}
-    <ul class="fl-grid">
-      {% for spesies in spesies_list %}
-        <li>
-          <a class="fl-kartu" href="{% url 'koleksi:catalog_detail' spesies.id %}">
-            <span class="fl-kartu__gambar">
-              {% if spesies.gambar %}
-                <img src="{{ spesies.gambar }}" alt="Foto {{ spesies.nama_umum }}" loading="lazy">
-              {% else %}
-                🌿
-              {% endif %}
-            </span>
-            <span class="fl-kartu__isi">
-              <span class="fl-kartu__nama">{{ spesies.nama_umum }}</span>
-              <span class="fl-kartu__ilmiah">{{ spesies.nama_ilmiah }}</span>
-            </span>
-          </a>
-        </li>
-      {% endfor %}
-    </ul>
+  <div id="catalog-results">
+    {% if spesies_list %}
+      <ul class="fl-grid">
+        {% for spesies in spesies_list %}
+          <li>
+            <a class="fl-kartu" href="{% url 'koleksi:catalog_detail' spesies.id %}">
+              <span class="fl-kartu__gambar">
+                {% if spesies.gambar %}
+                  <img src="{{ spesies.gambar }}" alt="Foto {{ spesies.nama_umum }}" loading="lazy">
+                {% else %}
+                  🌿
+                {% endif %}
+              </span>
+              <span class="fl-kartu__isi">
+                <span class="fl-kartu__nama">{{ spesies.nama_umum }}</span>
+                <span class="fl-kartu__ilmiah">{{ spesies.nama_ilmiah }}</span>
+              </span>
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
 
-    <nav class="fl-paginasi" aria-label="Navigasi halaman katalog">
-      {% if halaman > 1 %}
-        <a class="fl-btn fl-btn--sekunder" href="?{{ query_filter }}&page={{ halaman|add:'-1' }}">Sebelumnya</a>
-      {% else %}
-        <span class="fl-btn fl-btn--sekunder fl-paginasi__mati" aria-disabled="true">Sebelumnya</span>
-      {% endif %}
-      <span>Halaman {{ halaman }}</span>
-      {% if ada_halaman_berikut %}
-        <a class="fl-btn fl-btn--sekunder" href="?{{ query_filter }}&page={{ halaman|add:'1' }}">Berikutnya</a>
-      {% else %}
-        <span class="fl-btn fl-btn--sekunder fl-paginasi__mati" aria-disabled="true">Berikutnya</span>
-      {% endif %}
-    </nav>
-  {% else %}
-    <div class="fl-kosong" role="status" aria-live="polite">
-      {% if api_error %}
-        <p>Katalog sedang tidak dapat dijangkau. Coba lagi sebentar, atau telusuri data yang tersedia.</p>
-        <a class="fl-btn" href="{% url 'koleksi:catalog' %}?q={{ q|urlencode }}&amp;air={{ air|urlencode }}&amp;cahaya={{ cahaya|urlencode }}">Coba lagi</a>
-      {% else %}
-        <p>Tidak ada spesies yang cocok dengan pencarian dan filter yang dipakai.</p>
-      {% endif %}
-      <a class="fl-btn fl-btn--sekunder" href="{% url 'koleksi:catalog' %}">Hapus filter</a>
-    </div>
-  {% endif %}
+      <nav class="fl-paginasi" aria-label="Navigasi halaman katalog">
+        {% if halaman > 1 %}
+          <a class="fl-btn fl-btn--sekunder" href="?{{ query_filter }}&page={{ halaman|add:'-1' }}">Sebelumnya</a>
+        {% else %}
+          <span class="fl-btn fl-btn--sekunder fl-paginasi__mati" aria-disabled="true">Sebelumnya</span>
+        {% endif %}
+        <span>Halaman {{ halaman }}</span>
+        {% if ada_halaman_berikut %}
+          <a class="fl-btn fl-btn--sekunder" href="?{{ query_filter }}&page={{ halaman|add:'1' }}">Berikutnya</a>
+        {% else %}
+          <span class="fl-btn fl-btn--sekunder fl-paginasi__mati" aria-disabled="true">Berikutnya</span>
+        {% endif %}
+      </nav>
+    {% else %}
+      <div class="fl-kosong" role="status" aria-live="polite">
+        {% if api_error %}
+          <p>Katalog sedang tidak dapat dijangkau. Coba lagi sebentar, atau telusuri data yang tersedia.</p>
+          <a class="fl-btn" href="{% url 'koleksi:catalog' %}?q={{ q|urlencode }}&amp;air={{ air|urlencode }}&amp;cahaya={{ cahaya|urlencode }}">Coba lagi</a>
+        {% else %}
+          <p>Tidak ada spesies yang cocok dengan pencarian dan filter yang dipakai.</p>
+        {% endif %}
+        <a class="fl-btn fl-btn--sekunder" href="{% url 'koleksi:catalog' %}">Hapus filter</a>
+      </div>
+    {% endif %}
+  </div>
 </div>
+
+<script>
+  // Menerapkan Search Debouncing pada Pencarian Katalog (Sesuai Konsep Tutorial 05)
+  (function() {
+    const SEARCH_DEBOUNCE_DELAY = 300;
+    let searchDebounceTimer;
+    let catalogAbortController;
+
+    const searchInput = document.getElementById("cari-spesies");
+    const searchForm = document.getElementById("catalog-search-form");
+    const filterAir = document.getElementById("filter-air");
+    const filterCahaya = document.getElementById("filter-cahaya");
+    const resultsContainer = document.getElementById("catalog-results");
+
+    async function fetchCatalog(searchParams = "") {
+      if (catalogAbortController) catalogAbortController.abort();
+      catalogAbortController = new AbortController();
+
+      const queryPrefix = searchParams ? (searchParams.startsWith("?") ? searchParams : "?" + searchParams) : "";
+      const url = "{% url 'koleksi:catalog' %}" + queryPrefix;
+
+      if (resultsContainer) {
+        resultsContainer.style.opacity = "0.5";
+        resultsContainer.style.transition = "opacity 0.2s ease";
+      }
+
+      try {
+        const response = await fetch(url, {
+          headers: { "X-Requested-With": "XMLHttpRequest" },
+          signal: catalogAbortController.signal,
+        });
+
+        if (!response.ok) throw new Error("Gagal mengambil data katalog");
+
+        const html = await response.text();
+        const doc = new DOMParser().parseFromString(html, "text/html");
+        const newResults = doc.getElementById("catalog-results");
+
+        if (newResults && resultsContainer) {
+          resultsContainer.innerHTML = newResults.innerHTML;
+        }
+
+        // Sinkronkan URL di bilah browser tanpa reload
+        window.history.replaceState({}, "", url);
+      } catch (error) {
+        if (error.name === "AbortError") return;
+        console.error("Error fetching catalog:", error);
+      } finally {
+        if (resultsContainer) {
+          resultsContainer.style.opacity = "1";
+        }
+      }
+    }
+
+    function searchCatalog() {
+      const q = searchInput ? searchInput.value.trim() : "";
+      const air = filterAir ? filterAir.value : "";
+      const cahaya = filterCahaya ? filterCahaya.value : "";
+      const params = new URLSearchParams();
+      if (q) params.set("q", q);
+      if (air) params.set("air", air);
+      if (cahaya) params.set("cahaya", cahaya);
+
+      fetchCatalog(params.toString());
+    }
+
+    if (searchInput) {
+      searchInput.addEventListener("input", function() {
+        clearTimeout(searchDebounceTimer);
+        searchDebounceTimer = setTimeout(function() {
+          searchCatalog();
+        }, SEARCH_DEBOUNCE_DELAY);
+      });
+    }
+
+    if (searchForm) {
+      searchForm.addEventListener("submit", function(event) {
+        event.preventDefault();
+        clearTimeout(searchDebounceTimer);
+        searchCatalog();
+      });
+    }
+
+    if (filterAir) {
+      filterAir.addEventListener("change", function() {
+        clearTimeout(searchDebounceTimer);
+        searchCatalog();
+      });
+    }
+
+    if (filterCahaya) {
+      filterCahaya.addEventListener("change", function() {
+        clearTimeout(searchDebounceTimer);
+        searchCatalog();
+      });
+    }
+
+    // Intersepsi klik paginasi & reset filter agar berjalan tanpa reload
+    if (resultsContainer) {
+      resultsContainer.addEventListener("click", function(event) {
+        const link = event.target.closest("a");
+        if (link && link.href) {
+          const targetUrl = new URL(link.href, window.location.origin);
+          if (targetUrl.pathname === "{% url 'koleksi:catalog' %}") {
+            event.preventDefault();
+            fetchCatalog(targetUrl.search);
+          }
+        }
+      });
+    }
+  })();
+</script>
 {% endblock %}
