@@ -16,11 +16,11 @@
     <header class="site-header">
         {% block navbar %}
         <nav class="navbar-container">
-            <a class="brand-logo" href="\" aria-label="Floranity — Beranda">
+            <a class="brand-logo" href="/" aria-label="Floranity — Beranda">
                 <img src="{% static 'images/horizontal.svg' %}" alt="Floranity">
             </a>
 
-            <button class="nav-toggle" type="button" aria-label="Open Navigation Bar" aria-expanded="false" aria-controls="nav-menu">
+            <button class="nav-toggle" type="button" aria-label="Buka navigasi" aria-expanded="false" aria-controls="nav-menu">
                 <span></span>
                 <span></span>
                 <span></span>
@@ -33,7 +33,11 @@
                 <li><a href="/kalender/" class="nav-link">Kalender</a></li>
                 <li><a href="/forum/" class="nav-link">Forum</a></li>
             </ul>
-        <a>Login</a>
+        {% if user.is_authenticated %}
+        <a href="{% url 'akun:my_profile' %}" class="nav-link user-profile-badge">Profil Saya</a>
+        {% else %}
+        <a href="{% url 'akun:login' %}" class="nav-link">Login</a>
+        {% endif %}
         </nav>
         {% endblock navbar %}
     </header>

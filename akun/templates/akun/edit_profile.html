@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Edit profil · Floranity{% endblock %}
+{% block extra_css %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Doppio+One&family=Gidole&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'akun/css/profile.css' %}?v=5">
+{% endblock %}
+{% block content %}
+<div class="account-page">
+    {% if messages %}
+    <div class="account-messages" role="status" aria-live="polite">
+        {% for message in messages %}<p class="account-message {{ message.tags }}">{{ message }}</p>{% endfor %}
+    </div>
+    {% endif %}
+    <div class="account-topline"><div><span class="account-eyebrow">JADI DIRIMU SENDIRI</span><h1>Edit profil</h1></div><a class="account-text-link" href="{% url 'akun:my_profile' %}">← Profil saya</a></div>
+<div class="account-edit-grid">
+    <aside class="account-side-note">
+        {% if profile.avatar_url %}
+        <img class="account-avatar" src="{{ profile.avatar_url }}" alt="Foto profil {{ profile.display_name }}" width="112" height="112" referrerpolicy="no-referrer">
+        {% else %}
+        <span class="account-avatar account-initials" role="img" aria-label="Inisial {{ profile.display_name }}">{{ profile.initials }}</span>
+        {% endif %}
+        <h2>Sedikit tentangmu,<br>banyak cerita baru.</h2>
+        <p class="account-muted">Nama, foto, dan bio ini akan tampil di profil publikmu.</p>
+        <span class="account-pill">RUANG UNTUK BERTUMBUH</span>
+    </aside>
+    <form class="account-form-card" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <h2>Informasi profil</h2><p class="account-muted account-form-intro">Buat sesama pecinta tanaman lebih mengenalmu.</p>
+        {% if form.non_field_errors %}<div class="account-field-errors" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+        {% for field in form %}
+        <div class="account-field{% if field.errors %} account-field-invalid{% endif %}">
+            {% if field.name == 'remove_photo' %}<label class="account-check">{{ field }} {{ field.label }}</label>{% else %}<label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %}<span class="account-required" aria-hidden="true"> *</span>{% endif %}</label>{{ field }}{% endif %}
+            {% if field.help_text %}<p class="account-help" id="{{ field.auto_id }}_helptext">{{ field.help_text }}</p>{% endif %}
+            {% for error in field.errors %}<p class="account-field-errors" id="{{ field.auto_id }}_error" role="alert">{{ error }}</p>{% endfor %}
+        </div>
+        {% endfor %}
+        <div class="account-form-actions"><a href="{% url 'akun:my_profile' %}" class="account-text-link">Batal</a><button class="account-button" type="submit">Simpan perubahan <span aria-hidden="true">↗</span></button></div>
+    </form>
+</div>
+
+</div>
+{% endblock %}
