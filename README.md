@@ -57,3 +57,63 @@ Menyediakan fungsi **CRUD** untuk entitas Profil Pengguna yang terhubung *one-to
 ## Tautan Desain Figma
 [Link Figma](https://www.figma.com/design/qbUWPRG2hfBVHtiduK0h2W/Floranity---UI-UX?node-id=0-1&t=jYRySARAl85jCrX0-1)
 
+
+
+## Panduan Instalasi dan Setup Lokal
+
+Ikuti langkah-langkah berikut untuk menjalankan Floranity di lingkungan lokal:
+
+1. **Clone Repositori:**
+   ```bash
+   git clone https://github.com/pbp-kelompok-b3/floranity.git
+   cd floranity
+   ```
+
+2. **Buat dan Aktifkan Virtual Environment:**
+   * Di Windows (PowerShell):
+     ```powershell
+     python -m venv venv
+     .\venv\Scripts\Activate.ps1
+     ```
+   * Di Linux / macOS:
+     ```bash
+     python3 -m venv venv
+     source venv/bin/activate
+     ```
+
+3. **Install Dependensi:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Konfigurasi Environment Variable:**
+   Salin `.env.example` menjadi `.env`:
+   ```bash
+   cp .env.example .env
+   ```
+   Sesuaikan variabel yang diperlukan (misalnya `SECRET_KEY`, `PRODUCTION=False`).
+
+5. **Jalankan Migrasi Database:**
+   ```bash
+   python manage.py migrate
+   ```
+
+6. **Jalankan Server Pengembang:**
+   ```bash
+   python manage.py runserver
+   ```
+   Aplikasi dapat diakses melalui peramban di `http://127.0.0.1:8000/`.
+
+7. **Menjalankan Pengujian Unit (*Unit Tests*):**
+   ```bash
+   python manage.py test
+   ```
+
+---
+
+## AI Disclosure & Transparansi Penggunaan AI
+
+Pengembangan platform Floranity memanfaatkan *Artificial Intelligence* (AI) seperti **GitHub Copilot**, **ChatGPT (GPT-4o)**, dan **Claude 3.5 Sonnet** secara bertanggung jawab dengan pendekatan *Human-in-the-Loop*. AI berperan semata-mata sebagai akselerator penulisan *boilerplate code* dan referensi skema awal, sedangkan perancangan arsitektur, penegakan keamanan, mitigasi celah, dan validasi data ditangani secara manual oleh pengembang.
+
+Laporan komprehensif mengenai strategi prompt, keterbatasan kritis AI (seperti celah otorisasi BOLA, XSS, open redirect, dan ketiadaan caching), serta perbaikan manual yang dilakukan untuk setiap modul dapat dibaca secara lengkap pada dokumen:
+👉 **[Laporan Lengkap AI Disclosure (AI_DISCLOSURE.md)](AI_DISCLOSURE.md)**
