@@ -1,3 +1,5 @@
+import hashlib
+import math
 from collections import defaultdict
 from datetime import date, datetime, timedelta
 from decimal import Decimal, InvalidOperation
@@ -5,6 +7,7 @@ from zoneinfo import ZoneInfo
 
 import requests
 from django.conf import settings
+from django.core.cache import cache
 from django.db import transaction
 from django.db.models import Max, Q
 from django.utils import timezone
@@ -20,6 +23,38 @@ OPEN_METEO_GEOCODING_URL = "https://geocoding-api.open-meteo.com/v1/search"
 OPEN_METEO_FORECAST_URL = "https://api.open-meteo.com/v1/forecast"
 HORIZON_DAYS = 7
 RAIN_SKIP_MM = 5
+WEATHER_CACHE_SECONDS = 20 * 60
+WEATHER_STALE_SECONDS = 24 * 60 * 60
+
+
+def _finite_number(value):
+    if isinstance(value, bool):
+        return None
+    try:
+        number = float(value)
+    except (TypeError, ValueError, OverflowError):
+        return None
+    return number if math.isfinite(number) else None
+
+
+def _bounded_number(value, minimum, maximum):
+    number = _finite_number(value)
+    return number if number is not None and minimum <= number <= maximum else None
+
+
+def _cache_get(key):
+    try:
+        return cache.get(key)
+    except Exception:
+        return None
+
+
+def _cache_set(key, value, timeout):
+    try:
+        cache.set(key, value, timeout)
+    except Exception:
+        # Caching is optional; weather providers remain usable without the cache.
+        pass
 
 
 def _decimal(value):
@@ -29,27 +64,37 @@ def _decimal(value):
         return None
 
 
-def _water_interval(plant):
-    """Map Perenual's care level (or the saved species guide) to days."""
-    water_level = plant.penyiraman or ""
-    if plant.spesies_id and getattr(settings, "PERENUAL_API_KEY", ""):
-        try:
-            species = perenual.ambil_spesies(plant.spesies_id)
-            if species and species.get("penyiraman"):
-                water_level = species["penyiraman"]
-        except Exception:
-            pass
-
+def _parse_water_interval(water_level):
+    if not isinstance(water_level, str) or not water_level.strip():
+        return None
     normalized = water_level.strip().lower()
     if normalized in ("none", "tidak perlu", "tidak perlu penyiraman", "no watering"):
-        return None
+        return 0
     if any(term in normalized for term in ("daily", "setiap hari", "frequent", "sering")):
         return 2
     if any(term in normalized for term in ("weekly", "mingguan", "minimum", "sedikit", "jarang", "rare")):
         return 7
     if any(term in normalized for term in ("average", "rata-rata", "moderate", "sedang", "occasional")):
         return 4
-    return 4
+    return None
+
+
+def _water_interval(plant):
+    """Use valid Perenual guidance, then saved species guidance, then a safe default."""
+    saved_interval = _parse_water_interval(plant.penyiraman)
+    if plant.spesies_id and plant.spesies_id > 0 and getattr(settings, "PERENUAL_API_KEY", ""):
+        try:
+            species = perenual.ambil_spesies(plant.spesies_id)
+            api_interval = _parse_water_interval(species.get("penyiraman")) if species else None
+            if api_interval is not None:
+                return None if api_interval == 0 else api_interval
+        except Exception:
+            # The saved species guide remains available when Perenual is down or malformed.
+            pass
+
+    if saved_interval == 0:
+        return None
+    return saved_interval or 4
 
 
 def _openweather_forecast(city, api_key, today, latitude=None, longitude=None):
@@ -65,19 +110,42 @@ def _openweather_forecast(city, api_key, today, latitude=None, longitude=None):
     )
     response.raise_for_status()
     payload = response.json()
+    if not isinstance(payload, dict) or str(payload.get("cod", "200")) != "200":
+        raise ValueError("Respons OpenWeather tidak valid.")
+    forecast_entries = payload.get("list")
+    if not isinstance(forecast_entries, list):
+        raise ValueError("Data prakiraan OpenWeather tidak tersedia.")
+
     local_tz = ZoneInfo(settings.TIME_ZONE)
     grouped = defaultdict(lambda: {"rain": 0.0, "temps": [], "humidities": []})
-    for entry in payload.get("list", []):
-        forecast_day = datetime.fromtimestamp(entry["dt"], tz=local_tz).date()
+    has_measurements = False
+    for entry in forecast_entries:
+        if not isinstance(entry, dict):
+            continue
+        timestamp = _finite_number(entry.get("dt"))
+        if timestamp is None:
+            continue
+        try:
+            forecast_day = datetime.fromtimestamp(timestamp, tz=local_tz).date()
+        except (OverflowError, OSError, ValueError):
+            continue
         if not today <= forecast_day <= today + timedelta(days=HORIZON_DAYS - 1):
             continue
         values = grouped[forecast_day]
-        values["rain"] += float(entry.get("rain", {}).get("3h", 0) or 0)
-        main = entry.get("main", {})
-        if main.get("temp_max") is not None:
-            values["temps"].append(float(main["temp_max"]))
-        if main.get("humidity") is not None:
-            values["humidities"].append(float(main["humidity"]))
+        rain = entry.get("rain") if isinstance(entry.get("rain"), dict) else {}
+        rain_amount = _bounded_number(rain.get("3h"), 0, 1000)
+        if rain_amount is not None:
+            values["rain"] += rain_amount
+            has_measurements = True
+        main = entry.get("main") if isinstance(entry.get("main"), dict) else {}
+        temp = _bounded_number(main.get("temp_max"), -90, 70)
+        humidity = _bounded_number(main.get("humidity"), 0, 100)
+        if temp is not None:
+            values["temps"].append(temp)
+            has_measurements = True
+        if humidity is not None:
+            values["humidities"].append(humidity)
+            has_measurements = True
 
     forecast = {
         day: {
@@ -87,6 +155,8 @@ def _openweather_forecast(city, api_key, today, latitude=None, longitude=None):
         }
         for day, values in grouped.items()
     }
+    if not forecast or not has_measurements:
+        raise ValueError("OpenWeather tidak mengembalikan prakiraan yang bisa digunakan.")
     return forecast
 
 
@@ -98,12 +168,17 @@ def _open_meteo_forecast(city, today, latitude=None, longitude=None):
             timeout=8,
         )
         location_response.raise_for_status()
-        locations = location_response.json().get("results", [])
+        location_payload = location_response.json()
+        locations = location_payload.get("results", []) if isinstance(location_payload, dict) else []
         if not locations:
             raise ValueError("Lokasi tidak ditemukan.")
         location = locations[0]
-        latitude = location["latitude"]
-        longitude = location["longitude"]
+        if not isinstance(location, dict):
+            raise ValueError("Koordinat lokasi tidak valid.")
+        latitude = _bounded_number(location.get("latitude"), -90, 90)
+        longitude = _bounded_number(location.get("longitude"), -180, 180)
+        if latitude is None or longitude is None:
+            raise ValueError("Koordinat lokasi tidak valid.")
 
     forecast_response = requests.get(
         OPEN_METEO_FORECAST_URL,
@@ -117,43 +192,108 @@ def _open_meteo_forecast(city, today, latitude=None, longitude=None):
         timeout=8,
     )
     forecast_response.raise_for_status()
-    daily = forecast_response.json().get("daily", {})
+    payload = forecast_response.json()
+    daily = payload.get("daily", {}) if isinstance(payload, dict) else {}
+    if not isinstance(daily, dict) or not isinstance(daily.get("time"), list):
+        raise ValueError("Data harian Open-Meteo tidak valid.")
+
+    rain_values = daily.get("precipitation_sum")
+    temp_values = daily.get("temperature_2m_max")
+    humidity_values = daily.get("relative_humidity_2m_mean")
+    if not any(isinstance(values, list) and values for values in (rain_values, temp_values, humidity_values)):
+        raise ValueError("Open-Meteo tidak mengembalikan data cuaca harian.")
+
+    def value_at(values, index):
+        if not isinstance(values, list) or index >= len(values):
+            return None
+        return _finite_number(values[index])
+
     forecast = {}
-    for index, day_text in enumerate(daily.get("time", [])):
-        day = date.fromisoformat(day_text)
+    for index, day_text in enumerate(daily["time"]):
+        try:
+            day = date.fromisoformat(day_text)
+        except (TypeError, ValueError):
+            continue
         if day < today:
             continue
-        forecast[day] = {
-            "rain": (daily.get("precipitation_sum") or [])[index],
-            "temp_max": (daily.get("temperature_2m_max") or [])[index],
-            "humidity": (daily.get("relative_humidity_2m_mean") or [])[index],
-        }
+        rain = _bounded_number(value_at(rain_values, index), 0, 1000)
+        temp = _bounded_number(value_at(temp_values, index), -90, 70)
+        humidity = _bounded_number(value_at(humidity_values, index), 0, 100)
+        forecast[day] = {"rain": rain, "temp_max": temp, "humidity": humidity}
+    if not forecast or not any(any(value is not None for value in weather.values()) for weather in forecast.values()):
+        raise ValueError("Open-Meteo tidak mengembalikan tanggal prakiraan yang valid.")
     return forecast
 
 
 def get_weather_forecast(city, today=None, latitude=None, longitude=None):
     """Get daily rain and heat values, preferring configured OpenWeather data."""
     today = today or timezone.localdate()
-    city = city.strip()
-    has_coordinates = latitude is not None and longitude is not None
+    city = city.strip() if isinstance(city, str) else ""
+    latitude = _finite_number(latitude) if latitude is not None else None
+    longitude = _finite_number(longitude) if longitude is not None else None
+    if (
+        latitude is not None and longitude is not None
+        and (-90 <= latitude <= 90 and -180 <= longitude <= 180)
+    ):
+        has_coordinates = True
+    else:
+        latitude = longitude = None
+        has_coordinates = False
     if not city and not has_coordinates:
         return {}, "Tidak tersedia", "Masukkan kota untuk mengambil prakiraan cuaca."
+
+    location_key = (
+        f"coords:{latitude:.3f}:{longitude:.3f}"
+        if has_coordinates else f"city:{city.casefold()}"
+    )
+    location_digest = hashlib.sha256(location_key.encode("utf-8")).hexdigest()
+    cache_digest = hashlib.sha256(f"{today.isoformat()}:{location_key}".encode("utf-8")).hexdigest()
+    cache_key = f"schedule:weather:{cache_digest}"
+    stale_key = f"schedule:weather:stale:{location_digest}"
+    cached = _cache_get(cache_key)
+    if cached:
+        forecast, provider = cached
+        return forecast, provider, ""
 
     api_key = getattr(settings, "OPENWEATHER_API_KEY", "")
     if api_key:
         try:
-            return _openweather_forecast(city, api_key, today, latitude, longitude), "OpenWeather", ""
-        except (requests.RequestException, ValueError, KeyError, TypeError):
+            forecast = _openweather_forecast(city, api_key, today, latitude, longitude)
+            provider = "OpenWeather"
+            _cache_set(cache_key, (forecast, provider), WEATHER_CACHE_SECONDS)
+            _cache_set(stale_key, (forecast, provider), WEATHER_STALE_SECONDS)
+            return forecast, provider, ""
+        except Exception:
             # Keep the calendar useful if OpenWeather is temporarily unavailable.
             try:
-                return _open_meteo_forecast(city, today, latitude, longitude), "Open-Meteo", "Prakiraan OpenWeather tidak tersedia; memakai prakiraan alternatif."
-            except (requests.RequestException, ValueError, KeyError, TypeError):
-                return {}, "Tidak tersedia", "Prakiraan cuaca belum dapat dimuat. Jadwal memakai panduan kebutuhan air tanaman."
+                forecast = _open_meteo_forecast(city, today, latitude, longitude)
+                provider = "Open-Meteo"
+                _cache_set(cache_key, (forecast, provider), WEATHER_CACHE_SECONDS)
+                _cache_set(stale_key, (forecast, provider), WEATHER_STALE_SECONDS)
+                return forecast, provider, "Prakiraan OpenWeather tidak tersedia; memakai prakiraan alternatif."
+            except Exception:
+                pass
+    else:
+        try:
+            forecast = _open_meteo_forecast(city, today, latitude, longitude)
+            provider = "Open-Meteo"
+            _cache_set(cache_key, (forecast, provider), WEATHER_CACHE_SECONDS)
+            _cache_set(stale_key, (forecast, provider), WEATHER_STALE_SECONDS)
+            return forecast, provider, ""
+        except Exception:
+            pass
 
-    try:
-        return _open_meteo_forecast(city, today, latitude, longitude), "Open-Meteo", ""
-    except (requests.RequestException, ValueError, KeyError, TypeError):
-        return {}, "Tidak tersedia", "Prakiraan cuaca belum dapat dimuat. Jadwal memakai panduan kebutuhan air tanaman."
+    stale = _cache_get(stale_key)
+    if stale:
+        forecast, provider = stale
+        forecast = {
+            day: values
+            for day, values in forecast.items()
+            if today <= day <= today + timedelta(days=HORIZON_DAYS - 1)
+        }
+        if forecast:
+            return forecast, f"{provider} (tersimpan)", "Prakiraan terbaru gagal dimuat; memakai data cuaca tersimpan selama maksimal 24 jam."
+    return {}, "Tidak tersedia", "Prakiraan cuaca belum dapat dimuat. Jadwal memakai panduan kebutuhan air tanaman."
 
 
 def _recommendation(target_day, forecast):

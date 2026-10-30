@@ -21,17 +21,30 @@
   const selectAll = document.getElementById("select-visible-schedules");
   const scheduleCheckboxes = bulkForm?.querySelectorAll('input[name="schedule_ids"]') || [];
   if (selectAll && bulkForm) {
+    const selectionCount = document.getElementById("selection-count");
+    const bulkActionButtons = bulkForm.querySelectorAll(".schedule-bulk-actions button");
+    const updateSelection = () => {
+      const selectedCount = Array.from(scheduleCheckboxes).filter((checkbox) => checkbox.checked).length;
+      if (selectionCount) {
+        selectionCount.textContent = `${selectedCount} dipilih`;
+      }
+      selectAll.checked = scheduleCheckboxes.length > 0 && selectedCount === scheduleCheckboxes.length;
+      selectAll.indeterminate = selectedCount > 0 && selectedCount < scheduleCheckboxes.length;
+      bulkActionButtons.forEach((button) => {
+        button.disabled = selectedCount === 0;
+      });
+    };
+
     selectAll.addEventListener("change", () => {
       scheduleCheckboxes.forEach((checkbox) => {
         checkbox.checked = selectAll.checked;
       });
+      updateSelection();
     });
     scheduleCheckboxes.forEach((checkbox) => {
-      checkbox.addEventListener("change", () => {
-        selectAll.checked = scheduleCheckboxes.length > 0
-          && Array.from(scheduleCheckboxes).every((item) => item.checked);
-      });
+      checkbox.addEventListener("change", updateSelection);
     });
+    updateSelection();
   }
 
   locationButton.addEventListener("click", () => {

@@ -87,33 +87,41 @@ def calendar(request):
 @require_POST
 @rate_limit_sensitive(max_requests=8, window_seconds=60, key_prefix="schedule")
 def synchronize_schedule(request):
+    city = request.POST.get("city", "").strip()
+    if len(city) > 100 or any(ord(character) < 32 or ord(character) == 127 for character in city):
+        messages.error(request, "Nama kota tidak valid. Masukkan kota hingga 100 karakter.")
+        return redirect("schedule:calendar")
+
     raw_latitude = request.POST.get("latitude", "").strip()
     raw_longitude = request.POST.get("longitude", "").strip()
     latitude = longitude = None
+    coordinate_error = None
     if bool(raw_latitude) != bool(raw_longitude):
-        messages.error(request, "Lokasi perangkat tidak lengkap. Coba pilih lokasi kembali atau masukkan kota.")
-        return redirect("schedule:calendar")
-
-    if raw_latitude and raw_longitude:
+        coordinate_error = "Data lokasi perangkat tidak lengkap."
+    elif raw_latitude and raw_longitude:
         try:
             latitude = float(raw_latitude)
             longitude = float(raw_longitude)
         except ValueError:
-            messages.error(request, "Koordinat lokasi tidak valid. Coba pilih lokasi kembali.")
-            return redirect("schedule:calendar")
-        if (
+            coordinate_error = "Koordinat lokasi tidak valid."
+        if coordinate_error is None and (
             not math.isfinite(latitude)
             or not math.isfinite(longitude)
             or not -90 <= latitude <= 90
             or not -180 <= longitude <= 180
         ):
-            messages.error(request, "Koordinat lokasi berada di luar jangkauan yang valid.")
-            return redirect("schedule:calendar")
+            coordinate_error = "Koordinat lokasi berada di luar jangkauan yang valid."
 
-    city = request.POST.get("city", "").strip()[:100]
+    if coordinate_error:
+        latitude = longitude = None
+        if not city or city.casefold() == "lokasi saya":
+            messages.error(request, f"{coordinate_error} Pilih lokasi lagi atau masukkan kota secara manual.")
+            return redirect("schedule:calendar")
+        messages.warning(request, f"{coordinate_error} Jadwal memakai kota yang dimasukkan.")
+
     if latitude is not None:
         city = city or "Lokasi saya"
-    elif not city:
+    elif not city or city.casefold() == "lokasi saya":
         messages.error(request, "Masukkan kota atau pilih lokasi perangkat untuk memperbarui jadwal cuaca.")
         return redirect("schedule:calendar")
 
