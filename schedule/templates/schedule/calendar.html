@@ -137,9 +137,6 @@
                     <input type="checkbox" name="schedule_ids" value="{{ entry.pk }}">
                     <span class="schedule-sr-only">Pilih jadwal {{ entry.plant.nama_panggilan }} tanggal {{ group.date|date:'j F' }}</span>
                   </label>
-                  <div class="schedule-plant-image">
-                    {% if entry.plant.foto %}<img src="{{ entry.plant.foto }}" alt="" loading="lazy">{% else %}<span aria-hidden="true">♧</span>{% endif %}
-                  </div>
                   <div class="schedule-task-main">
                     <div class="schedule-task-heading">
                       <div>

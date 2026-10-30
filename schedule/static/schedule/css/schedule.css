@@ -210,8 +210,6 @@
 .schedule-task-select { display: grid; flex: 0 0 auto; place-items: center; }
 .schedule-task-select input { width: 1rem; height: 1rem; accent-color: var(--leaf); cursor: pointer; }
 .schedule-sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; clip-path: inset(50%); }
-.schedule-plant-image { display: grid; width: 4rem; height: 4rem; flex: 0 0 auto; place-items: center; overflow: hidden; border-radius: 0.75rem; background: #e8efdd; color: var(--leaf); font-size: 1.5rem; }
-.schedule-plant-image img { width: 100%; height: 100%; object-fit: cover; }
 .schedule-task-main { min-width: 0; flex: 1; }
 .schedule-task-heading { align-items: flex-start; justify-content: space-between; gap: 0.8rem; }
 .schedule-task-heading h4 { color: var(--leaf); font-size: 1rem; }
