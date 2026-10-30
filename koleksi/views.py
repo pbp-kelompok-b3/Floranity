@@ -15,6 +15,9 @@ from django.http import Http404, HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 
+from journal.forms import JournalLogForm
+from journal.models import JournalLog
+
 from .decorators import plant_owner_required, rate_limit_sensitive
 from .forms import JurnalPertumbuhanForm, TanamanForm
 from .models import JurnalPertumbuhan, Tanaman
@@ -22,6 +25,38 @@ from .seed import seed_sample_data_if_empty
 from . import sample_data, services
 
 JUMLAH_PER_HALAMAN = 6
+
+
+@login_required
+def jurnal(request):
+    """List the signed-in user's journal entries."""
+    return render(request, "koleksi/journal_list.html", {
+        "jurnal_list": JournalLog.objects.filter(owner=request.user),
+    })
+
+
+@login_required
+def jurnal_tambah(request):
+    """Render and save the journal feature's dedicated form template."""
+    plant_id = request.POST.get("plant_id") or request.GET.get("plant_id", "")
+    linked_plant = None
+    if str(plant_id).isdigit():
+        linked_plant = Tanaman.objects.filter(pk=int(plant_id), pemilik=request.user).first()
+    initial = {
+        "plant_name": linked_plant.nama_panggilan if linked_plant else request.GET.get("plant_name", ""),
+        "plant_species": linked_plant.nama_ilmiah if linked_plant else request.GET.get("plant_species", ""),
+        "plant_type": request.GET.get("plant_type", ""),
+    }
+    form = JournalLogForm(request.POST or None, request.FILES or None, initial=initial)
+    if request.method == "POST" and form.is_valid():
+        form.save_for_owner(request.user)
+        messages.success(request, "Catatan jurnal berhasil disimpan.")
+        return redirect("koleksi:jurnal")
+    return render(request, "journal/journal_log_form.html", {
+        "form": form,
+        "plant_id": plant_id,
+        "url_batal": reverse("koleksi:jurnal"),
+    })
 
 
 # --------------------------------------------------------------------------

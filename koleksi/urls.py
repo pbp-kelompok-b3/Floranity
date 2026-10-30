@@ -8,6 +8,8 @@ from koleksi.views import (
     update,
     delete,
     add_journal,
+    jurnal,
+    jurnal_tambah,
 )
 
 app_name = "koleksi"
@@ -19,7 +21,9 @@ urlpatterns = [
 
     # Koleksi pribadi
     path("koleksi/", show_collection, name="show_collection"),
-    path("koleksi/jurnal/", views.jurnal, name="jurnal"),
+    path("koleksi/jurnal/", jurnal, name="jurnal"),
+    path("koleksi/jurnal/tambah/", jurnal_tambah, name="jurnal_tambah"),
+    # Journal entries tied to the legacy plant detail form.
     path("koleksi/<int:tanaman_id>/jurnal/tambah/", add_journal, name="add_journal"),
     path("koleksi/tambah/", create_tanaman, name="create_tanaman"),
     path("koleksi/<int:tanaman_id>/", detail, name="detail"),

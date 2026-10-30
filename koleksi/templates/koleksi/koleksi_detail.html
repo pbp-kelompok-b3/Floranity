@@ -53,41 +53,12 @@
     </div>
   </div>
 
-  {% if not tanaman.pemilik or user == tanaman.pemilik %}
   <section class="fl-seksi">
-    <h2>Tambah catatan jurnal</h2>
-    <form class="fl-form" method="post" action="{% url 'koleksi:add_journal' tanaman.id %}"
-          enctype="multipart/form-data">
-      {% csrf_token %}
-      {% if journal_form.errors %}<p class="fl-field-error" role="alert">Periksa kembali tanggal dan catatan jurnal yang kamu isi.</p>{% endif %}
-      <div>
-      <div>
-        <label for="tanggal">Tanggal</label>
-        <input type="date" id="tanggal" name="tanggal" value="{{ journal_form.tanggal.value|default:'' }}" required
-               {% if journal_form.tanggal.errors %}aria-invalid="true" aria-describedby="error-journal-tanggal"{% endif %}>
-        {% for error in journal_form.tanggal.errors %}<p class="fl-field-error" id="error-journal-tanggal" role="alert">{{ error }}</p>{% endfor %}
-      </div>
-      </div>
-      <div>
-        <label for="foto">Foto pertumbuhan</label>
-        <input type="file" id="foto" name="foto" accept="image/*">
-        <p class="fl-form__bantuan">Opsional. Unggah foto langsung, atau tempel tautan URL gambar di bawah.</p>
-        <input type="url" id="foto_url" name="foto_url" value="{{ foto_url|default:'' }}"
-               placeholder="Atau tempel URL gambar: https://..." style="margin-top: 0.5rem;">
-      </div>
-      <div>
-        <label for="catatan">Catatan</label>
-        <textarea id="catatan" name="catatan"
-                  placeholder="Misalnya: muncul dua daun baru, media tanam diganti."
-                  {% if journal_form.catatan.errors %}aria-invalid="true" aria-describedby="error-journal-catatan"{% endif %}>{{ journal_form.catatan.value|default:'' }}</textarea>
-        {% for error in journal_form.catatan.errors %}<p class="fl-field-error" id="error-journal-catatan" role="alert">{{ error }}</p>{% endfor %}
-      </div>
-      <div class="fl-form__aksi">
-        <button class="fl-btn" type="submit">Simpan catatan</button>
-      </div>
-    </form>
+    <h2>Jurnal pertumbuhan</h2>
+    {% if user.is_authenticated and user == tanaman.pemilik %}
+      <a class="fl-btn" href="{% url 'koleksi:jurnal_tambah' %}?plant_id={{ tanaman.id }}&amp;plant_name={{ tanaman.nama_panggilan|urlencode }}&amp;plant_species={{ tanaman.nama_ilmiah|urlencode }}">Tambah catatan jurnal</a>
+    {% endif %}
   </section>
-  {% endif %}
 
     {% if jurnal_list %}
       <ul class="fl-jurnal">
