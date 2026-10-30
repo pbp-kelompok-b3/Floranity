@@ -15,7 +15,7 @@
         {% for message in messages %}<p class="account-message {{ message.tags }}">{{ message }}</p>{% endfor %}
     </div>
     {% endif %}
-    <div class="account-topline"><div><span class="account-eyebrow">RUANG TUMBUH</span><h1>{% if is_owner %}Profil saya{% else %}Profil anggota{% endif %}</h1></div><a href="{% url 'show_home' %}" class="account-text-link">← Beranda</a></div>
+    <div class="account-topline"><div><span class="account-eyebrow">RUANG TUMBUH</span><h1>{% if is_owner %}Profil saya{% else %}Profil anggota{% endif %}</h1></div><a href="{% url 'home' %}" class="account-text-link">← Beranda</a></div>
 <section class="account-profile-card">
     <div class="account-cover"><span>Setiap daun punya cerita.</span><span class="account-cover-leaf" aria-hidden="true">❧</span></div>
     <div class="account-profile-main">
