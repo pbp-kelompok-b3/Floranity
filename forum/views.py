@@ -1,7 +1,9 @@
 from django.http import HttpRequest, HttpResponse, JsonResponse
+from django.urls import reverse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST, require_http_methods
-from django.db.models import Count, Q
+from django.contrib.auth.decorators import login_required
+from django.db.models import Count, Q, Exists, OuterRef
 from forum.forms import PostForm, CommentForm
 from forum.models import Post
 
@@ -19,8 +21,9 @@ def show_forum(request: HttpRequest):
     return render(request, 'forum/forum_page_home.html', context)
 
 # Request handler untuk menampilkan page semua post milik user
+@login_required(login_url="/login/")
 def show_user_post(request: HttpRequest):
-    all_post = get_post_queryset(request, True)
+    all_post = get_post_queryset(request, show_user_only=True)
     for post in all_post:
         post.update_form = PostForm(instance=post)
 
@@ -34,8 +37,11 @@ def show_user_post(request: HttpRequest):
     return render(request, 'forum/forum_page_user_post.html', context)
 
 # Request handler untuk menampilkan page semua post yang disimpan oleh user (bookmarked post)
+@login_required(login_url="/login/")
 def show_bookmarked_post(request: HttpRequest):
-    context = {"post_list" : get_post_queryset(request, True)}
+    all_post = get_post_queryset(request, show_bookmark_only=True)
+
+    context = {"post_list" : all_post}
     if request.headers.get("HX-Request"):
         return render(request, 'forum/post_rows.html', context)
     
@@ -57,15 +63,13 @@ def show_post_page(request: HttpRequest, post_id):
 
 # Request handler untuk menampilkan form membuat post baru
 @require_POST
+@login_required(login_url="/login/")
 def create_post(request: HttpRequest):
     form = PostForm(request.POST or None)
 
     if form.is_valid():
         post = form.save(commit=False)
-        
-        # NOTE: Ketika sistem autentikasi udah ada, uncomment kode di bawah 
-        # post.author = request.user
-
+        post.author = request.user
         post.save()
         return redirect("forum:show_post_page", post_id=post.id)
 
@@ -74,22 +78,21 @@ def create_post(request: HttpRequest):
 # Request handler untuk menampilkan form mengedit post milik user
 # Form yang ditampilkan bukan form kosongan, tapi udah ada isi sesuai sama data post yang di-edit
 @require_POST
+@login_required(login_url="/login/")
 def edit_post(request: HttpRequest, post_id):
     post_obj = get_object_or_404(Post, pk=post_id)
     form = PostForm(request.POST or None, instance=post_obj)
 
     if form.is_valid():
         post = form.save(commit=False)
-
-        # NOTE: Ketika sistem autentikasi udah ada, uncomment kode di bawah 
-        # post.author = request.user
-        
+        post.author = request.user
         post.save()
     
     return redirect("forum:show_user_post")
     
 
 @require_http_methods(["DELETE"])
+@login_required(login_url="/login/")
 def delete_post(request: HttpRequest, post_id):
     post = get_object_or_404(Post, pk=post_id)
     post.delete()
@@ -97,15 +100,27 @@ def delete_post(request: HttpRequest, post_id):
 
 # Request handler untuk mendapatkan semua data post
 # Proses filtering (user only, query search) dilakukan di sini
-def get_post_queryset(request: HttpRequest, show_user_only: bool = False):
+def get_post_queryset(request: HttpRequest, show_user_only: bool = False, show_bookmark_only: bool = False):
     all_post = Post.objects.select_related("author").annotate(
         likes_total=Count("liked", distinct=True), 
-        comments_total=Count("post_comments", distinct=True)
+        comments_total=Count("post_comments", distinct=True),
+        is_liked=Exists(
+            Post.liked.through.objects.filter(
+                post_id=OuterRef("pk"), user_id=request.user.pk
+            )
+        ),
+        is_bookmarked=Exists(
+            Post.bookmarked.through.objects.filter(
+                post_id=OuterRef("pk"), user_id=request.user.pk
+            )
+        ),
         ).order_by("-created_at")
+    
+    if show_user_only:
+        all_post = all_post.filter(author=request.user)
 
-    # NOTE: Ketika sistem autentikasi udah ada, uncomment kode di bawah 
-    # if show_user_only:
-    #     all_post.filter(author=request.user)
+    if show_bookmark_only:
+        all_post = all_post.filter(bookmarked=request.user)
 
     # Untuk filter berdasarkan query "search bar"
     q = request.GET.get("content", "").strip()
@@ -141,34 +156,28 @@ def get_post_queryset(request: HttpRequest, show_user_only: bool = False):
 
 # Request handler untuk men-toggle tombol like pada post ketika diklik
 @require_POST
+@login_required(login_url="/login/")
 def toggle_like_button(request: HttpRequest, post_id):
     post = get_object_or_404(Post, pk=post_id)
 
-    # NOTE: Autentikasi belum ada. Kalau udah ada, uncomment kode di bawah
-    # if request.user in post.liked.all():
-    #     post.liked.remove(request.user)
-    #     return JsonResponse({"toggle_command" : "untoggle"})
+    if request.user in post.liked.all():
+        post.liked.remove(request.user)
+        return JsonResponse({"toggle_command" : "untoggle"})
     
-    # post.liked.add(request.user)
-    # return JsonResponse({"toggle_command" : "toggle"})
-
-    # NOTE: Kode sementara, untuk melihat toggle berhasil
+    post.liked.add(request.user)
     return JsonResponse({"toggle_command" : "toggle"})
 
 # Request handler untuk men-toggle tombol bookmark pada post ketika di klik
 @require_POST
+@login_required(login_url="/login/")
 def toggle_bookmark_button(request: HttpRequest, post_id):
     post = get_object_or_404(Post, pk=post_id)
     
-    # NOTE: Autentikasi belum ada. Kalau udah ada, uncomment kode di bawah
-    # if request.user in post.bookmarked.all():
-    #     request.user.remove(request.user)
-    #     return JsonResponse({"toggle_command" : "untoggle"})
+    if request.user in post.bookmarked.all():
+        post.bookmarked.remove(request.user)
+        return JsonResponse({"toggle_command" : "untoggle"})
     
-    # post.bookmarked.add(request.user)
-    # return JsonResponse({"toggle_command" : "toggle"})
-
-    # NOTE: Kode sementara, untuk melihat toggle active berhasil
+    post.bookmarked.add(request.user)
     return JsonResponse({"toggle_command" : "toggle"})
 
 # Request handler untuk menampilkan comment section pada sebuah post
@@ -187,12 +196,18 @@ def show_comment_section(request: HttpRequest, post_id):
 # Request handler untuk menambahkan komen pada sebuah post
 @require_POST
 def add_comment(request: HttpRequest, post_id):
+    if not request.user.is_authenticated:
+        response = HttpResponse()
+        response["HX-Redirect"] = "/login/"
+        return response
+
     form = CommentForm(request.POST or None)
     post = get_object_or_404(Post, pk=post_id)
     
     if form.is_valid():
         created_comment = form.save(commit=False)
         created_comment.commented_at = post
+        created_comment.user = request.user
         created_comment.save()
 
     all_comments = post.post_comments.all().order_by("-created_at")

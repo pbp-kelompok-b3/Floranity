@@ -21,6 +21,12 @@ document.addEventListener("click", async(event) => {
         return;
     }
 
+    const is_authenticated = button.getAttribute("data-authenticated");
+    if (is_authenticated === "false") {
+        window.location.href = "/login/?next=" + window.location.href;
+        return;
+    }
+
     const url = button.getAttribute("data-url");
     const response = await fetch(url, {
         method: "POST",
