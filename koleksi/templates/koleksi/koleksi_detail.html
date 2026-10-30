@@ -9,8 +9,13 @@
 
 {% block content %}
 <div class="fl-page">
+  {% if messages %}
+    <div class="fl-pesan-container" role="status" aria-live="polite">
+      {% for message in messages %}<p class="fl-pesan">{{ message }}</p>{% endfor %}
+    </div>
+  {% endif %}
   <p class="fl-breadcrumb">
-    <a href="{% url 'koleksi:daftar' %}">Koleksi saya</a> / {{ tanaman.nama_panggilan }}
+    <a href="{% url 'koleksi:show_collection' %}">{% if user.is_authenticated %}Koleksi saya{% else %}Koleksi tanaman{% endif %}</a> / {{ tanaman.nama_panggilan }}
   </p>
 
   <div class="fl-detail">
@@ -37,23 +42,52 @@
       {% if tanaman.catatan %}<p class="fl-form__bantuan">Catatan: {{ tanaman.catatan }}</p>{% endif %}
 
       <div class="fl-detail__aksi">
-        <a class="fl-btn fl-btn--sekunder" href="{% url 'koleksi:ubah' tanaman.id %}">Ubah info</a>
-        <a class="fl-btn fl-btn--bahaya" href="{% url 'koleksi:hapus' tanaman.id %}">Hapus tanaman</a>
+        {% if not tanaman.pemilik or user == tanaman.pemilik %}
+          <a class="fl-btn fl-btn--sekunder" href="{% url 'koleksi:update' tanaman.id %}">Ubah info</a>
+          <a class="fl-btn fl-btn--bahaya" href="{% url 'koleksi:delete' tanaman.id %}">Hapus tanaman</a>
+        {% endif %}
         {% if tanaman.spesies_id %}
-          <a class="fl-btn fl-btn--sekunder" href="{% url 'koleksi:katalog_detail' tanaman.spesies_id %}">Lihat spesies di katalog</a>
+          <a class="fl-btn fl-btn--sekunder" href="{% url 'koleksi:catalog_detail' tanaman.spesies_id %}">Lihat spesies di katalog</a>
         {% endif %}
       </div>
     </div>
   </div>
 
+  {% if not tanaman.pemilik or user == tanaman.pemilik %}
   <section class="fl-seksi">
-    <div class="fl-header">
+    <h2>Tambah catatan jurnal</h2>
+    <form class="fl-form" method="post" action="{% url 'koleksi:add_journal' tanaman.id %}"
+          enctype="multipart/form-data">
+      {% csrf_token %}
+      {% if journal_form.errors %}<p class="fl-field-error" role="alert">Periksa kembali tanggal dan catatan jurnal yang kamu isi.</p>{% endif %}
       <div>
-        <h2>Jurnal pertumbuhan</h2>
-        <p>Catatan terbaru tampil lebih dulu.</p>
+      <div>
+        <label for="tanggal">Tanggal</label>
+        <input type="date" id="tanggal" name="tanggal" value="{{ journal_form.tanggal.value|default:'' }}" required
+               {% if journal_form.tanggal.errors %}aria-invalid="true" aria-describedby="error-journal-tanggal"{% endif %}>
+        {% for error in journal_form.tanggal.errors %}<p class="fl-field-error" id="error-journal-tanggal" role="alert">{{ error }}</p>{% endfor %}
       </div>
-      <a class="fl-btn" href="{{ journal_create_url }}">Tambah catatan</a>
-    </div>
+      </div>
+      <div>
+        <label for="foto">Foto pertumbuhan</label>
+        <input type="file" id="foto" name="foto" accept="image/*">
+        <p class="fl-form__bantuan">Opsional. Unggah foto langsung, atau tempel tautan URL gambar di bawah.</p>
+        <input type="url" id="foto_url" name="foto_url" value="{{ foto_url|default:'' }}"
+               placeholder="Atau tempel URL gambar: https://..." style="margin-top: 0.5rem;">
+      </div>
+      <div>
+        <label for="catatan">Catatan</label>
+        <textarea id="catatan" name="catatan"
+                  placeholder="Misalnya: muncul dua daun baru, media tanam diganti."
+                  {% if journal_form.catatan.errors %}aria-invalid="true" aria-describedby="error-journal-catatan"{% endif %}>{{ journal_form.catatan.value|default:'' }}</textarea>
+        {% for error in journal_form.catatan.errors %}<p class="fl-field-error" id="error-journal-catatan" role="alert">{{ error }}</p>{% endfor %}
+      </div>
+      <div class="fl-form__aksi">
+        <button class="fl-btn" type="submit">Simpan catatan</button>
+      </div>
+    </form>
+  </section>
+  {% endif %}
 
     {% if jurnal_list %}
       <ul class="fl-jurnal">

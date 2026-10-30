@@ -49,6 +49,11 @@ input, button, textarea, select {
   font: inherit;
 }
 
+:where(a, button, input, textarea, select, [tabindex]):focus-visible {
+  outline: 3px solid var(--leaf2);
+  outline-offset: 3px;
+}
+
 p, h1, h2, h3, h4, h5, h6 {
   overflow-wrap: break-word;
 }

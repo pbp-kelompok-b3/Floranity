@@ -3,3 +3,5 @@ psycopg2-binary
 gunicorn
 python-dotenv
 whitenoise
+Pillow>=11,<13
+requests>=2.32,<3
