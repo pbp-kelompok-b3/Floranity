@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     'main',
     'akun',
     'koleksi',
+    'journal',
 ]
 
 MIDDLEWARE = [
