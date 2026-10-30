@@ -36,6 +36,7 @@
                 <li><a href="{% url 'koleksi:show_collection' %}" class="nav-link">Koleksi</a></li>
                 <li><a href="{% url 'koleksi:catalog' %}" class="nav-link">Katalog</a></li>
                 <li><a href="{% url 'koleksi:jurnal' %}" class="nav-link">Jurnal</a></li>
+                <li><a href="{% url 'schedule:calendar' %}" class="nav-link">Jadwal</a></li>
                 <li><a href="{% url 'forum:show_forum' %}" class="nav-link">Forum</a></li>
             </ul>
         {% if user.is_authenticated %}
@@ -60,6 +61,7 @@
                 <li><a href="/koleksi/">Koleksi</a></li>
                 <li><a href="/katalog/">Katalog</a></li>
                 <li><a href="/koleksi/jurnal/">Jurnal</a></li>
+                <li><a href="{% url 'schedule:calendar' %}">Jadwal</a></li>
             </ul>
             <p class="copyright-text">&copy; {% now "Y" %} Floranity. Hak cipta dilindungi.</p>
         </div>

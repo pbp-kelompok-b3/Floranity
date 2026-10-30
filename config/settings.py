@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'koleksi',
     'forum',
     'journal',
+    'schedule',
 ]
 
 MIDDLEWARE = [
@@ -136,5 +137,6 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 # Plant APIs Configuration
 PERENUAL_API_KEY = os.environ.get("PERENUAL_API_KEY", "") or os.environ.get("PERENUAL_KEY", "")
+OPENWEATHER_API_KEY = os.environ.get("OPENWEATHER_API_KEY", "")
 PERMAPEOPLE_KEY_ID = os.environ.get("PERMAPEOPLE_KEY_ID", "")
 PERMAPEOPLE_KEY_SECRET = os.environ.get("PERMAPEOPLE_KEY_SECRET", "")
