@@ -10,6 +10,7 @@ from urllib.parse import urlencode
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db import IntegrityError, connection
 from django.db.models import Q
 from django.http import Http404, HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -195,7 +196,7 @@ def detail(request, tanaman_id):
 
     context = {
         "tanaman": tanaman,
-        "jurnal_list": JournalLog.objects.filter(owner=request.user, plant=tanaman),
+        "jurnal_list": JournalLog.objects.filter(Q(owner=request.user) & (Q(plant=tanaman) | Q(plant__isnull=True, plant_name=tanaman.nama_panggilan))),
         "journal_create_url": reverse("koleksi:jurnal_tambah") + "?" + urlencode({
             "plant_id": tanaman.pk,
             "plant_name": tanaman.nama_panggilan,
@@ -254,7 +255,17 @@ def create_tanaman(request):
             except Exception:
                 pass
 
-        tanaman.save()
+        try:
+            tanaman.save()
+        except IntegrityError:
+            if connection.vendor == 'postgresql':
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        "SELECT setval(pg_get_serial_sequence('koleksi_tanaman', 'id'), coalesce(max(id), 1)) FROM koleksi_tanaman;"
+                    )
+                tanaman.save()
+            else:
+                raise
         messages.success(request, "Tanaman baru berhasil ditambahkan!")
         return redirect("koleksi:show_collection")
 
