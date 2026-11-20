@@ -116,3 +116,47 @@ Pengembangan platform Floranity memanfaatkan *Artificial Intelligence* (AI) sepe
 
 Laporan komprehensif mengenai strategi prompt, keterbatasan kritis AI (seperti celah otorisasi BOLA, XSS, open redirect, dan ketiadaan caching), serta perbaikan manual yang dilakukan untuk setiap modul dapat dibaca secara lengkap pada dokumen:
 👉 **[Laporan Lengkap AI Disclosure (AI_DISCLOSURE.md)](AI_DISCLOSURE.md)**
+
+
+## API Akun untuk Checkpoint 1
+
+API akun memakai Django REST Framework dengan `serializers.py`, function-based view `@api_view`, dan `api_urls.py`. Semua endpoint akun berada di prefix `/api/v1/akun/`. Data profil dikirim langsung sebagai objek JSON, tanpa pembungkus tambahan; error validasi berisi pesan per field.
+
+| Method | Endpoint | Akses | Respons sukses |
+| --- | --- | --- | --- |
+| GET | `/api/v1/akun/csrf/` | Publik | 200, `csrfToken` dan cookie `csrftoken` |
+| POST | `/api/v1/akun/register/` | Publik + CSRF | 201, akun dan profil baru |
+| POST | `/api/v1/akun/login/` | Publik + CSRF | 200, profil pribadi dan cookie session |
+| GET | `/api/v1/akun/me/` | Login | 200, profil pribadi |
+| PUT / PATCH | `/api/v1/akun/me/` | Login + CSRF | 200, profil setelah diperbarui |
+| DELETE | `/api/v1/akun/me/` | Login + CSRF | 204, akun dihapus |
+| GET | `/api/v1/akun/profiles/<user_id>/` | Publik | 200, profil publik anggota aktif |
+| POST | `/api/v1/akun/logout/` | Login + CSRF | 204, session diakhiri |
+
+### Autentikasi dan input
+
+Autentikasi memakai `SessionAuthentication`, sehingga login web dan API menggunakan session Django yang sama. Pengguna yang belum login mendapat JSON dengan status 403 saat membuka endpoint privat. Login juga dapat dilakukan lewat halaman web `/login/` atau halaman browsable API `/api-auth/login/`.
+
+Untuk request programatis, panggil endpoint `csrf/` terlebih dahulu, simpan cookie dari server, dan kirim nilai `csrfToken` dalam header `X-CSRFToken` pada POST, PUT, PATCH, dan DELETE. Setelah login, token CSRF dirotasi; ambil token baru melalui `csrf/` atau baca cookie `csrftoken` terbaru. Tidak perlu header token/Bearer.
+
+- Pendaftaran menerima JSON `username`, `password1`, dan `password2`. Akun belum otomatis login setelah pendaftaran.
+- Login menerima JSON `username` dan `password`.
+- PUT/PATCH menerima `display_name`, `bio`, `remove_photo`, serta file `photo` bila diunggah. Gunakan `multipart/form-data` untuk foto; tanpa foto dapat memakai JSON. PUT mewajibkan nama tampilan; PATCH mempertahankan field yang tidak dikirim.
+- DELETE menerima JSON `confirmation` yang harus sama dengan nama tampilan. Aturan penghapusan mengikuti `AccountRemovalForm` pada web saat ini.
+
+Profil publik hanya memuat `id`, `user_id`, `display_name`, `bio`, `avatar_url`, `initials`, dan `joined_at`. Profil pribadi menambahkan `username` dan `email`. Pembaruan serta penghapusan selalu memilih akun dari session pemilik; ID pemilik yang dikirim client tidak dapat digunakan untuk mengubah akun orang lain.
+
+Validasi pendaftaran, profil, foto, dan penghapusan menggunakan form Django yang sama dengan halaman web. Foto JPEG/PNG/WebP maksimal 5 MB diolah menjadi JPEG persegi 512 × 512; bio maksimal 500 karakter. Upload foto baru bersamaan dengan `remove_photo=true` ditolak. Profil pengguna yang tidak ditemukan atau tidak aktif menghasilkan 404.
+
+### Menjalankan dan memeriksa API
+
+```bash
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py test akun
+python manage.py runserver 127.0.0.1:8000
+```
+
+Saat server lokal berjalan, buka `http://127.0.0.1:8000/api/v1/akun/csrf/` untuk memeriksa respons JSON/browsable API. Pengujian akun mencakup regresi web dan API: session bersama, CSRF termasuk request anonim, privasi profil publik, kepemilikan data, validasi form, pemrosesan foto, serta penghapusan akun. Verifikasi HTTP lokal juga dilakukan untuk seluruh alur akun. API pada PWS perlu mengikuti proses deployment kelompok; hasil pengujian lokal tidak berarti PWS sudah diperbarui.
+
+Penambahan API akun dan pengujiannya dibantu OpenAI Codex. Referensi teknis: [DRF function-based views](https://www.django-rest-framework.org/api-guide/views/#function-based-views), [ModelSerializer](https://www.django-rest-framework.org/api-guide/serializers/#modelserializer), dan [SessionAuthentication serta CSRF](https://www.django-rest-framework.org/api-guide/authentication/#sessionauthentication).
