@@ -27,7 +27,6 @@ def katalog_list(request):
     q = request.query_params.get("q", "").strip()
     air = request.query_params.get("air", "").strip()
     cahaya = request.query_params.get("cahaya", "").strip()
-    kesulitan = request.query_params.get("kesulitan", "").strip()
     try:
         halaman = max(1, int(request.query_params.get("page", 1)))
     except ValueError:
@@ -40,7 +39,7 @@ def katalog_list(request):
     if getattr(settings, "PERENUAL_API_KEY", ""):
         try:
             spesies_list = services.cari_spesies(
-                q=q, halaman=halaman, air=air, cahaya=cahaya, kesulitan=kesulitan
+                q=q, halaman=halaman, air=air, cahaya=cahaya
             )
             ada_berikut = len(spesies_list) >= JUMLAH_PER_HALAMAN
         except Exception:
@@ -48,9 +47,7 @@ def katalog_list(request):
             api_error = True
 
     if not spesies_list and not (getattr(settings, "PERENUAL_API_KEY", "") and q):
-        hasil = sample_data.cari_spesies(
-            q, air=air, cahaya=cahaya, kesulitan=kesulitan
-        )
+        hasil = sample_data.cari_spesies(q, air=air, cahaya=cahaya)
         awal = (halaman - 1) * JUMLAH_PER_HALAMAN
         akhir = awal + JUMLAH_PER_HALAMAN
         spesies_list = hasil[awal:akhir]

@@ -8,6 +8,7 @@ from main import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/akun/', include('akun.api_urls')),
+    path('api/v1/', include('koleksi.api_urls')),
     path('api-auth/', include('rest_framework.urls')),
     path('', include('akun.urls')),
     path('', views.show_landing_page, name='home'),
