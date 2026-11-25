@@ -5,3 +5,4 @@ python-dotenv
 whitenoise
 Pillow>=11,<13
 requests>=2.32,<3
+djangorestframework~=3.18.3
